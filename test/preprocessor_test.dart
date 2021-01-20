@@ -4,6 +4,25 @@ import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 
 void main() {
+  group('<defs> elements are moved if needed', () {
+    void actualTest(String description, String svgAsString) {
+      test(description, () {
+        final svgElement = XmlDocument.parse(svgAsString).rootElement;
+        preprocessSvg(svgElement);
+        expect(svgElement.firstElementChild!.name.local, 'defs');
+      });
+    }
+
+    actualTest(
+      'when it is already where expected',
+      '<svg><defs /><rect width="10" height="10" /></svg>',
+    );
+    actualTest(
+      'when it is not where expected',
+      '<svg><rect width="10" height="10" /><defs /></svg>',
+    );
+  });
+
   test(
     '<use> elements are inlined and their attributes properly \"propagated\"',
     () {

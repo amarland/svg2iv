@@ -6,8 +6,19 @@ import 'package:xml/xml.dart';
 const useElementCustomAttributePrefix = 'use_';
 
 void preprocessSvg(XmlElement svgElement) {
+  _moveDefsElementToFirstPositionIfAny(svgElement);
   _inlineUseElements(svgElement);
   _reorderClipPathElementsIfNeeded(svgElement);
+}
+
+void _moveDefsElementToFirstPositionIfAny(XmlElement element) {
+  final defsElement = element.getElement('defs');
+  if (defsElement != null &&
+      // if there's another element before it
+      defsElement.previousSibling?.takeIf((it) => it is XmlElement) != null) {
+    defsElement.parent!.children.remove(defsElement);
+    element.children.insert(0, defsElement);
+  }
 }
 
 void _inlineUseElements(XmlElement element) {
@@ -108,7 +119,7 @@ void _wrapClippedPathsIntoGroups(XmlElement element) {
 void _reorderClipPathElementsIfNeeded(XmlElement element) {
   for (final clipPathElement in element.findAllElements('clipPath')) {
     final defsElement = element.getElement('defs') ??
-        XmlElement(XmlName('defs')).also((e) => element.children.add(e));
+        XmlElement(XmlName('defs')).also((e) => element.children.insert(0, e));
     final clipPathElementIdNode = clipPathElement.getAttributeNode('id');
     final clipPathElementId = clipPathElementIdNode?.value;
     if (clipPathElementId.isNullOrEmpty) continue;
