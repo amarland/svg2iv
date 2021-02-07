@@ -4,7 +4,7 @@ import 'package:svg2va/model/gradient.dart';
 import 'package:svg2va/model/identifiable.dart';
 
 abstract class VectorNode extends Identifiable {
-  const VectorNode(String? id) : super(id);
+  VectorNode(String? id) : super(id?.toPascalCase());
 }
 
 abstract class VectorNodeBuilder<T extends VectorNode,

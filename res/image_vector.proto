@@ -1,6 +1,19 @@
 syntax = "proto3";
 
-package svg2iv;
+package svg2iv.protobuf;
+
+message ImageVectorCollection {
+  repeated NullableImageVector nullable_image_vectors = 1;
+}
+
+message NullableImageVector {
+  oneof value_or_nothing {
+    ImageVector value = 1;
+    Null nothing = 2;
+  }
+}
+
+enum Null {NOTHING = 0;}
 
 message ImageVector {
   VectorGroup group = 1;
@@ -28,15 +41,15 @@ message VectorGroup {
   float scale_y = 10;
   float translation_x = 7;
   float translation_y = 8;
-  repeated PathNode clipPathData = 9;
+  repeated PathNode clip_path_data = 9;
 }
 
 message VectorPath {
-  repeated PathNode pathNodes = 1;
+  repeated PathNode path_nodes = 1;
   string id = 2;
-  Gradient fill = 3;
+  Brush fill = 3;
   float fill_alpha = 4;
-  Gradient stroke = 5;
+  Brush stroke = 5;
   float stroke_alpha = 6;
   float stroke_line_width = 7;
   StrokeCap stroke_line_cap = 9;
@@ -93,6 +106,14 @@ message PathNode {
       float coordinate = 1;
       bool flag = 2;
     }
+  }
+}
+
+message Brush {
+  oneof solid_color_or_gradient {
+    uint32 solid_color = 1;
+    Gradient linear_gradient = 2;
+    Gradient radial_gradient = 3;
   }
 }
 

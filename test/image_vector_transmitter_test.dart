@@ -11,38 +11,47 @@ void main() {
   test(
     'transmitImageVector successfully transmits a Protobuf ImageVector',
     () async {
-      final imageVector = ImageVector(
-        group: VectorGroup(
-          nodes: [
-            VectorNode(
-              path: VectorPath(
-                pathNodes: [
-                  PathNode(
-                    command: PathNode_Command.MOVE_TO,
-                    arguments: [
-                      PathNode_Argument(coordinate: 10.0),
-                      PathNode_Argument(coordinate: 20.0),
-                    ],
-                  )
+      final imageVectors = ImageVectorCollection(
+        nullableImageVectors: [
+          NullableImageVector(
+            value: ImageVector(
+              group: VectorGroup(
+                nodes: [
+                  VectorNode(
+                    path: VectorPath(
+                      pathNodes: [
+                        PathNode(
+                          command: PathNode_Command.MOVE_TO,
+                          arguments: [
+                            PathNode_Argument(coordinate: 10.0),
+                            PathNode_Argument(coordinate: 20.0),
+                          ],
+                        )
+                      ],
+                      id: 'test_path',
+                      fill: Brush(
+                        linearGradient: Gradient(colors: [0xAABBCCDD]),
+                      ),
+                      fillAlpha: 0.75,
+                    ),
+                  ),
                 ],
-                id: 'test_path',
-                fill: Gradient(colors: [0xAABBCCDD]),
-                fillAlpha: 0.75,
+                id: 'test_group',
               ),
+              name: 'test',
+              viewportWidth: 20,
+              viewportHeight: 20,
+              width: 20,
+              height: 20,
             ),
-          ],
-          id: 'test_group',
-        ),
-        name: 'test',
-        viewportWidth: 20,
-        viewportHeight: 20,
-        width: 20,
-        height: 20,
+          ),
+          NullableImageVector(nothing: Null.NOTHING),
+        ],
       );
       final serverSocket =
           await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
       await transmitProtobufImageVector(
-        imageVector,
+        imageVectors,
         InternetAddress.loopbackIPv4,
         serverSocket.port,
       );
@@ -51,8 +60,9 @@ void main() {
       while (await socket.hasNext) {
         buffer.addAll(await socket.next);
       }
+      await socket.cancel();
       await serverSocket.close();
-      expect(ImageVector.fromBuffer(buffer), imageVector);
+      expect(ImageVectorCollection.fromBuffer(buffer), imageVectors);
     },
   );
 }

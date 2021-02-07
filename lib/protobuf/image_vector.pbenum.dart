@@ -9,6 +9,19 @@
 import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+class Null extends $pb.ProtobufEnum {
+  static const Null NOTHING = Null._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NOTHING');
+
+  static const $core.List<Null> values = <Null> [
+    NOTHING,
+  ];
+
+  static final $core.Map<$core.int, Null> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static Null valueOf($core.int value) => _byValue[value];
+
+  const Null._($core.int v, $core.String n) : super(v, n);
+}
+
 class VectorPath_StrokeCap extends $pb.ProtobufEnum {
   static const VectorPath_StrokeCap CAP_BUTT = VectorPath_StrokeCap._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CAP_BUTT');
   static const VectorPath_StrokeCap CAP_ROUND = VectorPath_StrokeCap._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CAP_ROUND');
@@ -123,3 +136,4 @@ class Gradient_TileMode extends $pb.ProtobufEnum {
 
   const Gradient_TileMode._($core.int v, $core.String n) : super(v, n);
 }
+

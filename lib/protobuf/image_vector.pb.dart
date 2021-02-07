@@ -13,8 +13,127 @@ import 'image_vector.pbenum.dart';
 
 export 'image_vector.pbenum.dart';
 
+class ImageVectorCollection extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ImageVectorCollection', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
+    ..pc<NullableImageVector>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nullableImageVectors', $pb.PbFieldType.PM, subBuilder: NullableImageVector.create)
+    ..hasRequiredFields = false
+  ;
+
+  ImageVectorCollection._() : super();
+  factory ImageVectorCollection({
+    $core.Iterable<NullableImageVector> nullableImageVectors,
+  }) {
+    final _result = create();
+    if (nullableImageVectors != null) {
+      _result.nullableImageVectors.addAll(nullableImageVectors);
+    }
+    return _result;
+  }
+  factory ImageVectorCollection.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ImageVectorCollection.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ImageVectorCollection clone() => ImageVectorCollection()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ImageVectorCollection copyWith(void Function(ImageVectorCollection) updates) => super.copyWith((message) => updates(message as ImageVectorCollection)); // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ImageVectorCollection create() => ImageVectorCollection._();
+  ImageVectorCollection createEmptyInstance() => create();
+  static $pb.PbList<ImageVectorCollection> createRepeated() => $pb.PbList<ImageVectorCollection>();
+  @$core.pragma('dart2js:noInline')
+  static ImageVectorCollection getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImageVectorCollection>(create);
+  static ImageVectorCollection _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<NullableImageVector> get nullableImageVectors => $_getList(0);
+}
+
+enum NullableImageVector_ValueOrNothing {
+  value, 
+  nothing, 
+  notSet
+}
+
+class NullableImageVector extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, NullableImageVector_ValueOrNothing> _NullableImageVector_ValueOrNothingByTag = {
+    1 : NullableImageVector_ValueOrNothing.value,
+    2 : NullableImageVector_ValueOrNothing.nothing,
+    0 : NullableImageVector_ValueOrNothing.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NullableImageVector', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
+    ..oo(0, [1, 2])
+    ..aOM<ImageVector>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'value', subBuilder: ImageVector.create)
+    ..e<Null>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nothing', $pb.PbFieldType.OE, defaultOrMaker: Null.NOTHING, valueOf: Null.valueOf, enumValues: Null.values)
+    ..hasRequiredFields = false
+  ;
+
+  NullableImageVector._() : super();
+  factory NullableImageVector({
+    ImageVector value,
+    Null nothing,
+  }) {
+    final _result = create();
+    if (value != null) {
+      _result.value = value;
+    }
+    if (nothing != null) {
+      _result.nothing = nothing;
+    }
+    return _result;
+  }
+  factory NullableImageVector.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory NullableImageVector.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  NullableImageVector clone() => NullableImageVector()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  NullableImageVector copyWith(void Function(NullableImageVector) updates) => super.copyWith((message) => updates(message as NullableImageVector)); // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static NullableImageVector create() => NullableImageVector._();
+  NullableImageVector createEmptyInstance() => create();
+  static $pb.PbList<NullableImageVector> createRepeated() => $pb.PbList<NullableImageVector>();
+  @$core.pragma('dart2js:noInline')
+  static NullableImageVector getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<NullableImageVector>(create);
+  static NullableImageVector _defaultInstance;
+
+  NullableImageVector_ValueOrNothing whichValueOrNothing() => _NullableImageVector_ValueOrNothingByTag[$_whichOneof(0)];
+  void clearValueOrNothing() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  ImageVector get value => $_getN(0);
+  @$pb.TagNumber(1)
+  set value(ImageVector v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasValue() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearValue() => clearField(1);
+  @$pb.TagNumber(1)
+  ImageVector ensureValue() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  Null get nothing => $_getN(1);
+  @$pb.TagNumber(2)
+  set nothing(Null v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasNothing() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearNothing() => clearField(2);
+}
+
 class ImageVector extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ImageVector', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ImageVector', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
     ..aOM<VectorGroup>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: VectorGroup.create)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..a<$core.double>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'viewportWidth', $pb.PbFieldType.OF)
@@ -144,7 +263,7 @@ class VectorNode extends $pb.GeneratedMessage {
     2 : VectorNode_Node.path,
     0 : VectorNode_Node.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VectorNode', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VectorNode', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
     ..oo(0, [1, 2])
     ..aOM<VectorGroup>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: VectorGroup.create)
     ..aOM<VectorPath>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'path', subBuilder: VectorPath.create)
@@ -213,7 +332,7 @@ class VectorNode extends $pb.GeneratedMessage {
 }
 
 class VectorGroup extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VectorGroup', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VectorGroup', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
     ..pc<VectorNode>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nodes', $pb.PbFieldType.PM, subBuilder: VectorNode.create)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..a<$core.double>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rotation', $pb.PbFieldType.OF)
@@ -222,7 +341,7 @@ class VectorGroup extends $pb.GeneratedMessage {
     ..a<$core.double>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'scaleX', $pb.PbFieldType.OF)
     ..a<$core.double>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'translationX', $pb.PbFieldType.OF)
     ..a<$core.double>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'translationY', $pb.PbFieldType.OF)
-    ..pc<PathNode>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'clipPathData', $pb.PbFieldType.PM, protoName: 'clipPathData', subBuilder: PathNode.create)
+    ..pc<PathNode>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'clipPathData', $pb.PbFieldType.PM, subBuilder: PathNode.create)
     ..a<$core.double>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'scaleY', $pb.PbFieldType.OF)
     ..hasRequiredFields = false
   ;
@@ -374,12 +493,12 @@ class VectorGroup extends $pb.GeneratedMessage {
 }
 
 class VectorPath extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VectorPath', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv'), createEmptyInstance: create)
-    ..pc<PathNode>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pathNodes', $pb.PbFieldType.PM, protoName: 'pathNodes', subBuilder: PathNode.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VectorPath', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
+    ..pc<PathNode>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pathNodes', $pb.PbFieldType.PM, subBuilder: PathNode.create)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
-    ..aOM<Gradient>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fill', subBuilder: Gradient.create)
+    ..aOM<Brush>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fill', subBuilder: Brush.create)
     ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fillAlpha', $pb.PbFieldType.OF)
-    ..aOM<Gradient>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stroke', subBuilder: Gradient.create)
+    ..aOM<Brush>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stroke', subBuilder: Brush.create)
     ..a<$core.double>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'strokeAlpha', $pb.PbFieldType.OF)
     ..a<$core.double>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'strokeLineWidth', $pb.PbFieldType.OF)
     ..e<VectorPath_FillType>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fillType', $pb.PbFieldType.OE, defaultOrMaker: VectorPath_FillType.NON_ZERO, valueOf: VectorPath_FillType.valueOf, enumValues: VectorPath_FillType.values)
@@ -393,9 +512,9 @@ class VectorPath extends $pb.GeneratedMessage {
   factory VectorPath({
     $core.Iterable<PathNode> pathNodes,
     $core.String id,
-    Gradient fill,
+    Brush fill,
     $core.double fillAlpha,
-    Gradient stroke,
+    Brush stroke,
     $core.double strokeAlpha,
     $core.double strokeLineWidth,
     VectorPath_FillType fillType,
@@ -473,15 +592,15 @@ class VectorPath extends $pb.GeneratedMessage {
   void clearId() => clearField(2);
 
   @$pb.TagNumber(3)
-  Gradient get fill => $_getN(2);
+  Brush get fill => $_getN(2);
   @$pb.TagNumber(3)
-  set fill(Gradient v) { setField(3, v); }
+  set fill(Brush v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasFill() => $_has(2);
   @$pb.TagNumber(3)
   void clearFill() => clearField(3);
   @$pb.TagNumber(3)
-  Gradient ensureFill() => $_ensure(2);
+  Brush ensureFill() => $_ensure(2);
 
   @$pb.TagNumber(4)
   $core.double get fillAlpha => $_getN(3);
@@ -493,15 +612,15 @@ class VectorPath extends $pb.GeneratedMessage {
   void clearFillAlpha() => clearField(4);
 
   @$pb.TagNumber(5)
-  Gradient get stroke => $_getN(4);
+  Brush get stroke => $_getN(4);
   @$pb.TagNumber(5)
-  set stroke(Gradient v) { setField(5, v); }
+  set stroke(Brush v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasStroke() => $_has(4);
   @$pb.TagNumber(5)
   void clearStroke() => clearField(5);
   @$pb.TagNumber(5)
-  Gradient ensureStroke() => $_ensure(4);
+  Brush ensureStroke() => $_ensure(4);
 
   @$pb.TagNumber(6)
   $core.double get strokeAlpha => $_getN(5);
@@ -570,7 +689,7 @@ class PathNode_Argument extends $pb.GeneratedMessage {
     2 : PathNode_Argument_Argument.flag,
     0 : PathNode_Argument_Argument.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PathNode.Argument', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PathNode.Argument', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
     ..oo(0, [1, 2])
     ..a<$core.double>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'coordinate', $pb.PbFieldType.OF)
     ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'flag')
@@ -635,7 +754,7 @@ class PathNode_Argument extends $pb.GeneratedMessage {
 }
 
 class PathNode extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PathNode', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PathNode', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
     ..e<PathNode_Command>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'command', $pb.PbFieldType.OE, defaultOrMaker: PathNode_Command.CLOSE, valueOf: PathNode_Command.valueOf, enumValues: PathNode_Command.values)
     ..pc<PathNode_Argument>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'arguments', $pb.PbFieldType.PM, subBuilder: PathNode_Argument.create)
     ..hasRequiredFields = false
@@ -689,8 +808,104 @@ class PathNode extends $pb.GeneratedMessage {
   $core.List<PathNode_Argument> get arguments => $_getList(1);
 }
 
+enum Brush_SolidColorOrGradient {
+  solidColor, 
+  linearGradient, 
+  radialGradient, 
+  notSet
+}
+
+class Brush extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, Brush_SolidColorOrGradient> _Brush_SolidColorOrGradientByTag = {
+    1 : Brush_SolidColorOrGradient.solidColor,
+    2 : Brush_SolidColorOrGradient.linearGradient,
+    3 : Brush_SolidColorOrGradient.radialGradient,
+    0 : Brush_SolidColorOrGradient.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Brush', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
+    ..oo(0, [1, 2, 3])
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'solidColor', $pb.PbFieldType.OU3)
+    ..aOM<Gradient>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'linearGradient', subBuilder: Gradient.create)
+    ..aOM<Gradient>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'radialGradient', subBuilder: Gradient.create)
+    ..hasRequiredFields = false
+  ;
+
+  Brush._() : super();
+  factory Brush({
+    $core.int solidColor,
+    Gradient linearGradient,
+    Gradient radialGradient,
+  }) {
+    final _result = create();
+    if (solidColor != null) {
+      _result.solidColor = solidColor;
+    }
+    if (linearGradient != null) {
+      _result.linearGradient = linearGradient;
+    }
+    if (radialGradient != null) {
+      _result.radialGradient = radialGradient;
+    }
+    return _result;
+  }
+  factory Brush.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Brush.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Brush clone() => Brush()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Brush copyWith(void Function(Brush) updates) => super.copyWith((message) => updates(message as Brush)); // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Brush create() => Brush._();
+  Brush createEmptyInstance() => create();
+  static $pb.PbList<Brush> createRepeated() => $pb.PbList<Brush>();
+  @$core.pragma('dart2js:noInline')
+  static Brush getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Brush>(create);
+  static Brush _defaultInstance;
+
+  Brush_SolidColorOrGradient whichSolidColorOrGradient() => _Brush_SolidColorOrGradientByTag[$_whichOneof(0)];
+  void clearSolidColorOrGradient() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  $core.int get solidColor => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set solidColor($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasSolidColor() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSolidColor() => clearField(1);
+
+  @$pb.TagNumber(2)
+  Gradient get linearGradient => $_getN(1);
+  @$pb.TagNumber(2)
+  set linearGradient(Gradient v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasLinearGradient() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLinearGradient() => clearField(2);
+  @$pb.TagNumber(2)
+  Gradient ensureLinearGradient() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  Gradient get radialGradient => $_getN(2);
+  @$pb.TagNumber(3)
+  set radialGradient(Gradient v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRadialGradient() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRadialGradient() => clearField(3);
+  @$pb.TagNumber(3)
+  Gradient ensureRadialGradient() => $_ensure(2);
+}
+
 class Gradient extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Gradient', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Gradient', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
     ..p<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'colors', $pb.PbFieldType.PU3)
     ..p<$core.double>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stops', $pb.PbFieldType.PF)
     ..a<$core.double>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startX', $pb.PbFieldType.OF)
@@ -849,3 +1064,4 @@ class Gradient extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   void clearTileMode() => clearField(10);
 }
+

@@ -4,7 +4,7 @@ import 'package:svg2va/model/gradient.dart';
 import 'package:svg2va/model/vector_node.dart';
 
 class VectorPath extends VectorNode {
-  const VectorPath._init(
+  VectorPath._init(
     this.pathData, {
     String? id,
     this.fill,

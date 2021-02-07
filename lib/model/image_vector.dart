@@ -1,15 +1,16 @@
+import 'package:svg2va/extensions.dart';
 import 'package:svg2va/model/vector_group.dart';
 import 'package:svg2va/model/vector_node.dart';
 
 class ImageVector {
-  const ImageVector._init(
+  ImageVector._init(
     this.group,
     this.viewportWidth,
     this.viewportHeight,
     this.width,
     this.height, {
-    this.name,
-  });
+    String? name,
+  }) : name = name?.toPascalCase();
 
   final VectorGroup group;
   final String? name;

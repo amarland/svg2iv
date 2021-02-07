@@ -5,7 +5,7 @@ import 'package:svg2va/model/vector_node.dart';
 import 'package:svg2va/model/vector_path.dart';
 
 class VectorGroup extends VectorNode {
-  const VectorGroup._init(
+  VectorGroup._init(
     this.nodes, {
     String? id,
     this.rotation,
@@ -20,8 +20,12 @@ class VectorGroup extends VectorNode {
   final Translation? translation;
   final List<PathNode>? clipPathData;
 
-  bool get hasTransformations =>
-      rotation != null || scale != null || translation != null;
+  bool get hasAttributes =>
+      !id.isNullOrEmpty ||
+      rotation != null ||
+      scale != null ||
+      translation != null ||
+      !clipPathData.isNullOrEmpty;
 
   VectorGroup copyWith({
     List<VectorNode>? nodes,

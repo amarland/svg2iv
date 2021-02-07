@@ -181,8 +181,8 @@ Transformations? _parseTransformations(XmlElement element) {
     final parsedValues = values
         .split(_definitionSeparatorPattern)
         .map(double.tryParse)
-        .toList()
-        .whereNotNull();
+        .whereNotNull()
+        .toList();
     switch (name) {
       case 'translate':
         final count = parsedValues.length;
@@ -591,8 +591,8 @@ Gradient? _parseGradient(XmlElement gradientElement) {
           return newAlpha | (color & 0x00FFFFFF);
         }
       })
-      .toList()
-      .whereNotNull();
+      .whereNotNull()
+      .toList();
   if (colors.isEmpty) {
     return null;
   }
@@ -603,8 +603,8 @@ Gradient? _parseGradient(XmlElement gradientElement) {
             ? _parsePercentage(offsetAttributeValue)
             : null;
       })
-      .toList()
-      .whereNotNull();
+      .whereNotNull()
+      .toList();
   if (stops.isNotEmpty && colors.length != stops.length) {
     return null;
   }
@@ -704,7 +704,8 @@ Gradient? _parseColor(String colorAsString) {
       gradient = colorToGradient(0xFF, rgb[0], rgb[1], rgb[2]);
     }
   } else if (colorAsString.startsWith('rgba(')) {
-    final rgba = extractDefinitionValues(colorAsString, 5).whereNotNull();
+    final rgba =
+        extractDefinitionValues(colorAsString, 5).whereNotNull().toList();
     final rgb = rgba.sublist(0, 4).whereType<int>().cast<int>().toList();
     final alpha = rgba.length == 4 ? rgba[3] * 0xFF ~/ 1 : null;
     if (alpha != null && rgb.isNotEmpty && rgb.length == 3) {

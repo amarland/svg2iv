@@ -6,6 +6,16 @@ import 'package:svg2va/model/vector_group.dart';
 import 'package:svg2va/model/vector_path.dart';
 import 'package:svg2va/protobuf/image_vector.pb.dart' as $pb;
 
+$pb.ImageVectorCollection imageVectorIterableAsProtobuf(
+  Iterable<ImageVector> imageVectors,
+) {
+  return $pb.ImageVectorCollection(
+    nullableImageVectors: imageVectors.map(
+      (v) => v != null ? imageVectorAsProtobuf(v) : $pb.NullableImageVector(),
+    ),
+  );
+}
+
 $pb.ImageVector imageVectorAsProtobuf(ImageVector imageVector) {
   return $pb.ImageVector(
     group: _mapVectorGroup(imageVector.group),
@@ -67,26 +77,34 @@ $pb.PathNode _mapPathNode(PathNode pathNode) {
   );
 }
 
-$pb.Gradient _mapGradient(Gradient gradient) {
+$pb.Brush _mapGradient(Gradient gradient) {
   final tileMode = $pb.Gradient_TileMode.values[gradient.tileMode.index];
+  final colors = gradient.colors;
+  if (colors.length == 1 || colors.every((c) => c == colors[0])) {
+    return $pb.Brush(solidColor: colors[0]);
+  }
   if (gradient is LinearGradient) {
-    return $pb.Gradient(
-      colors: gradient.colors,
-      stops: gradient.stops,
-      startX: gradient.startX,
-      startY: gradient.startY,
-      endX: gradient.endX,
-      endY: gradient.endY,
-      tileMode: tileMode,
+    return $pb.Brush(
+      linearGradient: $pb.Gradient(
+        colors: colors,
+        stops: gradient.stops,
+        startX: gradient.startX,
+        startY: gradient.startY,
+        endX: gradient.endX,
+        endY: gradient.endY,
+        tileMode: tileMode,
+      ),
     );
   } else if (gradient is RadialGradient) {
-    return $pb.Gradient(
-      colors: gradient.colors,
-      stops: gradient.stops,
-      centerX: gradient.centerX,
-      centerY: gradient.centerY,
-      radius: gradient.radius,
-      tileMode: tileMode,
+    return $pb.Brush(
+      radialGradient: $pb.Gradient(
+        colors: colors,
+        stops: gradient.stops,
+        centerX: gradient.centerX,
+        centerY: gradient.centerY,
+        radius: gradient.radius,
+        tileMode: tileMode,
+      ),
     );
   }
   return null;

@@ -27,19 +27,17 @@ extension IterableItemSelection<E> on Iterable<E> {
 }
 
 extension NullableElementsIterableNullChecking<E> on Iterable<E?> {
-  bool anyNull() => !everyNotNull();
+  bool anyNull() => any((e) => e == null);
 
   bool anyNotNull() => any((e) => e != null);
 
-  bool everyNotNull() => every((e) => e != null);
+  bool everyNull() => !anyNotNull();
+
+  bool everyNotNull() => !anyNull();
 }
 
 extension NullableIterableNullChecking<E> on Iterable<E>? {
   bool get isNullOrEmpty => this == null || this!.isEmpty;
-}
-
-extension NullableElementsListFiltering<E> on List<E?> {
-  List<E> whereNotNull() => where((e) => e != null).cast<E>().toList();
 }
 
 extension Scoping<T, R> on T {

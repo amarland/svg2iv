@@ -6,46 +6,43 @@ import 'package:svg2va/model/image_vector.dart';
 import 'package:svg2va/model/vector_group.dart';
 import 'package:svg2va/model/vector_node.dart';
 import 'package:svg2va/model/vector_path.dart';
+import 'package:tuple/tuple.dart';
 
 const _imports = [
-  'androidx.compose.ui.graphics.Color',
-  'androidx.compose.ui.graphics.LinearGradient',
-  'androidx.compose.ui.graphics.PathFillType',
-  'androidx.compose.ui.graphics.RadialGradient',
-  'androidx.compose.ui.graphics.SolidColor',
-  'androidx.compose.ui.graphics.StrokeCap',
-  'androidx.compose.ui.graphics.StrokeJoin',
-  'androidx.compose.ui.graphics.TileMode',
-  'androidx.compose.ui.graphics.vector.VectorAsset',
-  'androidx.compose.ui.graphics.vector.VectorAssetBuilder',
-  'androidx.compose.ui.graphics.vector.path',
+  'androidx.compose.ui.graphics.*',
   'androidx.compose.ui.unit.dp',
 ];
 
-const _commandsToFunctionNames = {
-  PathDataCommand.close: 'close',
-  PathDataCommand.moveTo: 'moveTo',
-  PathDataCommand.relativeMoveTo: 'moveToRelative',
-  PathDataCommand.lineTo: 'lineTo',
-  PathDataCommand.relativeLineTo: 'lineToRelative',
-  PathDataCommand.horizontalLineTo: 'horizontalLineTo',
-  PathDataCommand.relativeHorizontalLineTo: 'horizontalLineToRelative',
-  PathDataCommand.verticalLineTo: 'verticalLineTo',
-  PathDataCommand.relativeVerticalLineTo: 'verticalLineToRelative',
-  PathDataCommand.curveTo: 'curveTo',
-  PathDataCommand.relativeCurveTo: 'curveToRelative',
-  PathDataCommand.smoothCurveTo: 'reflectiveCurveTo',
-  PathDataCommand.relativeSmoothCurveTo: 'reflectiveCurveToRelative',
-  PathDataCommand.quadraticBezierCurveTo: 'quadTo',
-  PathDataCommand.relativeQuadraticBezierCurveTo: 'quadToRelative',
-  PathDataCommand.smoothQuadraticBezierCurveTo: 'reflectiveQuadTo',
+const _commandsToFunctionAndClassNames = {
+  PathDataCommand.close: Tuple2('close', 'Close'),
+  PathDataCommand.moveTo: Tuple2('moveTo', 'MoveTo'),
+  PathDataCommand.relativeMoveTo: Tuple2('moveToRelative', 'RelativeMoveTo'),
+  PathDataCommand.lineTo: Tuple2('lineTo', 'LineTo'),
+  PathDataCommand.relativeLineTo: Tuple2('lineToRelative', 'RelativeLineTo'),
+  PathDataCommand.horizontalLineTo: Tuple2('horizontalLineTo', 'HorizontalTo'),
+  PathDataCommand.relativeHorizontalLineTo:
+      Tuple2('horizontalLineToRelative', 'RelativeHorizontalTo'),
+  PathDataCommand.verticalLineTo: Tuple2('verticalLineTo', 'VerticalTo'),
+  PathDataCommand.relativeVerticalLineTo:
+      Tuple2('verticalLineToRelative', 'RelativeVerticalTo'),
+  PathDataCommand.curveTo: Tuple2('curveTo', 'CurveTo'),
+  PathDataCommand.relativeCurveTo: Tuple2('curveToRelative', 'RelativeCurveTo'),
+  PathDataCommand.smoothCurveTo:
+      Tuple2('reflectiveCurveTo', 'ReflectiveCurveTo'),
+  PathDataCommand.relativeSmoothCurveTo:
+      Tuple2('reflectiveCurveToRelative', 'RelativeReflectiveCurveTo'),
+  PathDataCommand.quadraticBezierCurveTo: Tuple2('quadTo', 'QuadTo'),
+  PathDataCommand.relativeQuadraticBezierCurveTo:
+      Tuple2('quadToRelative', 'RelativeQuadTo'),
+  PathDataCommand.smoothQuadraticBezierCurveTo:
+      Tuple2('reflectiveQuadTo', 'ReflectiveQuadTo'),
   PathDataCommand.relativeSmoothQuadraticBezierCurveTo:
-      'reflectiveQuadToRelative',
-  PathDataCommand.arcTo: 'arcTo',
-  PathDataCommand.relativeArcTo: 'arcToRelative',
+      Tuple2('reflectiveQuadToRelative', 'RelativeReflectiveQuadTo'),
+  PathDataCommand.arcTo: Tuple2('arcTo', 'ArcTo'),
+  PathDataCommand.relativeArcTo: Tuple2('arcToRelative', 'RelativeArcTo'),
 };
 
-void writeToFile(
+void writeImageVectorsToFile(
   String destinationPath,
   Map<String, ImageVector> imageVectors, [
   String? extensionReceiver,
@@ -81,7 +78,7 @@ void writeToFile(
     (sourceFileName, imageVector) => writeImageVector(
       fileSink,
       imageVector,
-      sourceFileName,
+      sourceFileName.toPascalCase(),
       extensionReceiver,
     ),
   );
@@ -98,15 +95,17 @@ void writeImageVector(
   var indentationLevel = 0;
   final extensionReceiverDeclaration =
       extensionReceiver?.let((s) => s.capitalizeCharAt(0) + '.') ?? '';
-  final imageVectorName =
-      (imageVector.name ?? nameIfVectorNameNull).toCamelCase();
+  final imageVectorName = (imageVector.name ?? nameIfVectorNameNull);
   sink
-    ..writeln('private var _$imageVectorName: VectorAsset? = null')
+    ..writeln(
+      'private var _${imageVectorName.toCamelCase()}: ImageVector? = null',
+    )
     ..writeln()
-    ..writeln('val ${extensionReceiverDeclaration}'
-        '${imageVectorName.capitalizeCharAt(0)}: VectorAsset')
+    ..writeln(
+      'val $extensionReceiverDeclaration$imageVectorName: ImageVector',
+    )
     ..writelnIndent(++indentationLevel, 'get() = _$imageVectorName ?: run {')
-    ..writelnIndent(++indentationLevel, 'VectorAssetBuilder(');
+    ..writelnIndent(++indentationLevel, 'ImageVector.Builder(');
   indentationLevel++;
   imageVector.name?.let(
     (name) => sink.writelnIndent(
@@ -137,15 +136,10 @@ void writeImageVector(
 
 int writeGroup(StringSink sink, VectorGroup group, int indentationLevel) {
   sink.writeIndent(indentationLevel, 'group');
-  if (group.id != null || group.hasTransformations) {
+  if (group.hasAttributes) {
     sink.writeln('(');
     sink
-      ..writeArgumentIfNotNull<String>(
-        ++indentationLevel,
-        'name',
-        group.id,
-        (name) => '"${name.toPascalCase()}"',
-      )
+      ..writeArgumentIfNotNull(++indentationLevel, 'name', group.id)
       ..writeArgumentIfNotNull(
           indentationLevel, 'rotation', group.rotation?.angle)
       ..writeArgumentIfNotNull(
@@ -157,7 +151,9 @@ int writeGroup(StringSink sink, VectorGroup group, int indentationLevel) {
       ..writeArgumentIfNotNull(
           indentationLevel, 'translationX', group.translation?.x)
       ..writeArgumentIfNotNull(
-          indentationLevel, 'translationY', group.translation?.y);
+          indentationLevel, 'translationY', group.translation?.y)
+      ..writeArgumentIfNotNull(
+          indentationLevel, 'clipPathData', group.clipPathData);
     sink.writeIndent(--indentationLevel, ')');
   }
   sink.writeln(' {');
@@ -178,12 +174,7 @@ int writePath(StringSink sink, VectorPath path, int indentationLevel) {
   if (path.hasAttributes) {
     sink.writeln('(');
     sink
-      ..writeArgumentIfNotNull<String>(
-        ++indentationLevel,
-        'name',
-        path.id,
-        (name) => '"${name.toPascalCase()}"',
-      )
+      ..writeArgumentIfNotNull(++indentationLevel, 'name', path.id)
       ..writeArgumentIfNotNull(indentationLevel, 'fill', path.fill)
       ..writeArgumentIfNotNull(indentationLevel, 'fillAlpha', path.fillAlpha)
       ..writeArgumentIfNotNull(indentationLevel, 'stroke', path.stroke)
@@ -202,24 +193,41 @@ int writePath(StringSink sink, VectorPath path, int indentationLevel) {
     sink.writeIndent(--indentationLevel, ')');
   }
   sink.writeln(' {');
-  indentationLevel++;
-  for (final instruction in path.pathData) {
-    _commandsToFunctionNames[instruction.command]?.let(
-      (name) => sink
-        ..writeIndent(indentationLevel, '$name(')
-        ..writeAll(
-          instruction.arguments.map(
-            (argument) => argument is double
-                ? _numToKotlinFloatAsString(argument)
-                : argument,
-          ),
-          ', ',
-        )
-        ..writeln(')'),
-    );
-  }
+  _writePathNodes(sink, path.pathData, ++indentationLevel);
   sink.writelnIndent(--indentationLevel, '}');
   return indentationLevel;
+}
+
+// asClassConstructorCall (as opposed to asBuilderFunctionCall):
+// true  => `PathNode.MoveTo(x, y)`, when declaring VectorGroup clip path nodes
+// false => `moveTo(x, y)`, when declaring VectorPath nodes
+void _writePathNodes(
+  StringSink sink,
+  List<PathNode> nodes,
+  int indentationLevel, {
+  bool asClassConstructorCall = false,
+}) {
+  for (final node in nodes) {
+    _commandsToFunctionAndClassNames[node.command]?.let(
+      (pair) {
+        final name =
+            asClassConstructorCall ? 'PathNode.${pair.item2}' : pair.item1;
+        sink
+          ..writeIndent(indentationLevel, '$name(')
+          ..writeAll(
+            node.arguments.map(
+              (argument) => argument is double
+                  ? _numToKotlinFloatAsString(argument)
+                  : argument,
+            ),
+            ', ',
+          )
+          ..write(')');
+        if (asClassConstructorCall) sink.write(',');
+        sink.writeln();
+      },
+    );
+  }
 }
 
 String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
@@ -229,7 +237,8 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
   } else {
     final isGradientLinear = gradient is LinearGradient;
     buffer
-      ..write(isGradientLinear ? 'LinearGradient' : 'RadialGradient')
+      ..write('Brush.')
+      ..write(isGradientLinear ? 'linearGradient' : 'radialGradient')
       ..writeln('(');
     indentationLevel++;
     if (gradient.stops == null) {
@@ -294,31 +303,36 @@ extension _StringSinkWriting on StringSink {
   void writeArgumentIfNotNull<T>(
     int indentationLevel,
     String parameterName,
-    T? argument, [
-    String Function(T)? toString,
-  ]) {
+    T? argument,
+  ) {
     if (argument == null) return;
     writeIndent(indentationLevel, '$parameterName = ');
     final String argumentAsString;
-    if (toString != null) {
-      argumentAsString = toString(argument);
+    if (argument is double) {
+      argumentAsString = _numToKotlinFloatAsString(argument);
+    } else if (argument is List<PathNode>) {
+      final buffer = StringBuffer()..writeln('listOf(');
+      _writePathNodes(
+        buffer,
+        argument,
+        ++indentationLevel,
+        asClassConstructorCall: true,
+      );
+      buffer.writeIndent(--indentationLevel, ')');
+      argumentAsString = buffer.toString();
+    } else if (argument is StrokeCap ||
+        argument is StrokeJoin ||
+        argument is PathFillType ||
+        argument is TileMode) {
+      argumentAsString = argument
+          .toString()
+          .capitalizeCharAt(argument.toString().indexOf('.') + 1);
+    } else if (argument is Gradient) {
+      argumentAsString = gradientToBrushAsString(argument, indentationLevel);
+    } else if (argument is String) {
+      argumentAsString = '"$argument"';
     } else {
-      if (argument is double) {
-        argumentAsString = _numToKotlinFloatAsString(argument);
-      } else if (argument is StrokeCap ||
-          argument is StrokeJoin ||
-          argument is PathFillType ||
-          argument is TileMode) {
-        argumentAsString = argument
-            .toString()
-            .capitalizeCharAt(argument.toString().indexOf('.') + 1);
-      } else if (argument is Gradient) {
-        argumentAsString = gradientToBrushAsString(argument, indentationLevel);
-      } else if (argument is String) {
-        argumentAsString = '"$argument"';
-      } else {
-        argumentAsString = argument.toString();
-      }
+      argumentAsString = argument.toString();
     }
     writeln(argumentAsString + ',');
   }

@@ -53,29 +53,30 @@ void main() {
 
     test('without attributes', () {
       final path = VectorPathBuilder(pathData).build();
-      final expected = StringBuffer()
-        ..writeln('path {')
-        ..writeln(pathDataAsString)
-        ..writeln('}');
+      final expected = (StringBuffer()
+            ..writeln('path {')
+            ..writeln(pathDataAsString)
+            ..writeln('}'))
+          .toString();
       final actual = StringBuffer()
           .also((buffer) => writePath(buffer, path, 0))
           .toString();
-      expect(actual, expected.toString());
+      expect(actual, expected);
     });
 
     test('with only a solid fill color', () {
       const fillColor = 0x11223344;
       final path =
           VectorPathBuilder(pathData).fill(LinearGradient([fillColor])).build();
-      final expected = StringBuffer('''
+      final expected = (StringBuffer('''
 path(
     fill = SolidColor(Color($fillColor)),
 ) {
-''')..writeln(pathDataAsString)..writeln('}');
+''')..writeln(pathDataAsString)..writeln('}')).toString();
       final actual = StringBuffer()
           .also((buffer) => writePath(buffer, path, 0))
           .toString();
-      expect(actual, expected.toString());
+      expect(actual, expected);
     });
 
     test('with all attributes set and gradients', () {
@@ -104,10 +105,10 @@ path(
           .strokeLineMiter(3.0)
           .pathFillType(PathFillType.nonZero)
           .build();
-      final expected = StringBuffer('''
+      final expected = (StringBuffer('''
 path(
     name = "TestVector",
-    fill = LinearGradient(
+    fill = Brush.linearGradient(
         listOf(Color(${0x11223344}), Color(${0x55667788})),
         startX = 1F,
         startY = 2F,
@@ -115,7 +116,7 @@ path(
         endY = 4F,
     ),
     fillAlpha = 0.5F,
-    stroke = RadialGradient(
+    stroke = Brush.radialGradient(
         0.25F to Color(${0x11223344}),
         0.5F to Color(${0x55667788}),
         0.75F to Color(${0x99101112}),
@@ -131,11 +132,11 @@ path(
     strokeLineMiter = 3F,
     pathFillType = PathFillType.NonZero,
 ) {
-''')..writeln(pathDataAsString)..writeln('}');
+''')..writeln(pathDataAsString)..writeln('}')).toString();
       final actual = StringBuffer()
           .also((buffer) => writePath(buffer, path, 0))
           .toString();
-      expect(actual, expected.toString());
+      expect(actual, expected);
     });
   });
   group('writeGroup() writes a DSL-compliant group declaration', () {
@@ -144,15 +145,20 @@ path(
           .id('test_group')
           .transformations(
             TransformationsBuilder()
-                .rotation(Rotation(30.0, pivotX: 5.0, pivotY: 5.0))
+                .rotation(const Rotation(30.0, pivotX: 5.0, pivotY: 5.0))
                 .scale(Scale(1.2))
-                .addTranslation(Translation(9.0))
+                .addTranslation(const Translation(9.0))
                 .build()!,
+          )
+          .clipPathData(
+            const [
+              PathNode(PathDataCommand.horizontalLineTo, [12.0])
+            ],
           )
           .addNode(
             VectorPathBuilder(
               const [
-                PathNode(PathDataCommand.horizontalLineTo, [12.0])
+                PathNode(PathDataCommand.horizontalLineTo, [24.0])
               ],
             ).build(),
           )
@@ -178,9 +184,12 @@ group(
     scaleY = 1.2F,
     translationX = 9F,
     translationY = 0F,
+    clipPathData = listOf(
+        PathNode.HorizontalTo(12F),
+    ),
 ) {
     path {
-        horizontalLineTo(12F)
+        horizontalLineTo(24F)
     }
     group {
         path {
@@ -192,7 +201,7 @@ group(
       final actual = StringBuffer()
           .also((buffer) => writeGroup(buffer, group, 0))
           .toString();
-      expect(actual, expected.toString());
+      expect(actual, expected);
     });
   });
 }

@@ -1,5 +1,5 @@
 abstract class Identifiable {
-  const Identifiable(this.id);
+  Identifiable(this.id);
 
   final String? id;
 }

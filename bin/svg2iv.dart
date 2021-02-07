@@ -6,14 +6,17 @@ import 'package:args/args.dart';
 import 'package:svg2va/destination_file_writer.dart';
 import 'package:svg2va/extensions.dart';
 import 'package:svg2va/model/image_vector.dart';
+import 'package:svg2va/protobuf/image_vector_adapter.dart';
+import 'package:svg2va/protobuf/image_vector_transmitter.dart';
 import 'package:svg2va/svg2iv.dart';
 import 'package:svg2va/svg_parser_exception.dart';
 
 const destinationOptionName = 'destination';
 const helpFlagName = 'help';
 const receiverOptionName = 'receiver';
+const socketAddressOptionName = 'socket-address';
 
-void main(List<String> args) {
+void main(List<String> args) async {
   Iterable<File> listSvgFilesRecursivelySync(Directory directory) => directory
       .listSync(recursive: true)
       .where((fse) => fse is File && fse.path.endsWith('.svg'))
@@ -50,6 +53,7 @@ void main(List<String> args) {
           .toString(),
       valueHelp: 'receiver_type',
     )
+    ..addOption(socketAddressOptionName, abbr: 's', hide: true)
     ..addFlag(
       helpFlagName,
       abbr: 'd',
@@ -92,32 +96,38 @@ void main(List<String> args) {
       exit(2);
     }
   }
-  final destinationPath = argResults[destinationOptionName] as String;
   FileSystemEntity destination;
-  if (destinationPath.isNullOrEmpty) {
-    stdout.writeln('No valid destination directory specified;'
-        ' defaulting to the current working directory.');
-    destination = Directory.current;
-  }
-  final shouldDestinationBeAFile = destinationPath.endsWith('.kt');
-  Directory destinationDirectory;
-  if (shouldDestinationBeAFile) {
-    destination = File(destinationPath);
-    destinationDirectory = destination.parent;
-    stdout.writeln('Destination is assumed to be a file.');
-  } else {
-    destinationDirectory = destination = Directory(destinationPath);
-  }
-  if (!destinationDirectory.existsSync()) {
-    stdout.writeln('Destination directory does not exist. Creating it…');
-    try {
-      destinationDirectory.createSync(recursive: true);
-    } on FileSystemException {
-      stderr.writeln('Destination directory could not be created. Exiting.');
-      exit(2);
+  final socketAddress =
+      (argResults[socketAddressOptionName] as String)?.split(':');
+  if (socketAddress == null) {
+    final destinationPath = argResults[destinationOptionName] as String;
+    if (destinationPath.isNullOrEmpty) {
+      stdout.writeln('No valid destination directory specified;'
+          ' defaulting to the current working directory.');
+      destination = Directory.current;
+    }
+    Directory destinationDirectory;
+    if (destinationPath.endsWith('.kt')) {
+      destination = File(destinationPath);
+      destinationDirectory = destination.parent;
+      stdout.writeln('Destination is assumed to be a file.');
+    } else {
+      destinationDirectory = destination = Directory(destinationPath);
+    }
+    if (!destinationDirectory.existsSync()) {
+      stdout.writeln('Destination directory does not exist. Creating it…');
+      try {
+        destinationDirectory.createSync(recursive: true);
+      } on FileSystemException {
+        stderr.writeln('Destination directory could not be created. Exiting.');
+        exit(2);
+      }
     }
   }
-  final imageVectors = <String, ImageVector>{};
+  final imageVectors = Map.fromIterables(
+    sourceFiles.map((f) => f.path),
+    List<ImageVector>.filled(sourceFiles.length, null),
+  );
   for (final source in sourceFiles) {
     if (!source.existsSync()) {
       stderr.writeln('${source.path} does not exist!');
@@ -143,16 +153,30 @@ void main(List<String> args) {
       exitCode = 1;
     }
   }
-  final extensionReceiver = argResults[receiverOptionName] as String;
-  if (shouldDestinationBeAFile) {
-    writeToFile(destination.path, imageVectors, extensionReceiver);
-  } else {
-    imageVectors.forEach(
-      (name, imageVector) => writeToFile(
-        destination.path + Platform.pathSeparator + name,
-        {name: imageVector},
-        extensionReceiver,
-      ),
-    );
+  if (destination != null && imageVectors.values.anyNotNull()) {
+    final extensionReceiver = argResults[receiverOptionName] as String;
+    if (destination is File) {
+      writeImageVectorsToFile(
+          destination.path, imageVectors, extensionReceiver);
+    } else {
+      imageVectors.forEach(
+        (name, imageVector) => writeImageVectorsToFile(
+          destination.path + Platform.pathSeparator + name,
+          {name: imageVector},
+          extensionReceiver,
+        ),
+      );
+    }
+  }
+  if (socketAddress != null &&
+      socketAddress.length == 2 &&
+      socketAddress.every((it) => it.isNotEmpty)) {
+    final host = InternetAddress(socketAddress[0]);
+    final portNumber = int.tryParse(socketAddress[1]);
+    await transmitProtobufImageVector(
+      imageVectorIterableAsProtobuf(imageVectors.values),
+      host,
+      portNumber,
+    ).catchError((_, stackTrace) => stderr.writeln(stackTrace));
   }
 }
