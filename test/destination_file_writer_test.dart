@@ -109,19 +109,19 @@ path(
 path(
     name = "TestVector",
     fill = Brush.linearGradient(
-        listOf(Color(${0x11223344}), Color(${0x55667788})),
-        startX = 1F,
-        startY = 2F,
-        endX = 3F,
-        endY = 4F,
+        listOf(
+            Color(0x11223344),
+            Color(0x55667788),
+        ),
+        start = Offset(1F, 2F),
+        end = Offset(3F, 4F),
     ),
     fillAlpha = 0.5F,
     stroke = Brush.radialGradient(
-        0.25F to Color(${0x11223344}),
-        0.5F to Color(${0x55667788}),
-        0.75F to Color(${0x99101112}),
-        centerX = 1F,
-        centerY = 2F,
+        0.25F to Color(0x11223344),
+        0.5F to Color(0x55667788),
+        0.75F to Color(0x99101112),
+        center = Offset(1F, 2F),
         radius = 3F,
         tileMode = TileMode.Clamp,
     ),
@@ -177,7 +177,7 @@ path(
       final expected = '''
 group(
     name = "TestGroup",
-    rotation = 30F,
+    rotate = 30F,
     pivotX = 5F,
     pivotY = 5F,
     scaleX = 1.2F,

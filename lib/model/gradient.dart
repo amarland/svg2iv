@@ -18,14 +18,14 @@ class LinearGradient extends Gradient {
   LinearGradient(
     List<int> colors, {
     List<double>? stops,
-    this.startX,
-    this.startY,
-    this.endX,
-    this.endY,
+    this.startX = 0.0,
+    this.startY = 0.0,
+    this.endX = double.infinity,
+    this.endY = double.infinity,
     TileMode? tileMode,
   }) : super(colors, stops, tileMode);
 
-  final double? startX, startY, endX, endY;
+  final double startX, startY, endX, endY;
 }
 
 class RadialGradient extends Gradient {
@@ -34,11 +34,12 @@ class RadialGradient extends Gradient {
     List<double>? stops,
     this.centerX,
     this.centerY,
-    this.radius,
+    this.radius = double.infinity,
     TileMode? tileMode,
   }) : super(colors, stops, tileMode);
 
-  final double? centerX, centerY, radius;
+  final double? centerX, centerY;
+  final double radius;
 }
 
 enum TileMode { clamp, repeated, mirror }

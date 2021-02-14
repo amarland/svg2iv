@@ -141,7 +141,7 @@ int writeGroup(StringSink sink, VectorGroup group, int indentationLevel) {
     sink
       ..writeArgumentIfNotNull(++indentationLevel, 'name', group.id)
       ..writeArgumentIfNotNull(
-          indentationLevel, 'rotation', group.rotation?.angle)
+          indentationLevel, 'rotate', group.rotation?.angle)
       ..writeArgumentIfNotNull(
           indentationLevel, 'pivotX', group.rotation?.pivotX)
       ..writeArgumentIfNotNull(
@@ -231,6 +231,9 @@ void _writePathNodes(
 }
 
 String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
+  String colorToString(int color) =>
+      'Color(0x${color.toRadixString(16).toUpperCase()})';
+
   final buffer = StringBuffer();
   if (gradient.colors.length == 1) {
     buffer.write('SolidColor(Color(${gradient.colors[0]}))');
@@ -242,45 +245,64 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
       ..writeln('(');
     indentationLevel++;
     if (gradient.stops == null) {
-      buffer
-        ..write(_generateIndentation(indentationLevel))
-        ..write('listOf(')
-        ..writeAll(gradient.colors.map((c) => 'Color($c)'), ', ')
-        ..writeln('),');
+      buffer..writelnIndent(indentationLevel, 'listOf(');
+      indentationLevel++;
+      for (final color in gradient.colors.map(colorToString)) {
+        buffer
+          ..writeIndent(indentationLevel, color)
+          ..writeln(',');
+      }
+      buffer.writelnIndent(--indentationLevel, '),');
     } else {
       final lastIndex = gradient.stops!.length - 1;
       for (var i = 0; i <= lastIndex; i++) {
         buffer
-          ..write(_generateIndentation(indentationLevel))
-          ..write(_numToKotlinFloatAsString(gradient.stops![i]))
+          ..writeIndent(
+            indentationLevel,
+            _numToKotlinFloatAsString(gradient.stops![i]),
+          )
           ..write(' to ')
-          ..write('Color(${gradient.colors[i]})')
+          ..write(colorToString(gradient.colors[i]))
           ..writeln(',');
       }
     }
     if (isGradientLinear) {
       final linearGradient = gradient as LinearGradient;
+      final startX = linearGradient.startX;
+      final startY = linearGradient.startY;
+      final endX = linearGradient.endX;
+      final endY = linearGradient.endY;
       buffer
         ..writeArgumentIfNotNull(
-            indentationLevel, 'startX', linearGradient.startX)
+          indentationLevel,
+          'start',
+          startX != 0.0 || startY != 0.0 ? Tuple2(startX, startY) : null,
+        )
         ..writeArgumentIfNotNull(
-            indentationLevel, 'startY', linearGradient.startY)
-        ..writeArgumentIfNotNull(indentationLevel, 'endX', linearGradient.endX)
-        ..writeArgumentIfNotNull(indentationLevel, 'endY', linearGradient.endY);
+          indentationLevel,
+          'end',
+          endX != double.infinity || endY != double.infinity
+              ? Tuple2(endX, endY)
+              : null,
+        );
     } else {
       final radialGradient = gradient as RadialGradient;
+      final centerX = radialGradient.centerX;
+      final centerY = radialGradient.centerY;
       buffer
         ..writeArgumentIfNotNull(
-            indentationLevel, 'centerX', radialGradient.centerX)
-        ..writeArgumentIfNotNull(
-            indentationLevel, 'centerY', radialGradient.centerY)
+          indentationLevel,
+          'center',
+          centerX != null || centerY != null
+              ? Tuple2(centerX ?? 0.0, centerY ?? 0.0)
+              : null,
+        )
         ..writeArgumentIfNotNull(
             indentationLevel, 'radius', radialGradient.radius);
     }
     buffer
       ..writeArgumentIfNotNull(indentationLevel, 'tileMode', gradient.tileMode)
-      ..write(_generateIndentation(--indentationLevel))
-      ..write(')');
+      ..writeIndent(--indentationLevel, ')');
   }
   return buffer.toString();
 }
@@ -329,6 +351,10 @@ extension _StringSinkWriting on StringSink {
           .capitalizeCharAt(argument.toString().indexOf('.') + 1);
     } else if (argument is Gradient) {
       argumentAsString = gradientToBrushAsString(argument, indentationLevel);
+    } else if (argument is Tuple2<double, double>) {
+      final x = _numToKotlinFloatAsString(argument.item1);
+      final y = _numToKotlinFloatAsString(argument.item2);
+      argumentAsString = 'Offset($x, $y)';
     } else if (argument is String) {
       argumentAsString = '"$argument"';
     } else {
