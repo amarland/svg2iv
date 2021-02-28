@@ -1,17 +1,18 @@
-// @dart=2.9
-
-import 'package:svg2va/model/gradient.dart';
-import 'package:svg2va/model/image_vector.dart';
-import 'package:svg2va/model/vector_group.dart';
-import 'package:svg2va/model/vector_path.dart';
-import 'package:svg2va/protobuf/image_vector.pb.dart' as $pb;
+import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/model/gradient.dart';
+import 'package:svg2iv/model/image_vector.dart';
+import 'package:svg2iv/model/vector_group.dart';
+import 'package:svg2iv/model/vector_path.dart';
+import 'package:svg2iv/protobuf/image_vector.pb.dart' as $pb;
 
 $pb.ImageVectorCollection imageVectorIterableAsProtobuf(
-  Iterable<ImageVector> imageVectors,
+  Iterable<ImageVector?> imageVectors,
 ) {
   return $pb.ImageVectorCollection(
     nullableImageVectors: imageVectors.map(
-      (v) => v != null ? imageVectorAsProtobuf(v) : $pb.NullableImageVector(),
+      (v) => v != null
+          ? $pb.NullableImageVector(value: imageVectorAsProtobuf(v))
+          : $pb.NullableImageVector(nothing: $pb.Null.NOTHING),
     ),
   );
 }
@@ -35,14 +36,14 @@ $pb.VectorGroup _mapVectorGroup(VectorGroup group) {
       return $pb.VectorNode(group: mappedGroup, path: mappedPath);
     }),
     id: group.id,
-    rotation: group.rotation.angle,
-    pivotX: group.rotation.pivotX,
-    pivotY: group.rotation.pivotY,
-    scaleX: group.scale.x,
-    scaleY: group.scale.y,
-    translationX: group.translation.x,
-    translationY: group.translation.y,
-    clipPathData: group.clipPathData.map(_mapPathNode),
+    rotation: group.rotation?.angle,
+    pivotX: group.rotation?.pivotX,
+    pivotY: group.rotation?.pivotY,
+    scaleX: group.scale?.x,
+    scaleY: group.scale?.y,
+    translationX: group.translation?.x,
+    translationY: group.translation?.y,
+    clipPathData: group.clipPathData?.map(_mapPathNode),
   );
 }
 
@@ -55,10 +56,16 @@ $pb.VectorPath _mapVectorPath(VectorPath path) {
     stroke: _mapGradient(path.stroke),
     strokeAlpha: path.strokeAlpha,
     strokeLineWidth: path.strokeLineWidth,
-    strokeLineCap: $pb.VectorPath_StrokeCap.values[path.strokeLineCap.index],
-    strokeLineJoin: $pb.VectorPath_StrokeJoin.values[path.strokeLineJoin.index],
+    strokeLineCap: path.strokeLineCap?.let(
+      (it) => $pb.VectorPath_StrokeCap.values[it.index],
+    ),
+    strokeLineJoin: path.strokeLineJoin?.let(
+      (it) => $pb.VectorPath_StrokeJoin.values[it.index],
+    ),
     strokeLineMiter: path.strokeLineMiter,
-    fillType: $pb.VectorPath_FillType.values[path.pathFillType.index],
+    fillType: path.pathFillType?.let(
+      (it) => $pb.VectorPath_FillType.values[it.index],
+    ),
   );
 }
 
@@ -68,17 +75,18 @@ $pb.PathNode _mapPathNode(PathNode pathNode) {
     arguments: pathNode.arguments.map((arg) {
       if (arg is bool) {
         return $pb.PathNode_Argument(flag: arg);
-      } else if (arg is double) {
-        return $pb.PathNode_Argument(coordinate: arg);
       } else {
-        return null;
+        return $pb.PathNode_Argument(coordinate: arg);
       }
     }),
   );
 }
 
-$pb.Brush _mapGradient(Gradient gradient) {
-  final tileMode = $pb.Gradient_TileMode.values[gradient.tileMode.index];
+$pb.Brush? _mapGradient(Gradient? gradient) {
+  if (gradient == null) return null;
+  final tileMode = gradient.tileMode?.let(
+    (it) => $pb.Gradient_TileMode.values[it.index],
+  );
   final colors = gradient.colors;
   if (colors.length == 1 || colors.every((c) => c == colors[0])) {
     return $pb.Brush(solidColor: colors[0]);
@@ -107,5 +115,4 @@ $pb.Brush _mapGradient(Gradient gradient) {
       ),
     );
   }
-  return null;
 }

@@ -3,8 +3,8 @@
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:svg2va/protobuf/image_vector.pb.dart';
-import 'package:svg2va/protobuf/image_vector_transmitter.dart';
+import 'package:svg2iv/protobuf/image_vector.pb.dart';
+import 'package:svg2iv/protobuf/image_vector_transmitter.dart';
 import 'package:test/test.dart';
 
 void main() {

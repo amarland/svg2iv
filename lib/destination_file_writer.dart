@@ -1,17 +1,12 @@
 import 'dart:io';
 
-import 'package:svg2va/extensions.dart';
-import 'package:svg2va/model/gradient.dart';
-import 'package:svg2va/model/image_vector.dart';
-import 'package:svg2va/model/vector_group.dart';
-import 'package:svg2va/model/vector_node.dart';
-import 'package:svg2va/model/vector_path.dart';
+import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/model/gradient.dart';
+import 'package:svg2iv/model/image_vector.dart';
+import 'package:svg2iv/model/vector_group.dart';
+import 'package:svg2iv/model/vector_node.dart';
+import 'package:svg2iv/model/vector_path.dart';
 import 'package:tuple/tuple.dart';
-
-const _imports = [
-  'androidx.compose.ui.graphics.*',
-  'androidx.compose.ui.unit.dp',
-];
 
 const _commandsToFunctionAndClassNames = {
   PathDataCommand.close: Tuple2('close', 'Close'),
@@ -71,8 +66,8 @@ void writeImageVectorsToFile(
   fileSink
     ..writeln('package $packageName')
     ..writeln()
-    ..writeAll(_imports)
-    ..writeln()
+    ..writeln('androidx.compose.ui.graphics.*')
+    ..writeln('androidx.compose.ui.unit.dp')
     ..writeln();
   imageVectors.forEach(
     (sourceFileName, imageVector) => writeImageVector(
@@ -96,15 +91,19 @@ void writeImageVector(
   final extensionReceiverDeclaration =
       extensionReceiver?.let((s) => s.capitalizeCharAt(0) + '.') ?? '';
   final imageVectorName = (imageVector.name ?? nameIfVectorNameNull);
+  final backingPropertyName = imageVectorName.toCamelCase();
   sink
     ..writeln(
-      'private var _${imageVectorName.toCamelCase()}: ImageVector? = null',
+      'private var _${backingPropertyName}: ImageVector? = null',
     )
     ..writeln()
     ..writeln(
       'val $extensionReceiverDeclaration$imageVectorName: ImageVector',
     )
-    ..writelnIndent(++indentationLevel, 'get() = _$imageVectorName ?: run {')
+    ..writelnIndent(
+      ++indentationLevel,
+      'get() = _$backingPropertyName ?: run {',
+    )
     ..writelnIndent(++indentationLevel, 'ImageVector.Builder(');
   indentationLevel++;
   imageVector.name?.let(
@@ -114,9 +113,14 @@ void writeImageVector(
     ),
   );
   sink
-    ..writelnIndent(indentationLevel, 'defaultWidth = ${imageVector.width}.dp,')
     ..writelnIndent(
-        indentationLevel, 'defaultHeight = ${imageVector.height}.dp,')
+      indentationLevel,
+      'defaultWidth = ${_numToKotlinFloatAsString(imageVector.width)}.dp,',
+    )
+    ..writelnIndent(
+      indentationLevel,
+      'defaultHeight = ${_numToKotlinFloatAsString(imageVector.height)}.dp,',
+    )
     ..writelnIndent(
       indentationLevel,
       'viewportWidth = ' + _numToKotlinFloatAsString(imageVector.viewportWidth),
@@ -128,14 +132,24 @@ void writeImageVector(
     )
     ..writelnIndent(--indentationLevel, ')')
     ..writeIndent(++indentationLevel, '.');
-  indentationLevel = writeGroup(sink, imageVector.group, indentationLevel);
+  indentationLevel = writeGroup(
+    sink,
+    imageVector.group,
+    indentationLevel,
+    isPrecededByPoint: true,
+  );
   sink
-    ..writeln('.build()')
+    ..writelnIndent(indentationLevel, '.build()')
     ..writelnIndent(--indentationLevel, '}');
 }
 
-int writeGroup(StringSink sink, VectorGroup group, int indentationLevel) {
-  sink.writeIndent(indentationLevel, 'group');
+int writeGroup(
+  StringSink sink,
+  VectorGroup group,
+  int indentationLevel, {
+  bool isPrecededByPoint = false,
+}) {
+  sink.writeIndent(isPrecededByPoint ? 0 : indentationLevel, 'group');
   if (group.hasAttributes) {
     sink.writeln('(');
     sink
@@ -231,12 +245,21 @@ void _writePathNodes(
 }
 
 String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
-  String colorToString(int color) =>
-      'Color(0x${color.toRadixString(16).toUpperCase()})';
+  String colorToString(int color) {
+    var hexString = color.toRadixString(16).toUpperCase();
+    final codeUnits = hexString.codeUnits;
+    if (hexString.startsWith('FF')) {
+      hexString = hexString.substring(2);
+      if (codeUnits.every((codeUnit) => codeUnit == codeUnits[0])) {
+        hexString = hexString.substring(3);
+      }
+    }
+    return 'Color(0x${hexString})';
+  }
 
   final buffer = StringBuffer();
   if (gradient.colors.length == 1) {
-    buffer.write('SolidColor(Color(${gradient.colors[0]}))');
+    buffer.write('SolidColor(${colorToString(gradient.colors[0])})');
   } else {
     final isGradientLinear = gradient is LinearGradient;
     buffer
@@ -311,7 +334,10 @@ String _generateIndentation(int indentationLevel) =>
     String.fromCharCodes(List.filled(indentationLevel * 4, 0x20));
 
 String _numToKotlinFloatAsString(num number) =>
-    '${number ~/ 1 == number ? number.toStringAsFixed(0) : number.toString()}F';
+    (number ~/ 1 == number
+        ? number.toStringAsFixed(0)
+        : number.toStringAsFixed(4).replaceFirst(RegExp(r'0*$'), '')) +
+    'F';
 
 extension _StringSinkWriting on StringSink {
   void writeIndent(int indentationLevel, Object obj) {

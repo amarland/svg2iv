@@ -1,8 +1,8 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: image_vector.proto
 //
-// @dart = 2.3
+// @dart = 2.12
 // ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
 
 import 'dart:core' as $core;
@@ -21,7 +21,7 @@ class ImageVectorCollection extends $pb.GeneratedMessage {
 
   ImageVectorCollection._() : super();
   factory ImageVectorCollection({
-    $core.Iterable<NullableImageVector> nullableImageVectors,
+    $core.Iterable<NullableImageVector>? nullableImageVectors,
   }) {
     final _result = create();
     if (nullableImageVectors != null) {
@@ -40,7 +40,7 @@ class ImageVectorCollection extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ImageVectorCollection copyWith(void Function(ImageVectorCollection) updates) => super.copyWith((message) => updates(message as ImageVectorCollection)); // ignore: deprecated_member_use
+  ImageVectorCollection copyWith(void Function(ImageVectorCollection) updates) => super.copyWith((message) => updates(message as ImageVectorCollection)) as ImageVectorCollection; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static ImageVectorCollection create() => ImageVectorCollection._();
@@ -48,15 +48,15 @@ class ImageVectorCollection extends $pb.GeneratedMessage {
   static $pb.PbList<ImageVectorCollection> createRepeated() => $pb.PbList<ImageVectorCollection>();
   @$core.pragma('dart2js:noInline')
   static ImageVectorCollection getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImageVectorCollection>(create);
-  static ImageVectorCollection _defaultInstance;
+  static ImageVectorCollection? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<NullableImageVector> get nullableImageVectors => $_getList(0);
 }
 
 enum NullableImageVector_ValueOrNothing {
-  value, 
-  nothing, 
+  value,
+  nothing,
   notSet
 }
 
@@ -75,8 +75,8 @@ class NullableImageVector extends $pb.GeneratedMessage {
 
   NullableImageVector._() : super();
   factory NullableImageVector({
-    ImageVector value,
-    Null nothing,
+    ImageVector? value,
+    Null? nothing,
   }) {
     final _result = create();
     if (value != null) {
@@ -98,7 +98,7 @@ class NullableImageVector extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  NullableImageVector copyWith(void Function(NullableImageVector) updates) => super.copyWith((message) => updates(message as NullableImageVector)); // ignore: deprecated_member_use
+  NullableImageVector copyWith(void Function(NullableImageVector) updates) => super.copyWith((message) => updates(message as NullableImageVector)) as NullableImageVector; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static NullableImageVector create() => NullableImageVector._();
@@ -106,9 +106,9 @@ class NullableImageVector extends $pb.GeneratedMessage {
   static $pb.PbList<NullableImageVector> createRepeated() => $pb.PbList<NullableImageVector>();
   @$core.pragma('dart2js:noInline')
   static NullableImageVector getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<NullableImageVector>(create);
-  static NullableImageVector _defaultInstance;
+  static NullableImageVector? _defaultInstance;
 
-  NullableImageVector_ValueOrNothing whichValueOrNothing() => _NullableImageVector_ValueOrNothingByTag[$_whichOneof(0)];
+  NullableImageVector_ValueOrNothing whichValueOrNothing() => _NullableImageVector_ValueOrNothingByTag[$_whichOneof(0)]!;
   void clearValueOrNothing() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -145,12 +145,12 @@ class ImageVector extends $pb.GeneratedMessage {
 
   ImageVector._() : super();
   factory ImageVector({
-    VectorGroup group,
-    $core.String name,
-    $core.double viewportWidth,
-    $core.double viewportHeight,
-    $core.double width,
-    $core.double height,
+    VectorGroup? group,
+    $core.String? name,
+    $core.double? viewportWidth,
+    $core.double? viewportHeight,
+    $core.double? width,
+    $core.double? height,
   }) {
     final _result = create();
     if (group != null) {
@@ -184,7 +184,7 @@ class ImageVector extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ImageVector copyWith(void Function(ImageVector) updates) => super.copyWith((message) => updates(message as ImageVector)); // ignore: deprecated_member_use
+  ImageVector copyWith(void Function(ImageVector) updates) => super.copyWith((message) => updates(message as ImageVector)) as ImageVector; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static ImageVector create() => ImageVector._();
@@ -192,7 +192,7 @@ class ImageVector extends $pb.GeneratedMessage {
   static $pb.PbList<ImageVector> createRepeated() => $pb.PbList<ImageVector>();
   @$core.pragma('dart2js:noInline')
   static ImageVector getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImageVector>(create);
-  static ImageVector _defaultInstance;
+  static ImageVector? _defaultInstance;
 
   @$pb.TagNumber(1)
   VectorGroup get group => $_getN(0);
@@ -252,8 +252,8 @@ class ImageVector extends $pb.GeneratedMessage {
 }
 
 enum VectorNode_Node {
-  group, 
-  path, 
+  group,
+  path,
   notSet
 }
 
@@ -272,8 +272,8 @@ class VectorNode extends $pb.GeneratedMessage {
 
   VectorNode._() : super();
   factory VectorNode({
-    VectorGroup group,
-    VectorPath path,
+    VectorGroup? group,
+    VectorPath? path,
   }) {
     final _result = create();
     if (group != null) {
@@ -295,7 +295,7 @@ class VectorNode extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  VectorNode copyWith(void Function(VectorNode) updates) => super.copyWith((message) => updates(message as VectorNode)); // ignore: deprecated_member_use
+  VectorNode copyWith(void Function(VectorNode) updates) => super.copyWith((message) => updates(message as VectorNode)) as VectorNode; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static VectorNode create() => VectorNode._();
@@ -303,9 +303,9 @@ class VectorNode extends $pb.GeneratedMessage {
   static $pb.PbList<VectorNode> createRepeated() => $pb.PbList<VectorNode>();
   @$core.pragma('dart2js:noInline')
   static VectorNode getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<VectorNode>(create);
-  static VectorNode _defaultInstance;
+  static VectorNode? _defaultInstance;
 
-  VectorNode_Node whichNode() => _VectorNode_NodeByTag[$_whichOneof(0)];
+  VectorNode_Node whichNode() => _VectorNode_NodeByTag[$_whichOneof(0)]!;
   void clearNode() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -348,16 +348,16 @@ class VectorGroup extends $pb.GeneratedMessage {
 
   VectorGroup._() : super();
   factory VectorGroup({
-    $core.Iterable<VectorNode> nodes,
-    $core.String id,
-    $core.double rotation,
-    $core.double pivotX,
-    $core.double pivotY,
-    $core.double scaleX,
-    $core.double translationX,
-    $core.double translationY,
-    $core.Iterable<PathNode> clipPathData,
-    $core.double scaleY,
+    $core.Iterable<VectorNode>? nodes,
+    $core.String? id,
+    $core.double? rotation,
+    $core.double? pivotX,
+    $core.double? pivotY,
+    $core.double? scaleX,
+    $core.double? translationX,
+    $core.double? translationY,
+    $core.Iterable<PathNode>? clipPathData,
+    $core.double? scaleY,
   }) {
     final _result = create();
     if (nodes != null) {
@@ -403,7 +403,7 @@ class VectorGroup extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  VectorGroup copyWith(void Function(VectorGroup) updates) => super.copyWith((message) => updates(message as VectorGroup)); // ignore: deprecated_member_use
+  VectorGroup copyWith(void Function(VectorGroup) updates) => super.copyWith((message) => updates(message as VectorGroup)) as VectorGroup; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static VectorGroup create() => VectorGroup._();
@@ -411,7 +411,7 @@ class VectorGroup extends $pb.GeneratedMessage {
   static $pb.PbList<VectorGroup> createRepeated() => $pb.PbList<VectorGroup>();
   @$core.pragma('dart2js:noInline')
   static VectorGroup getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<VectorGroup>(create);
-  static VectorGroup _defaultInstance;
+  static VectorGroup? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<VectorNode> get nodes => $_getList(0);
@@ -510,17 +510,17 @@ class VectorPath extends $pb.GeneratedMessage {
 
   VectorPath._() : super();
   factory VectorPath({
-    $core.Iterable<PathNode> pathNodes,
-    $core.String id,
-    Brush fill,
-    $core.double fillAlpha,
-    Brush stroke,
-    $core.double strokeAlpha,
-    $core.double strokeLineWidth,
-    VectorPath_FillType fillType,
-    VectorPath_StrokeCap strokeLineCap,
-    VectorPath_StrokeJoin strokeLineJoin,
-    $core.double strokeLineMiter,
+    $core.Iterable<PathNode>? pathNodes,
+    $core.String? id,
+    Brush? fill,
+    $core.double? fillAlpha,
+    Brush? stroke,
+    $core.double? strokeAlpha,
+    $core.double? strokeLineWidth,
+    VectorPath_FillType? fillType,
+    VectorPath_StrokeCap? strokeLineCap,
+    VectorPath_StrokeJoin? strokeLineJoin,
+    $core.double? strokeLineMiter,
   }) {
     final _result = create();
     if (pathNodes != null) {
@@ -569,7 +569,7 @@ class VectorPath extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  VectorPath copyWith(void Function(VectorPath) updates) => super.copyWith((message) => updates(message as VectorPath)); // ignore: deprecated_member_use
+  VectorPath copyWith(void Function(VectorPath) updates) => super.copyWith((message) => updates(message as VectorPath)) as VectorPath; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static VectorPath create() => VectorPath._();
@@ -577,7 +577,7 @@ class VectorPath extends $pb.GeneratedMessage {
   static $pb.PbList<VectorPath> createRepeated() => $pb.PbList<VectorPath>();
   @$core.pragma('dart2js:noInline')
   static VectorPath getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<VectorPath>(create);
-  static VectorPath _defaultInstance;
+  static VectorPath? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<PathNode> get pathNodes => $_getList(0);
@@ -678,8 +678,8 @@ class VectorPath extends $pb.GeneratedMessage {
 }
 
 enum PathNode_Argument_Argument {
-  coordinate, 
-  flag, 
+  coordinate,
+  flag,
   notSet
 }
 
@@ -698,8 +698,8 @@ class PathNode_Argument extends $pb.GeneratedMessage {
 
   PathNode_Argument._() : super();
   factory PathNode_Argument({
-    $core.double coordinate,
-    $core.bool flag,
+    $core.double? coordinate,
+    $core.bool? flag,
   }) {
     final _result = create();
     if (coordinate != null) {
@@ -721,7 +721,7 @@ class PathNode_Argument extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PathNode_Argument copyWith(void Function(PathNode_Argument) updates) => super.copyWith((message) => updates(message as PathNode_Argument)); // ignore: deprecated_member_use
+  PathNode_Argument copyWith(void Function(PathNode_Argument) updates) => super.copyWith((message) => updates(message as PathNode_Argument)) as PathNode_Argument; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static PathNode_Argument create() => PathNode_Argument._();
@@ -729,9 +729,9 @@ class PathNode_Argument extends $pb.GeneratedMessage {
   static $pb.PbList<PathNode_Argument> createRepeated() => $pb.PbList<PathNode_Argument>();
   @$core.pragma('dart2js:noInline')
   static PathNode_Argument getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PathNode_Argument>(create);
-  static PathNode_Argument _defaultInstance;
+  static PathNode_Argument? _defaultInstance;
 
-  PathNode_Argument_Argument whichArgument() => _PathNode_Argument_ArgumentByTag[$_whichOneof(0)];
+  PathNode_Argument_Argument whichArgument() => _PathNode_Argument_ArgumentByTag[$_whichOneof(0)]!;
   void clearArgument() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -762,8 +762,8 @@ class PathNode extends $pb.GeneratedMessage {
 
   PathNode._() : super();
   factory PathNode({
-    PathNode_Command command,
-    $core.Iterable<PathNode_Argument> arguments,
+    PathNode_Command? command,
+    $core.Iterable<PathNode_Argument>? arguments,
   }) {
     final _result = create();
     if (command != null) {
@@ -785,7 +785,7 @@ class PathNode extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PathNode copyWith(void Function(PathNode) updates) => super.copyWith((message) => updates(message as PathNode)); // ignore: deprecated_member_use
+  PathNode copyWith(void Function(PathNode) updates) => super.copyWith((message) => updates(message as PathNode)) as PathNode; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static PathNode create() => PathNode._();
@@ -793,7 +793,7 @@ class PathNode extends $pb.GeneratedMessage {
   static $pb.PbList<PathNode> createRepeated() => $pb.PbList<PathNode>();
   @$core.pragma('dart2js:noInline')
   static PathNode getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PathNode>(create);
-  static PathNode _defaultInstance;
+  static PathNode? _defaultInstance;
 
   @$pb.TagNumber(1)
   PathNode_Command get command => $_getN(0);
@@ -809,9 +809,9 @@ class PathNode extends $pb.GeneratedMessage {
 }
 
 enum Brush_SolidColorOrGradient {
-  solidColor, 
-  linearGradient, 
-  radialGradient, 
+  solidColor,
+  linearGradient,
+  radialGradient,
   notSet
 }
 
@@ -832,9 +832,9 @@ class Brush extends $pb.GeneratedMessage {
 
   Brush._() : super();
   factory Brush({
-    $core.int solidColor,
-    Gradient linearGradient,
-    Gradient radialGradient,
+    $core.int? solidColor,
+    Gradient? linearGradient,
+    Gradient? radialGradient,
   }) {
     final _result = create();
     if (solidColor != null) {
@@ -859,7 +859,7 @@ class Brush extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Brush copyWith(void Function(Brush) updates) => super.copyWith((message) => updates(message as Brush)); // ignore: deprecated_member_use
+  Brush copyWith(void Function(Brush) updates) => super.copyWith((message) => updates(message as Brush)) as Brush; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static Brush create() => Brush._();
@@ -867,9 +867,9 @@ class Brush extends $pb.GeneratedMessage {
   static $pb.PbList<Brush> createRepeated() => $pb.PbList<Brush>();
   @$core.pragma('dart2js:noInline')
   static Brush getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Brush>(create);
-  static Brush _defaultInstance;
+  static Brush? _defaultInstance;
 
-  Brush_SolidColorOrGradient whichSolidColorOrGradient() => _Brush_SolidColorOrGradientByTag[$_whichOneof(0)];
+  Brush_SolidColorOrGradient whichSolidColorOrGradient() => _Brush_SolidColorOrGradientByTag[$_whichOneof(0)]!;
   void clearSolidColorOrGradient() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -921,16 +921,16 @@ class Gradient extends $pb.GeneratedMessage {
 
   Gradient._() : super();
   factory Gradient({
-    $core.Iterable<$core.int> colors,
-    $core.Iterable<$core.double> stops,
-    $core.double startX,
-    $core.double startY,
-    $core.double endX,
-    $core.double endY,
-    $core.double centerX,
-    $core.double centerY,
-    $core.double radius,
-    Gradient_TileMode tileMode,
+    $core.Iterable<$core.int>? colors,
+    $core.Iterable<$core.double>? stops,
+    $core.double? startX,
+    $core.double? startY,
+    $core.double? endX,
+    $core.double? endY,
+    $core.double? centerX,
+    $core.double? centerY,
+    $core.double? radius,
+    Gradient_TileMode? tileMode,
   }) {
     final _result = create();
     if (colors != null) {
@@ -976,7 +976,7 @@ class Gradient extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Gradient copyWith(void Function(Gradient) updates) => super.copyWith((message) => updates(message as Gradient)); // ignore: deprecated_member_use
+  Gradient copyWith(void Function(Gradient) updates) => super.copyWith((message) => updates(message as Gradient)) as Gradient; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static Gradient create() => Gradient._();
@@ -984,7 +984,7 @@ class Gradient extends $pb.GeneratedMessage {
   static $pb.PbList<Gradient> createRepeated() => $pb.PbList<Gradient>();
   @$core.pragma('dart2js:noInline')
   static Gradient getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Gradient>(create);
-  static Gradient _defaultInstance;
+  static Gradient? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<$core.int> get colors => $_getList(0);

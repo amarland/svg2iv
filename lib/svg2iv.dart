@@ -1,16 +1,16 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:svg2va/extensions.dart';
-import 'package:svg2va/model/gradient.dart';
-import 'package:svg2va/model/image_vector.dart';
-import 'package:svg2va/model/transformations.dart';
-import 'package:svg2va/model/vector_group.dart';
-import 'package:svg2va/model/vector_node.dart';
-import 'package:svg2va/model/vector_path.dart';
-import 'package:svg2va/path_data_parser.dart';
-import 'package:svg2va/preprocessor.dart';
-import 'package:svg2va/svg_parser_exception.dart';
+import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/model/gradient.dart';
+import 'package:svg2iv/model/image_vector.dart';
+import 'package:svg2iv/model/transformations.dart';
+import 'package:svg2iv/model/vector_group.dart';
+import 'package:svg2iv/model/vector_node.dart';
+import 'package:svg2iv/model/vector_path.dart';
+import 'package:svg2iv/path_data_parser.dart';
+import 'package:svg2iv/preprocessor.dart';
+import 'package:svg2iv/svg_parser_exception.dart';
 import 'package:xml/xml.dart';
 
 final _definitionSeparatorPattern = RegExp(r'[,\s]\s*');
@@ -68,10 +68,10 @@ ImageVector parseSvgFile(File source) {
   final builder = ImageVectorBuilder(viewportWidth, viewportHeight);
   rootElement.getAttribute('id')?.let(builder.name);
   if (width == null && widthAsString != null) {
-    width = _parseLength(widthAsString, viewportWidth);
+    width = _parseLength(widthAsString, baseForPercentage: viewportWidth);
   }
   if (height == null && heightAsString != null) {
-    height = _parseLength(heightAsString, viewportHeight);
+    height = _parseLength(heightAsString, baseForPercentage: viewportHeight);
   }
   width?.let(builder.width);
   height?.let(builder.height);
@@ -84,51 +84,38 @@ ImageVector parseSvgFile(File source) {
 
 Iterable<VectorNode> _extractNodesOfInterest(XmlElement rootElement) sync* {
   for (final element in rootElement.children.whereType<XmlElement>().where(
-      (element) =>
-          element.getAttribute('display')?.let((value) => value != 'none'))) {
-    VectorNode? node;
+    (element) {
+      final displayAttribute = element.getAttribute('display');
+      return displayAttribute == null || displayAttribute != 'none';
+    },
+  )) {
+    final nodes = <VectorNode?>[];
     switch (element.name.local) {
       case 'defs':
-        final gradientElements = element.children.whereType<XmlElement>().where(
-          (element) {
-            final elementName = element.name.local;
-            return elementName == 'linearGradient' ||
-                elementName == 'radialGradient';
-          },
-        );
-        for (final gradientElement in gradientElements) {
-          final id = gradientElement.getAttribute('id');
-          if (!id.isNullOrEmpty) {
-            _parseGradient(gradientElement)?.let(
-              (gradient) => _definitions[id!] = gradient,
-            );
-          }
-        }
-        final identifiedNodes =
-            _extractNodesOfInterest(element).where((n) => !n.id.isNullOrEmpty);
-        for (final node in identifiedNodes) {
+        for (final node in _extractNodesOfInterest(element)
+            .where((n) => !n.id.isNullOrEmpty)) {
           _definitions[node.id!] = node;
         }
         break;
       case 'g':
-        node = _parseGroupElement(element);
+        nodes.addAll(_parseGroupElement(element));
         break;
       case 'path':
-        node = _parsePathElement(element);
+        nodes.add(_parsePathElement(element));
         break;
       case 'line':
-        node = _parseLineElement(element);
+        nodes.add(_parseLineElement(element));
         break;
       case 'polyline':
       case 'polygon':
-        node = _parsePolyShapeElement(element);
+        nodes.add(_parsePolyShapeElement(element));
         break;
       case 'rect':
-        node = _parseRectElement(element);
+        nodes.add(_parseRectElement(element));
         break;
       case 'circle':
       case 'ellipse':
-        node = _parseEllipseElement(element);
+        nodes.add(_parseEllipseElement(element));
         break;
       case 'clipPath':
         final id = element.getAttribute('id');
@@ -144,24 +131,39 @@ Iterable<VectorNode> _extractNodesOfInterest(XmlElement rootElement) sync* {
                 .singleOrNull
                 ?.let((path) => paths.add(path));
           }
-          paths
-              .takeIf((it) => it.isNotEmpty)
-              ?.let((paths) => _definitions[id!] = paths);
+          if (paths.isNotEmpty) {
+            _definitions[id!] = paths;
+          }
         }
+        // yields nothing
+        break;
+      case 'linearGradient':
+      case 'radialGradient':
+        final id = element.getAttribute('id');
+        if (!id.isNullOrEmpty) {
+          final gradient = _parseGradient(element);
+          _definitions[id!] = gradient;
+        }
+        // yields nothing
         break;
     }
-    if (node != null) yield node;
+    for (final node in nodes.whereNotNull()) {
+      yield node;
+    }
   }
 }
 
-VectorGroup _parseGroupElement(XmlElement groupElement) {
+// can be a single group or the list of its nodes if it's considered "redundant"
+Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
   var builder = VectorGroupBuilder();
   _parseTransformations(groupElement)?.let((t) => builder.transformations(t));
   for (final childNode in _extractNodesOfInterest(groupElement)) {
     builder.addNode(childNode);
   }
   builder = _fillAttributes(groupElement, builder);
-  return _handleClipPathAttribute(groupElement, builder) ?? builder.build();
+  final group =
+      _handleClipPathAttribute(groupElement, builder) ?? builder.build();
+  return group.hasAttributes ? [group] : group.nodes;
 }
 
 Transformations? _parseTransformations(XmlElement element) {
@@ -265,7 +267,7 @@ VectorNode? _parseLineElement(XmlElement lineElement) {
         break;
     }
     return mappedAttributes[name];
-  }).toList();
+  });
   final transformations = _parseTransformations(lineElement);
   final pathData = _extractPathDataFromLinePoints(points, transformations);
   return _buildVectorNodeFromPathData(lineElement, pathData, transformations);
@@ -427,7 +429,7 @@ VectorGroup? _handleClipPathAttribute(
   VectorNodeBuilder currentBuilder,
 ) {
   final clipPathAttributeValue = currentElement.getAttribute('clip-path');
-  if (clipPathAttributeValue.isNullOrEmpty) {
+  if (!clipPathAttributeValue.isNullOrEmpty) {
     final referencedNodeId =
         extractIdFromUrlFunctionCall(clipPathAttributeValue!);
     final referencedNode = _definitions[referencedNodeId];
@@ -511,12 +513,17 @@ B _fillAttributes<T extends VectorNode, B extends VectorNodeBuilder<T, B>>(
         _parsePercentage(attributeValue)
             ?.let((fillAlpha) => builder.fillAlpha(fillAlpha));
         break;
-      case 'opacity':
+      case 'stroke':
         _parseColor(attributeValue)?.let((stroke) => builder.stroke(stroke));
         break;
       case 'stroke-opacity':
         _parsePercentage(attributeValue)?.let(
           (strokeAlpha) => builder.strokeAlpha(strokeAlpha),
+        );
+        break;
+      case 'stroke-width':
+        _parseLength(attributeValue)?.let(
+          (strokeWidth) => builder.strokeLineWidth(strokeWidth),
         );
         break;
       case 'stroke-linecap':
@@ -640,14 +647,20 @@ Gradient? _parseGradient(XmlElement gradientElement) {
         );
 }
 
-// TODO: support other units?
-double? _parseLength(String lengthAsString, num base) =>
-    _parsePercentage(lengthAsString)?.let((percentage) => base * percentage) ??
-    double.tryParse(lengthAsString.replaceFirst('px', ''))
-        ?.takeIf((l) => !l.isNegative);
+// TODO: support more units than px?
+// values expressed as a percentage if `baseForPercentage` is null
+// (typically unknown or not easily reachable)
+double? _parseLength(String lengthAsString, {num? baseForPercentage}) {
+  return baseForPercentage?.let((base) => _parsePercentage(lengthAsString)
+          ?.let((percentage) => base * percentage)) ??
+      double.tryParse(lengthAsString.replaceFirst('px', ''))
+          ?.takeIf((l) => !l.isNegative);
+}
 
+// 0..1
 double? _parsePercentage(String percentageAsString) {
   final trimmed = percentageAsString.trim();
+  if (trimmed == '1') return 1.0;
   final valueToParse = trimmed.endsWith('%')
       ? trimmed.substring(0, trimmed.length - 1)
       : trimmed;
@@ -669,10 +682,13 @@ Gradient? _parseColor(String colorAsString) {
     final valueAsList = colorAsString.substring(1).split('');
     final List<int?> argb;
     if (valueAsList.length == 3) {
-      argb = valueAsList.map((s) {
-        final digit = int.tryParse(s, radix: 16);
-        return digit != null ? digit * 10 + digit : null;
-      }).toList();
+      argb = <int?>[
+        0xFF,
+        ...valueAsList.map((s) {
+          final digit = int.tryParse(s, radix: 16);
+          return digit != null ? digit * 10 + digit : null;
+        }),
+      ];
     } else if (valueAsList.length >= 6) {
       final int? alpha;
       final List<String?> rgb;

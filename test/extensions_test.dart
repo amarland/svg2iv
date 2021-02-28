@@ -1,4 +1,4 @@
-import 'package:svg2va/extensions.dart';
+import 'package:svg2iv/extensions.dart';
 import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
 

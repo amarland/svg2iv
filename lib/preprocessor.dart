@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:svg2va/extensions.dart';
-import 'package:svg2va/svg2iv.dart';
+import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/svg2iv.dart';
 import 'package:xml/xml.dart';
 
 const useElementCustomAttributePrefix = 'use_';
@@ -11,18 +11,18 @@ void preprocessSvg(XmlElement svgElement) {
   _reorderClipPathElementsIfNeeded(svgElement);
 }
 
-void _moveDefsElementToFirstPositionIfAny(XmlElement element) {
-  final defsElement = element.getElement('defs');
+void _moveDefsElementToFirstPositionIfAny(XmlElement svgElement) {
+  final defsElement = svgElement.getElement('defs');
   if (defsElement != null &&
       // if there's another element before it
       defsElement.previousSibling?.takeIf((it) => it is XmlElement) != null) {
     defsElement.parent!.children.remove(defsElement);
-    element.children.insert(0, defsElement);
+    svgElement.children.insert(0, defsElement);
   }
 }
 
-void _inlineUseElements(XmlElement element) {
-  for (final useElement in element.findAllElements('use')) {
+void _inlineUseElements(XmlElement svgElement) {
+  for (final useElement in svgElement.findAllElements('use')) {
     final referencedElementId = useElement.attributes
         .where((attr) => attr.name.local.replaceFirst('xlink:', '') == 'href')
         .singleOrNull
@@ -30,7 +30,7 @@ void _inlineUseElements(XmlElement element) {
         .substring(1); // [0] => #
     if (referencedElementId != null &&
         referencedElementId != (useElement.getAttribute('id') ?? '')) {
-      final referencedElement = element.descendants
+      final referencedElement = svgElement.descendants
           .whereType<XmlElement>()
           .where((d) {
             final id = d.getAttribute('id');
@@ -96,8 +96,8 @@ void _inlineUseElements(XmlElement element) {
 }
 
 /*
-void _wrapClippedPathsIntoGroups(XmlElement element) {
-  final allNonGroupChildElements = element.descendants
+void _wrapClippedPathsIntoGroups(XmlElement svgElement) {
+  final allNonGroupChildElements = svgElement.descendants
       .whereType<XmlElement>()
       .where((element) => element.name.local != 'g');
   for (final element in allNonGroupChildElements) {
@@ -116,10 +116,9 @@ void _wrapClippedPathsIntoGroups(XmlElement element) {
 }
 */
 
-void _reorderClipPathElementsIfNeeded(XmlElement element) {
-  for (final clipPathElement in element.findAllElements('clipPath')) {
-    final defsElement = element.getElement('defs') ??
-        XmlElement(XmlName('defs')).also((e) => element.children.insert(0, e));
+void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
+  for (final clipPathElement in svgElement.findAllElements('clipPath')) {
+    final defsElement = getOrCreateDefsElement(svgElement);
     final clipPathElementIdNode = clipPathElement.getAttributeNode('id');
     final clipPathElementId = clipPathElementIdNode?.value;
     if (clipPathElementId.isNullOrEmpty) continue;
@@ -158,3 +157,7 @@ void _reorderClipPathElementsIfNeeded(XmlElement element) {
     );
   }
 }
+
+XmlElement getOrCreateDefsElement(XmlElement svgElement) =>
+    svgElement.getElement('defs') ??
+    XmlElement(XmlName('defs')).also((e) => svgElement.children.insert(0, e));

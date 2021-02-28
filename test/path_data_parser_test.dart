@@ -1,5 +1,5 @@
-import 'package:svg2va/model/vector_path.dart';
-import 'package:svg2va/path_data_parser.dart';
+import 'package:svg2iv/model/vector_path.dart';
+import 'package:svg2iv/path_data_parser.dart';
 import 'package:test/test.dart';
 
 void main() {

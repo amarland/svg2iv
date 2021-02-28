@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
-import 'package:svg2va/extensions.dart';
-import 'package:svg2va/model/gradient.dart';
-import 'package:svg2va/model/identifiable.dart';
+import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/model/gradient.dart';
+import 'package:svg2iv/model/identifiable.dart';
 
 abstract class VectorNode extends Identifiable {
   VectorNode(String? id) : super(id?.toPascalCase());

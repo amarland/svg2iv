@@ -1,8 +1,8 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: image_vector.proto
 //
-// @dart = 2.3
+// @dart = 2.12
 // ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
 
 // ignore_for_file: UNDEFINED_SHOWN_NAME
@@ -17,7 +17,7 @@ class Null extends $pb.ProtobufEnum {
   ];
 
   static final $core.Map<$core.int, Null> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static Null valueOf($core.int value) => _byValue[value];
+  static Null? valueOf($core.int value) => _byValue[value];
 
   const Null._($core.int v, $core.String n) : super(v, n);
 }
@@ -34,7 +34,7 @@ class VectorPath_StrokeCap extends $pb.ProtobufEnum {
   ];
 
   static final $core.Map<$core.int, VectorPath_StrokeCap> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static VectorPath_StrokeCap valueOf($core.int value) => _byValue[value];
+  static VectorPath_StrokeCap? valueOf($core.int value) => _byValue[value];
 
   const VectorPath_StrokeCap._($core.int v, $core.String n) : super(v, n);
 }
@@ -51,7 +51,7 @@ class VectorPath_StrokeJoin extends $pb.ProtobufEnum {
   ];
 
   static final $core.Map<$core.int, VectorPath_StrokeJoin> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static VectorPath_StrokeJoin valueOf($core.int value) => _byValue[value];
+  static VectorPath_StrokeJoin? valueOf($core.int value) => _byValue[value];
 
   const VectorPath_StrokeJoin._($core.int v, $core.String n) : super(v, n);
 }
@@ -66,7 +66,7 @@ class VectorPath_FillType extends $pb.ProtobufEnum {
   ];
 
   static final $core.Map<$core.int, VectorPath_FillType> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static VectorPath_FillType valueOf($core.int value) => _byValue[value];
+  static VectorPath_FillType? valueOf($core.int value) => _byValue[value];
 
   const VectorPath_FillType._($core.int v, $core.String n) : super(v, n);
 }
@@ -115,7 +115,7 @@ class PathNode_Command extends $pb.ProtobufEnum {
   ];
 
   static final $core.Map<$core.int, PathNode_Command> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static PathNode_Command valueOf($core.int value) => _byValue[value];
+  static PathNode_Command? valueOf($core.int value) => _byValue[value];
 
   const PathNode_Command._($core.int v, $core.String n) : super(v, n);
 }
@@ -132,7 +132,7 @@ class Gradient_TileMode extends $pb.ProtobufEnum {
   ];
 
   static final $core.Map<$core.int, Gradient_TileMode> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static Gradient_TileMode valueOf($core.int value) => _byValue[value];
+  static Gradient_TileMode? valueOf($core.int value) => _byValue[value];
 
   const Gradient_TileMode._($core.int v, $core.String n) : super(v, n);
 }

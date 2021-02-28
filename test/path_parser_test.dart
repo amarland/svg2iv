@@ -2,8 +2,8 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:svg2va/image_vector.dart';
-import 'package:svg2va/path_parser.dart';
+import 'package:svg2iv/image_vector.dart';
+import 'package:svg2iv/path_parser.dart';
 import 'package:svg_path_parser/svg_path_parser.dart' as third_party;
 
 void main() {

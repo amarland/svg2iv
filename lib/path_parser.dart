@@ -2,7 +2,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:svg2va/vector_path.dart';
+import 'package:svg2iv/vector_path.dart';
 import 'package:svg_path_parser/svg_path_parser.dart';
 
 class PathParser implements Parser {

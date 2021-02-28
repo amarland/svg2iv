@@ -1,4 +1,4 @@
-name: svg2va
+name: svg2iv
 description: A command-line application to convert SVG files to Jetpack Compose `ImageVector`s.
 # version: 1.0.0
 
@@ -6,9 +6,9 @@ environment:
   sdk: '>=2.12.0-0 <3.0.0'
 
 dependencies:
-  args: ^1.6.0
+  args: ^2.0.0
   path_parsing: ^0.2.0-nullsafety.0
-  protobuf: ^2.0.0-nullsafety.1
+  protobuf: ^2.0.0
   # svg_path_parser: ^0.1.1 # for Flutter
   tuple: ^2.0.0-nullsafety.0
   xml: ^5.0.0-nullsafety.1

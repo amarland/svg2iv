@@ -1,10 +1,10 @@
-import 'package:svg2va/destination_file_writer.dart';
-import 'package:svg2va/extensions.dart';
-import 'package:svg2va/model/gradient.dart';
-import 'package:svg2va/model/transformations.dart';
-import 'package:svg2va/model/vector_group.dart';
-import 'package:svg2va/model/vector_node.dart';
-import 'package:svg2va/model/vector_path.dart';
+import 'package:svg2iv/destination_file_writer.dart';
+import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/model/gradient.dart';
+import 'package:svg2iv/model/transformations.dart';
+import 'package:svg2iv/model/vector_group.dart';
+import 'package:svg2iv/model/vector_node.dart';
+import 'package:svg2iv/model/vector_path.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -18,7 +18,7 @@ void main() {
       ),
       PathNode(
         PathDataCommand.arcTo,
-        [1.65, 1.65, 0.0, false, false, 6.28, 2.59],
+        [1.650, 1.6500, 0.0, false, false, 6.28, 2.59],
       ),
       PathNode(PathDataCommand.verticalLineTo, [11.0]),
       PathNode(
@@ -65,12 +65,12 @@ void main() {
     });
 
     test('with only a solid fill color', () {
-      const fillColor = 0x11223344;
-      final path =
-          VectorPathBuilder(pathData).fill(LinearGradient([fillColor])).build();
+      final path = VectorPathBuilder(pathData)
+          .fill(LinearGradient([0x11223344]))
+          .build();
       final expected = (StringBuffer('''
 path(
-    fill = SolidColor(Color($fillColor)),
+    fill = SolidColor(Color(0x11223344)),
 ) {
 ''')..writeln(pathDataAsString)..writeln('}')).toString();
       final actual = StringBuffer()

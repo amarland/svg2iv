@@ -1,6 +1,6 @@
-import 'package:svg2va/extensions.dart';
-import 'package:svg2va/model/vector_group.dart';
-import 'package:svg2va/model/vector_node.dart';
+import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/model/vector_group.dart';
+import 'package:svg2iv/model/vector_node.dart';
 
 class ImageVector {
   ImageVector._init(
@@ -8,14 +8,32 @@ class ImageVector {
     this.viewportWidth,
     this.viewportHeight,
     this.width,
-    this.height, {
+    this.height, [
     String? name,
-  }) : name = name?.toPascalCase();
+  ]) : name = name?.toPascalCase();
 
   final VectorGroup group;
   final String? name;
   final double width, height;
   final double viewportWidth, viewportHeight;
+
+  ImageVector copyWith({
+    VectorGroup? group,
+    String? name,
+    double? width,
+    height,
+    double? viewportWidth,
+    viewportHeight,
+  }) {
+    return ImageVector._init(
+      group ?? this.group,
+      viewportWidth ?? this.viewportWidth,
+      viewportHeight ?? this.viewportHeight,
+      width ?? this.width,
+      height ?? this.height,
+      name?.toPascalCase() ?? this.name,
+    );
+  }
 }
 
 class ImageVectorBuilder {
@@ -57,7 +75,7 @@ class ImageVectorBuilder {
       _viewportHeight,
       _width ?? _viewportWidth,
       _height ?? _viewportHeight,
-      name: _name,
+      _name,
     );
   }
 }

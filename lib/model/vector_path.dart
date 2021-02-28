@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart' show ListEquality;
-import 'package:svg2va/extensions.dart';
-import 'package:svg2va/model/gradient.dart';
-import 'package:svg2va/model/vector_node.dart';
+import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/model/gradient.dart';
+import 'package:svg2iv/model/vector_node.dart';
 
 class VectorPath extends VectorNode {
   VectorPath._init(

@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
-import 'package:svg2va/extensions.dart';
-import 'package:svg2va/model/transformations.dart';
-import 'package:svg2va/model/vector_node.dart';
-import 'package:svg2va/model/vector_path.dart';
+import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/model/transformations.dart';
+import 'package:svg2iv/model/vector_node.dart';
+import 'package:svg2iv/model/vector_path.dart';
 
 class VectorGroup extends VectorNode {
   VectorGroup._init(

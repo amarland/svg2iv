@@ -1,4 +1,4 @@
-import 'package:svg2va/extensions.dart';
+import 'package:svg2iv/extensions.dart';
 
 abstract class Gradient {
   Gradient(this.colors, this.stops, this.tileMode) {
@@ -18,12 +18,16 @@ class LinearGradient extends Gradient {
   LinearGradient(
     List<int> colors, {
     List<double>? stops,
-    this.startX = 0.0,
-    this.startY = 0.0,
-    this.endX = double.infinity,
-    this.endY = double.infinity,
+    double? startX,
+    double? startY,
+    double? endX,
+    double? endY,
     TileMode? tileMode,
-  }) : super(colors, stops, tileMode);
+  })  : startX = startX ?? 0.0,
+        startY = startY ?? 0.0,
+        endX = endX ?? double.infinity,
+        endY = endY ?? double.infinity,
+        super(colors, stops, tileMode);
 
   final double startX, startY, endX, endY;
 }
@@ -34,9 +38,10 @@ class RadialGradient extends Gradient {
     List<double>? stops,
     this.centerX,
     this.centerY,
-    this.radius = double.infinity,
+    double? radius,
     TileMode? tileMode,
-  }) : super(colors, stops, tileMode);
+  })  : radius = radius ?? double.infinity,
+        super(colors, stops, tileMode);
 
   final double? centerX, centerY;
   final double radius;

@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:path_parsing/path_parsing.dart';
-import 'package:svg2va/model/transformations.dart';
-import 'package:svg2va/model/vector_path.dart';
+import 'package:svg2iv/model/transformations.dart';
+import 'package:svg2iv/model/vector_path.dart';
 
 List<PathNode>? parsePathData(
   String? pathData, {
