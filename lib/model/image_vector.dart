@@ -1,10 +1,9 @@
 import 'package:svg2iv/extensions.dart';
-import 'package:svg2iv/model/vector_group.dart';
 import 'package:svg2iv/model/vector_node.dart';
 
 class ImageVector {
   ImageVector._init(
-    this.group,
+    this.nodes,
     this.viewportWidth,
     this.viewportHeight,
     this.width,
@@ -12,13 +11,13 @@ class ImageVector {
     String? name,
   ]) : name = name?.toPascalCase();
 
-  final VectorGroup group;
+  final List<VectorNode> nodes;
   final String? name;
   final double width, height;
   final double viewportWidth, viewportHeight;
 
   ImageVector copyWith({
-    VectorGroup? group,
+    List<VectorNode>? nodes,
     String? name,
     double? width,
     height,
@@ -26,7 +25,7 @@ class ImageVector {
     viewportHeight,
   }) {
     return ImageVector._init(
-      group ?? this.group,
+      nodes ?? this.nodes,
       viewportWidth ?? this.viewportWidth,
       viewportHeight ?? this.viewportHeight,
       width ?? this.width,
@@ -42,7 +41,7 @@ class ImageVectorBuilder {
     this._viewportHeight,
   );
 
-  final VectorGroupBuilder _rootGroupBuilder = VectorGroupBuilder();
+  final _nodes = <VectorNode>[];
 
   final double _viewportWidth, _viewportHeight;
   String? _name;
@@ -64,13 +63,13 @@ class ImageVectorBuilder {
   }
 
   ImageVectorBuilder addNode(VectorNode node) {
-    _rootGroupBuilder.addNode(node);
+    _nodes.add(node);
     return this;
   }
 
   ImageVector build() {
     return ImageVector._init(
-      _rootGroupBuilder.build(),
+      _nodes,
       _viewportWidth,
       _viewportHeight,
       _width ?? _viewportWidth,

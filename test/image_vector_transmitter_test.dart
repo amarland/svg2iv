@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:async/async.dart';
@@ -15,29 +13,26 @@ void main() {
         nullableImageVectors: [
           NullableImageVector(
             value: ImageVector(
-              group: VectorGroup(
-                nodes: [
-                  VectorNode(
-                    path: VectorPath(
-                      pathNodes: [
-                        PathNode(
-                          command: PathNode_Command.MOVE_TO,
-                          arguments: [
-                            PathNode_Argument(coordinate: 10.0),
-                            PathNode_Argument(coordinate: 20.0),
-                          ],
-                        )
-                      ],
-                      id: 'test_path',
-                      fill: Brush(
-                        linearGradient: Gradient(colors: [0xAABBCCDD]),
-                      ),
-                      fillAlpha: 0.75,
+              nodes: [
+                VectorNode(
+                  path: VectorPath(
+                    pathNodes: [
+                      PathNode(
+                        command: PathNode_Command.MOVE_TO,
+                        arguments: [
+                          PathNode_Argument(coordinate: 10.0),
+                          PathNode_Argument(coordinate: 20.0),
+                        ],
+                      )
+                    ],
+                    id: 'test_path',
+                    fill: Brush(
+                      linearGradient: Gradient(colors: [0xAABBCCDD]),
                     ),
+                    fillAlpha: 0.75,
                   ),
-                ],
-                id: 'test_group',
-              ),
+                ),
+              ],
               name: 'test',
               viewportWidth: 20,
               viewportHeight: 20,

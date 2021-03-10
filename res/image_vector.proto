@@ -16,7 +16,7 @@ message NullableImageVector {
 enum Null {NOTHING = 0;}
 
 message ImageVector {
-  VectorGroup group = 1;
+  repeated VectorNode nodes = 1;
   string name = 2;
   float viewport_width = 3;
   float viewport_height = 4;

@@ -96,9 +96,12 @@ If not provided, the generated property will be declared as a top-level property
     }
   }
   FileSystemEntity? destination;
-  final socketAddress =
-      (argResults[socketAddressOptionName] as String).split(':');
-  if (socketAddress.isNotEmpty) {
+  final socketAddress = (argResults[socketAddressOptionName] as String)
+      .split(':')
+      .takeIf((splits) =>
+          splits.length == 2 && splits.every((s) => !s.isNullOrEmpty));
+  if (socketAddress == null) {
+    // transmit instead of generating
     final destinationPath = argResults[destinationOptionName] as String?;
     if (destinationPath.isNullOrEmpty) {
       stdout.writeln('No valid destination directory specified;'
@@ -174,7 +177,7 @@ If not provided, the generated property will be declared as a top-level property
       );
     }
   }
-  if (socketAddress.length == 2 && socketAddress.every((it) => it.isNotEmpty)) {
+  if (socketAddress != null && socketAddress.every((it) => it.isNotEmpty)) {
     final host = InternetAddress.tryParse(socketAddress[0]);
     final portNumber = int.tryParse(socketAddress[1]);
     if (host == null || portNumber == null) {

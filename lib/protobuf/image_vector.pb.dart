@@ -134,7 +134,7 @@ class NullableImageVector extends $pb.GeneratedMessage {
 
 class ImageVector extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ImageVector', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'svg2iv.protobuf'), createEmptyInstance: create)
-    ..aOM<VectorGroup>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: VectorGroup.create)
+    ..pc<VectorNode>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nodes', $pb.PbFieldType.PM, subBuilder: VectorNode.create)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..a<$core.double>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'viewportWidth', $pb.PbFieldType.OF)
     ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'viewportHeight', $pb.PbFieldType.OF)
@@ -145,7 +145,7 @@ class ImageVector extends $pb.GeneratedMessage {
 
   ImageVector._() : super();
   factory ImageVector({
-    VectorGroup? group,
+    $core.Iterable<VectorNode>? nodes,
     $core.String? name,
     $core.double? viewportWidth,
     $core.double? viewportHeight,
@@ -153,8 +153,8 @@ class ImageVector extends $pb.GeneratedMessage {
     $core.double? height,
   }) {
     final _result = create();
-    if (group != null) {
-      _result.group = group;
+    if (nodes != null) {
+      _result.nodes.addAll(nodes);
     }
     if (name != null) {
       _result.name = name;
@@ -195,15 +195,7 @@ class ImageVector extends $pb.GeneratedMessage {
   static ImageVector? _defaultInstance;
 
   @$pb.TagNumber(1)
-  VectorGroup get group => $_getN(0);
-  @$pb.TagNumber(1)
-  set group(VectorGroup v) { setField(1, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasGroup() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearGroup() => clearField(1);
-  @$pb.TagNumber(1)
-  VectorGroup ensureGroup() => $_ensure(0);
+  $core.List<VectorNode> get nodes => $_getList(0);
 
   @$pb.TagNumber(2)
   $core.String get name => $_getSZ(1);
@@ -252,8 +244,8 @@ class ImageVector extends $pb.GeneratedMessage {
 }
 
 enum VectorNode_Node {
-  group,
-  path,
+  group, 
+  path, 
   notSet
 }
 
@@ -678,8 +670,8 @@ class VectorPath extends $pb.GeneratedMessage {
 }
 
 enum PathNode_Argument_Argument {
-  coordinate,
-  flag,
+  coordinate, 
+  flag, 
   notSet
 }
 
@@ -809,9 +801,9 @@ class PathNode extends $pb.GeneratedMessage {
 }
 
 enum Brush_SolidColorOrGradient {
-  solidColor,
-  linearGradient,
-  radialGradient,
+  solidColor, 
+  linearGradient, 
+  radialGradient, 
   notSet
 }
 
@@ -1064,4 +1056,3 @@ class Gradient extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   void clearTileMode() => clearField(10);
 }
-

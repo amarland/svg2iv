@@ -46,7 +46,7 @@ final $typed_data.Uint8List nullableImageVectorDescriptor = $convert.base64Decod
 const ImageVector$json = const {
   '1': 'ImageVector',
   '2': const [
-    const {'1': 'group', '3': 1, '4': 1, '5': 11, '6': '.svg2iv.protobuf.VectorGroup', '10': 'group'},
+    const {'1': 'nodes', '3': 1, '4': 3, '5': 11, '6': '.svg2iv.protobuf.VectorNode', '10': 'nodes'},
     const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
     const {'1': 'viewport_width', '3': 3, '4': 1, '5': 2, '10': 'viewportWidth'},
     const {'1': 'viewport_height', '3': 4, '4': 1, '5': 2, '10': 'viewportHeight'},
@@ -56,7 +56,7 @@ const ImageVector$json = const {
 };
 
 /// Descriptor for `ImageVector`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List imageVectorDescriptor = $convert.base64Decode('CgtJbWFnZVZlY3RvchIyCgVncm91cBgBIAEoCzIcLnN2ZzJpdi5wcm90b2J1Zi5WZWN0b3JHcm91cFIFZ3JvdXASEgoEbmFtZRgCIAEoCVIEbmFtZRIlCg52aWV3cG9ydF93aWR0aBgDIAEoAlINdmlld3BvcnRXaWR0aBInCg92aWV3cG9ydF9oZWlnaHQYBCABKAJSDnZpZXdwb3J0SGVpZ2h0EhQKBXdpZHRoGAUgASgCUgV3aWR0aBIWCgZoZWlnaHQYBiABKAJSBmhlaWdodA==');
+final $typed_data.Uint8List imageVectorDescriptor = $convert.base64Decode('CgtJbWFnZVZlY3RvchIxCgVub2RlcxgBIAMoCzIbLnN2ZzJpdi5wcm90b2J1Zi5WZWN0b3JOb2RlUgVub2RlcxISCgRuYW1lGAIgASgJUgRuYW1lEiUKDnZpZXdwb3J0X3dpZHRoGAMgASgCUg12aWV3cG9ydFdpZHRoEicKD3ZpZXdwb3J0X2hlaWdodBgEIAEoAlIOdmlld3BvcnRIZWlnaHQSFAoFd2lkdGgYBSABKAJSBXdpZHRoEhYKBmhlaWdodBgGIAEoAlIGaGVpZ2h0');
 @$core.Deprecated('Use vectorNodeDescriptor instead')
 const VectorNode$json = const {
   '1': 'VectorNode',

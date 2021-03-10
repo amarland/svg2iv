@@ -2,6 +2,7 @@ import 'package:svg2iv/extensions.dart';
 import 'package:svg2iv/model/gradient.dart';
 import 'package:svg2iv/model/image_vector.dart';
 import 'package:svg2iv/model/vector_group.dart';
+import 'package:svg2iv/model/vector_node.dart';
 import 'package:svg2iv/model/vector_path.dart';
 import 'package:svg2iv/protobuf/image_vector.pb.dart' as $pb;
 
@@ -19,7 +20,7 @@ $pb.ImageVectorCollection imageVectorIterableAsProtobuf(
 
 $pb.ImageVector imageVectorAsProtobuf(ImageVector imageVector) {
   return $pb.ImageVector(
-    group: _mapVectorGroup(imageVector.group),
+    nodes: _mapVectorNodes(imageVector.nodes),
     name: imageVector.name,
     viewportWidth: imageVector.viewportWidth,
     viewportHeight: imageVector.viewportHeight,
@@ -28,19 +29,22 @@ $pb.ImageVector imageVectorAsProtobuf(ImageVector imageVector) {
   );
 }
 
-$pb.VectorGroup _mapVectorGroup(VectorGroup group) {
-  return $pb.VectorGroup(
-    nodes: group.nodes.map((node) {
+Iterable<$pb.VectorNode> _mapVectorNodes(Iterable<VectorNode> nodes) =>
+    nodes.map((node) {
       final mappedGroup = node is VectorGroup ? _mapVectorGroup(node) : null;
       final mappedPath = node is VectorPath ? _mapVectorPath(node) : null;
       return $pb.VectorNode(group: mappedGroup, path: mappedPath);
-    }),
+    });
+
+$pb.VectorGroup _mapVectorGroup(VectorGroup group) {
+  return $pb.VectorGroup(
+    nodes: _mapVectorNodes(group.nodes),
     id: group.id,
     rotation: group.rotation?.angle,
     pivotX: group.rotation?.pivotX,
     pivotY: group.rotation?.pivotY,
-    scaleX: group.scale?.x,
-    scaleY: group.scale?.y,
+    scaleX: group.scale?.x ?? 1.0,
+    scaleY: group.scale?.y ?? 1.0,
     translationX: group.translation?.x,
     translationY: group.translation?.y,
     clipPathData: group.clipPathData?.map(_mapPathNode),
@@ -48,24 +52,27 @@ $pb.VectorGroup _mapVectorGroup(VectorGroup group) {
 }
 
 $pb.VectorPath _mapVectorPath(VectorPath path) {
+  final strokeLineCap = path.strokeLineCap;
+  final strokeLineJoin = path.strokeLineJoin;
+  final pathFillType = path.pathFillType;
   return $pb.VectorPath(
     pathNodes: path.pathData.map(_mapPathNode),
     id: path.id,
     fill: _mapGradient(path.fill),
-    fillAlpha: path.fillAlpha,
+    fillAlpha: path.fillAlpha ?? 1.0,
     stroke: _mapGradient(path.stroke),
-    strokeAlpha: path.strokeAlpha,
+    strokeAlpha: path.strokeAlpha ?? 1.0,
     strokeLineWidth: path.strokeLineWidth,
-    strokeLineCap: path.strokeLineCap?.let(
-      (it) => $pb.VectorPath_StrokeCap.values[it.index],
-    ),
-    strokeLineJoin: path.strokeLineJoin?.let(
-      (it) => $pb.VectorPath_StrokeJoin.values[it.index],
-    ),
-    strokeLineMiter: path.strokeLineMiter,
-    fillType: path.pathFillType?.let(
-      (it) => $pb.VectorPath_FillType.values[it.index],
-    ),
+    strokeLineCap: strokeLineCap != null
+        ? $pb.VectorPath_StrokeCap.values[strokeLineCap.index]
+        : $pb.VectorPath_StrokeCap.CAP_BUTT,
+    strokeLineJoin: strokeLineJoin != null
+        ? $pb.VectorPath_StrokeJoin.values[strokeLineJoin.index]
+        : $pb.VectorPath_StrokeJoin.JOIN_MITER,
+    strokeLineMiter: path.strokeLineMiter ?? 4.0,
+    fillType: pathFillType != null
+        ? $pb.VectorPath_FillType.values[pathFillType.index]
+        : $pb.VectorPath_FillType.NON_ZERO,
   );
 }
 
@@ -76,7 +83,8 @@ $pb.PathNode _mapPathNode(PathNode pathNode) {
       if (arg is bool) {
         return $pb.PathNode_Argument(flag: arg);
       } else {
-        return $pb.PathNode_Argument(coordinate: arg);
+        // calling `toDouble` seems to fix a cast issue from `_Smi`, somehow
+        return $pb.PathNode_Argument(coordinate: arg.toDouble());
       }
     }),
   );

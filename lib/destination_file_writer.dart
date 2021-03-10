@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:svg2iv/extensions.dart';
 import 'package:svg2iv/model/gradient.dart';
 import 'package:svg2iv/model/image_vector.dart';
@@ -48,12 +49,12 @@ void writeImageVectorsToFile(
   final file = File(destinationPath).absolute;
   final fileSink = file.openWrite();
   final pathSeparator = Platform.pathSeparator;
-  final sourceDirectoryPattern =
-      'src\\$pathSeparator(java|kotlin)\\$pathSeparator';
   final absoluteFilePath = file.path;
   final String packageName;
   final startOfPackageName =
-      RegExp(sourceDirectoryPattern).firstMatch(absoluteFilePath)?.end;
+      RegExp('src\\$pathSeparator(java|kotlin)\\$pathSeparator')
+          .firstMatch(absoluteFilePath)
+          ?.end;
   if (startOfPackageName == null) {
     packageName = '<package>';
   } else {
@@ -89,22 +90,23 @@ void writeImageVector(
 ]) {
   var indentationLevel = 0;
   final extensionReceiverDeclaration =
-      extensionReceiver?.let((s) => s.capitalizeCharAt(0) + '.') ?? '';
+      extensionReceiver.isNullOrEmpty ? '' : extensionReceiver! + '.';
   final imageVectorName = (imageVector.name ?? nameIfVectorNameNull);
-  final backingPropertyName = imageVectorName.toCamelCase();
+  final backingPropertyName = '_' + imageVectorName.toCamelCase();
   sink
     ..writeln(
-      'private var _${backingPropertyName}: ImageVector? = null',
+      'private var ${backingPropertyName}: ImageVector? = null',
     )
     ..writeln()
     ..writeln(
       'val $extensionReceiverDeclaration$imageVectorName: ImageVector',
     )
+    ..writelnIndent(++indentationLevel, 'get() {')
+    ..writelnIndent(++indentationLevel, 'if ($backingPropertyName == null) {')
     ..writelnIndent(
       ++indentationLevel,
-      'get() = _$backingPropertyName ?: run {',
-    )
-    ..writelnIndent(++indentationLevel, 'ImageVector.Builder(');
+      '$backingPropertyName = ImageVector.Builder(',
+    );
   indentationLevel++;
   imageVector.name?.let(
     (name) => sink.writelnIndent(
@@ -123,33 +125,64 @@ void writeImageVector(
     )
     ..writelnIndent(
       indentationLevel,
-      'viewportWidth = ' + _numToKotlinFloatAsString(imageVector.viewportWidth),
+      'viewportWidth = '
+      '${_numToKotlinFloatAsString(imageVector.viewportWidth)},',
     )
     ..writelnIndent(
       indentationLevel,
-      'viewportHeight = ' +
-          _numToKotlinFloatAsString(imageVector.viewportHeight),
+      'viewportHeight = '
+      '${_numToKotlinFloatAsString(imageVector.viewportHeight)},',
     )
     ..writelnIndent(--indentationLevel, ')')
-    ..writeIndent(++indentationLevel, '.');
-  indentationLevel = writeGroup(
+    ..writeIndent(indentationLevel, '.');
+  indentationLevel = _writeNodes(
     sink,
-    imageVector.group,
-    indentationLevel,
-    isPrecededByPoint: true,
+    imageVector.nodes,
+    indentationLevel++,
+    shouldFirstDeclarationBeIndented: false,
   );
   sink
     ..writelnIndent(indentationLevel, '.build()')
+    ..writelnIndent(--indentationLevel, '}')
+    ..writelnIndent(indentationLevel, 'return $backingPropertyName')
     ..writelnIndent(--indentationLevel, '}');
+}
+
+int _writeNodes(
+  StringSink sink,
+  Iterable<VectorNode> nodes,
+  int indentationLevel, {
+  bool shouldFirstDeclarationBeIndented = true,
+}) {
+  nodes.forEachIndexed((index, node) {
+    final shouldDeclarationBeIndented =
+        shouldFirstDeclarationBeIndented || index > 0;
+    if (node is VectorGroup) {
+      indentationLevel = writeGroup(
+        sink,
+        node,
+        indentationLevel,
+        shouldDeclarationBeIndented: shouldDeclarationBeIndented,
+      );
+    } else if (node is VectorPath) {
+      indentationLevel = writePath(
+        sink,
+        node,
+        indentationLevel,
+        shouldDeclarationBeIndented: shouldDeclarationBeIndented,
+      );
+    }
+  });
+  return indentationLevel;
 }
 
 int writeGroup(
   StringSink sink,
   VectorGroup group,
   int indentationLevel, {
-  bool isPrecededByPoint = false,
+  bool shouldDeclarationBeIndented = false,
 }) {
-  sink.writeIndent(isPrecededByPoint ? 0 : indentationLevel, 'group');
+  sink.writeIndent(shouldDeclarationBeIndented ? indentationLevel : 0, 'group');
   if (group.hasAttributes) {
     sink.writeln('(');
     sink
@@ -171,20 +204,18 @@ int writeGroup(
     sink.writeIndent(--indentationLevel, ')');
   }
   sink.writeln(' {');
-  indentationLevel++;
-  for (final node in group.nodes) {
-    if (node is VectorGroup) {
-      indentationLevel = writeGroup(sink, node, indentationLevel);
-    } else if (node is VectorPath) {
-      indentationLevel = writePath(sink, node, indentationLevel);
-    }
-  }
+  indentationLevel = _writeNodes(sink, group.nodes, indentationLevel++);
   sink.writelnIndent(--indentationLevel, '}');
   return indentationLevel;
 }
 
-int writePath(StringSink sink, VectorPath path, int indentationLevel) {
-  sink.writeIndent(indentationLevel, 'path');
+int writePath(
+  StringSink sink,
+  VectorPath path,
+  int indentationLevel, {
+  bool shouldDeclarationBeIndented = true,
+}) {
+  sink.writeIndent(shouldDeclarationBeIndented ? indentationLevel : 0, 'path');
   if (path.hasAttributes) {
     sink.writeln('(');
     sink
@@ -245,21 +276,13 @@ void _writePathNodes(
 }
 
 String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
-  String colorToString(int color) {
-    var hexString = color.toRadixString(16).toUpperCase();
-    final codeUnits = hexString.codeUnits;
-    if (hexString.startsWith('FF')) {
-      hexString = hexString.substring(2);
-      if (codeUnits.every((codeUnit) => codeUnit == codeUnits[0])) {
-        hexString = hexString.substring(3);
-      }
-    }
-    return 'Color(0x${hexString})';
-  }
+  String colorToString(int color) =>
+      'Color(0x${color.toRadixString(16).toUpperCase()})';
 
   final buffer = StringBuffer();
-  if (gradient.colors.length == 1) {
-    buffer.write('SolidColor(${colorToString(gradient.colors[0])})');
+  final colors = gradient.colors;
+  if (colors.length == 1 || colors.every((c) => c == colors[0])) {
+    buffer.write('SolidColor(${colorToString(colors[0])})');
   } else {
     final isGradientLinear = gradient is LinearGradient;
     buffer
@@ -270,7 +293,7 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
     if (gradient.stops == null) {
       buffer..writelnIndent(indentationLevel, 'listOf(');
       indentationLevel++;
-      for (final color in gradient.colors.map(colorToString)) {
+      for (final color in colors.map(colorToString)) {
         buffer
           ..writeIndent(indentationLevel, color)
           ..writeln(',');
@@ -285,7 +308,7 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
             _numToKotlinFloatAsString(gradient.stops![i]),
           )
           ..write(' to ')
-          ..write(colorToString(gradient.colors[i]))
+          ..write(colorToString(colors[i]))
           ..writeln(',');
       }
     }

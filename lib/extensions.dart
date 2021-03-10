@@ -64,7 +64,8 @@ extension StringFormatting on String {
   String toPascalCase() {
     return replaceAllMapped(
       RegExp(
-          r'[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+'),
+        r'[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+',
+      ),
       (match) {
         final first = match[0]!;
         return first[0].toUpperCase() + first.substring(1).toLowerCase();

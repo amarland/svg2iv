@@ -107,6 +107,7 @@ class VectorPathBuilder
 }
 
 enum PathDataCommand {
+  close,
   moveTo,
   relativeMoveTo,
   lineTo,
@@ -125,7 +126,6 @@ enum PathDataCommand {
   relativeSmoothQuadraticBezierCurveTo,
   arcTo,
   relativeArcTo,
-  close,
 }
 
 class PathNode {

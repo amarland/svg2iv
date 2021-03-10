@@ -44,7 +44,9 @@ ImageVector parseSvgFile(File source) {
       ?.split(_definitionSeparatorPattern)
       .map(double.tryParse)
       .toList()
-      .takeIf((viewBox) => viewBox.length != 4 || viewBox.sublist(2).anyNull());
+      .takeIf(
+        (viewBox) => viewBox.length == 4 && viewBox.sublist(2).everyNotNull(),
+      );
   final widthAsString = rootElement.getAttribute('width');
   final heightAsString = rootElement.getAttribute('height');
   if (viewBox != null) {
@@ -379,11 +381,11 @@ VectorNode? _parseEllipseElement(XmlElement ellipseElement) {
   final pathData = [
     PathNode(PathDataCommand.moveTo, [cx - rx, cy]),
     PathNode(
-      PathDataCommand.arcTo,
+      PathDataCommand.relativeArcTo,
       [rx, ry, 0.0, true, sweepFlag, diameter, 0],
     ),
     PathNode(
-      PathDataCommand.arcTo,
+      PathDataCommand.relativeArcTo,
       [rx, ry, 0.0, true, sweepFlag, -diameter, 0],
     ),
     if (isShapeACircle) PathNode(PathDataCommand.close, List.empty())

@@ -136,4 +136,3 @@ class Gradient_TileMode extends $pb.ProtobufEnum {
 
   const Gradient_TileMode._($core.int v, $core.String n) : super(v, n);
 }
-
