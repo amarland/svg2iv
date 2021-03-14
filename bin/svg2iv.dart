@@ -7,7 +7,7 @@ import 'package:svg2iv/model/image_vector.dart';
 import 'package:svg2iv/protobuf/image_vector_adapter.dart';
 import 'package:svg2iv/protobuf/image_vector_transmitter.dart';
 import 'package:svg2iv/svg2iv.dart';
-import 'package:svg2iv/svg_parser_exception.dart';
+import 'package:svg2iv/file_parser.dart';
 import 'package:xml/xml.dart';
 
 const destinationOptionName = 'destination';
@@ -142,7 +142,7 @@ If not provided, the generated property will be declared as a top-level property
         ),
       );
       imageVectors[fileName] = parseSvgFile(source);
-    } on SvgParserException catch (e) {
+    } on FileParserException catch (e) {
       stderr
         ..writeln('An error occurred while parsing ${source.path}:')
         ..writeln(e.message);

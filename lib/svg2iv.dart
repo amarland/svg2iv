@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/file_parser.dart';
 import 'package:svg2iv/model/gradient.dart';
 import 'package:svg2iv/model/image_vector.dart';
 import 'package:svg2iv/model/transformations.dart';
@@ -9,31 +10,15 @@ import 'package:svg2iv/model/vector_group.dart';
 import 'package:svg2iv/model/vector_node.dart';
 import 'package:svg2iv/model/vector_path.dart';
 import 'package:svg2iv/path_data_parser.dart';
-import 'package:svg2iv/preprocessor.dart';
-import 'package:svg2iv/svg_parser_exception.dart';
+import 'package:svg2iv/svg_preprocessor.dart';
 import 'package:xml/xml.dart';
 
 final _definitionSeparatorPattern = RegExp(r'[,\s]\s*');
 
-final Map<String, dynamic> _definitions = {};
+final _definitions = <String, dynamic>{};
 
 ImageVector parseSvgFile(File source) {
-  final XmlDocument document;
-  try {
-    document = XmlDocument.parse(source.readAsStringSync());
-  } on FileSystemException {
-    throw SvgParserException('The file could not be read.');
-  } on XmlParserException {
-    throw SvgParserException('The contents of the file could not be parsed.');
-  }
-  final rootElement = document.rootElement;
-  try {
-    if (rootElement.name.local != 'svg') {
-      throw SvgParserException('The root element is not an `svg` element.');
-    }
-  } on StateError {
-    throw SvgParserException('The file is empty.');
-  }
+  final rootElement = parseXmlFile(source, expectedRootName: 'svg');
   preprocessSvg(rootElement);
   double? viewportWidth;
   double? viewportHeight;
@@ -63,7 +48,7 @@ ImageVector parseSvgFile(File source) {
   viewportWidth ??= width;
   viewportHeight ??= height;
   if (viewportWidth == null || viewportHeight == null) {
-    throw SvgParserException(
+    throw FileParserException(
       'The size of the viewport could not be determined.',
     );
   }
@@ -77,9 +62,7 @@ ImageVector parseSvgFile(File source) {
   }
   width?.let(builder.width);
   height?.let(builder.height);
-  for (final node in _extractNodesOfInterest(rootElement)) {
-    builder.addNode(node);
-  }
+  builder.addNodes(_extractNodesOfInterest(rootElement));
   _definitions.clear();
   return builder.build();
 }

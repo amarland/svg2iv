@@ -67,6 +67,11 @@ class ImageVectorBuilder {
     return this;
   }
 
+  ImageVectorBuilder addNodes(Iterable<VectorNode> nodes) {
+    _nodes.addAll(nodes);
+    return this;
+  }
+
   ImageVector build() {
     return ImageVector._init(
       _nodes,
