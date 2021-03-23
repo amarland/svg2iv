@@ -95,7 +95,7 @@ void writeImageVector(
   final backingPropertyName = '_' + imageVectorName.toCamelCase();
   sink
     ..writeln(
-      'private var ${backingPropertyName}: ImageVector? = null',
+      'private var $backingPropertyName: ImageVector? = null',
     )
     ..writeln()
     ..writeln(
@@ -138,7 +138,7 @@ void writeImageVector(
   indentationLevel = _writeNodes(
     sink,
     imageVector.nodes,
-    indentationLevel++,
+    ++indentationLevel,
     shouldFirstDeclarationBeIndented: false,
   );
   sink
@@ -204,7 +204,7 @@ int writeGroup(
     sink.writeIndent(--indentationLevel, ')');
   }
   sink.writeln(' {');
-  indentationLevel = _writeNodes(sink, group.nodes, indentationLevel++);
+  indentationLevel = _writeNodes(sink, group.nodes, ++indentationLevel);
   sink.writelnIndent(--indentationLevel, '}');
   return indentationLevel;
 }
@@ -290,8 +290,8 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
       ..write(isGradientLinear ? 'linearGradient' : 'radialGradient')
       ..writeln('(');
     indentationLevel++;
-    if (gradient.stops == null) {
-      buffer..writelnIndent(indentationLevel, 'listOf(');
+    if (gradient.stops.isEmpty) {
+      buffer.writelnIndent(indentationLevel, 'listOf(');
       indentationLevel++;
       for (final color in colors.map(colorToString)) {
         buffer
@@ -300,12 +300,11 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
       }
       buffer.writelnIndent(--indentationLevel, '),');
     } else {
-      final lastIndex = gradient.stops!.length - 1;
-      for (var i = 0; i <= lastIndex; i++) {
+      for (var i = 0; i < gradient.stops.length; i++) {
         buffer
           ..writeIndent(
             indentationLevel,
-            _numToKotlinFloatAsString(gradient.stops![i]),
+            _numToKotlinFloatAsString(gradient.stops[i]),
           )
           ..write(' to ')
           ..write(colorToString(colors[i]))

@@ -3,12 +3,12 @@ import 'package:path_parsing/path_parsing.dart';
 import 'package:svg2iv/model/transformations.dart';
 import 'package:svg2iv/model/vector_path.dart';
 
-List<PathNode>? parsePathData(
+List<PathNode> parsePathData(
   String? pathData, {
   Translation? translation,
   bool shouldNormalize = false,
 }) {
-  if (pathData == null) return null;
+  if (pathData == null) return List.empty();
   final segments = SvgPathStringSource(pathData).parseSegments();
   translation = translation.orDefault();
   final offsetX = translation.x;

@@ -42,8 +42,8 @@ ImageVector parseSvgFile(File source) {
       !widthAsString!.endsWith('%') &&
       !heightAsString.isNullOrEmpty &&
       !heightAsString!.endsWith('%')) {
-    width = double.tryParse(widthAsString);
-    height = double.tryParse(heightAsString);
+    width = widthAsString.toDouble();
+    height = heightAsString.toDouble();
   }
   viewportWidth ??= width;
   viewportHeight ??= height;
@@ -145,7 +145,7 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
   for (final childNode in _extractNodesOfInterest(groupElement)) {
     builder.addNode(childNode);
   }
-  builder = _fillAttributes(groupElement, builder);
+  builder = _fillPresentationAttributes(groupElement, builder);
   final group =
       _handleClipPathAttribute(groupElement, builder) ?? builder.build();
   return group.hasAttributes ? [group] : group.nodes;
@@ -213,7 +213,7 @@ Transformations? _parseTransformations(XmlElement element) {
           attrs.name.local.startsWith(useElementCustomAttributePrefix))
       .associate(
         (attr) => attr.name.local,
-        (attr) => double.tryParse(attr.value),
+        (attr) => attr.value.toDouble(),
       );
   final offsetX = customAttributes['x'];
   final offsetY = customAttributes['y'];
@@ -268,7 +268,7 @@ VectorNode? _parsePolyShapeElement(XmlElement polyShapeElement) {
   final transformations = _parseTransformations(polyShapeElement);
   final pathData = _extractPathDataFromLinePoints(points, transformations);
   if (polyShapeElement.name.local == 'polygon') {
-    pathData?.add(PathNode(PathDataCommand.close, List.empty()));
+    pathData.add(PathNode(PathDataCommand.close, List.empty()));
   }
   return _buildVectorNodeFromPathData(
     polyShapeElement,
@@ -387,17 +387,17 @@ Translation? _consumeTranslationIfPossible(Transformations? transformations) =>
 
 VectorNode? _buildVectorNodeFromPathData(
   XmlElement sourceElement,
-  List<PathNode>? pathData,
+  List<PathNode> pathData,
   Transformations? transformations,
 ) {
-  if (pathData.isNullOrEmpty) return null;
+  if (pathData.isEmpty) return null;
   if (sourceElement.parentElement!.name.local == 'clipPath') {
     // return now, we only care about the path data
-    return VectorPathBuilder(pathData!).build();
+    return VectorPathBuilder(pathData).build();
   }
-  final pathBuilder = _fillAttributes(
+  final pathBuilder = _fillPresentationAttributes(
     sourceElement,
-    VectorPathBuilder(pathData!),
+    VectorPathBuilder(pathData),
   );
   // if transformations (other than a "simple" translation) are defined
   // for this path, wrap it in a group
@@ -439,13 +439,15 @@ VectorGroup? _handleClipPathAttribute(
   }
 }
 
-List<PathNode>? _extractPathDataFromLinePoints(
+List<PathNode> _extractPathDataFromLinePoints(
   List<double?>? points,
   Transformations? transformations,
 ) {
   if (points == null ||
       points.any((p) => p == null || !p.isFinite) ||
-      points.length.isOdd) return null;
+      points.length.isOdd) {
+    return List.empty();
+  }
   final translation = _consumeTranslationIfPossible(transformations);
   if (translation != null) {
     points = points
@@ -465,10 +467,11 @@ List<PathNode>? _extractPathDataFromLinePoints(
 Map<String, double> _mapCoordinateAttributes(List<XmlAttribute> attributes) =>
     Map.fromIterables(
       attributes.map((attr) => attr.name.local),
-      attributes.map((attr) => double.tryParse(attr.value) ?? double.nan),
+      attributes.map((attr) => attr.value.toDouble() ?? double.nan),
     );
 
-B _fillAttributes<T extends VectorNode, B extends VectorNodeBuilder<T, B>>(
+B _fillPresentationAttributes<T extends VectorNode,
+    B extends VectorNodeBuilder<T, B>>(
   XmlElement element,
   B builder,
 ) {
@@ -477,76 +480,40 @@ B _fillAttributes<T extends VectorNode, B extends VectorNodeBuilder<T, B>>(
     final attributeValue = attribute.value;
     switch (attributeName) {
       case 'fill-rule':
-        PathFillType? fillType;
-        switch (attributeValue) {
-          case 'nonzero':
-            fillType = PathFillType.nonZero;
-            break;
-          case 'evenodd':
-            fillType = PathFillType.evenOdd;
-            break;
-        }
-        fillType?.let((fillType) => builder.pathFillType(fillType));
+        pathFillTypeFromString(attributeValue)
+            ?.let((fillType) => builder.pathFillType(fillType));
         break;
       case 'id':
         builder.id(attributeValue);
         break;
       case 'fill':
-        _parseColor(attributeValue)?.let((fill) => builder.fill(fill));
+        _parseBrush(attributeValue)?.let((fill) => builder.fill(fill));
         break;
       case 'fill-opacity':
         _parsePercentage(attributeValue)
             ?.let((fillAlpha) => builder.fillAlpha(fillAlpha));
         break;
       case 'stroke':
-        _parseColor(attributeValue)?.let((stroke) => builder.stroke(stroke));
+        _parseBrush(attributeValue)?.let((stroke) => builder.stroke(stroke));
         break;
       case 'stroke-opacity':
-        _parsePercentage(attributeValue)?.let(
-          (strokeAlpha) => builder.strokeAlpha(strokeAlpha),
-        );
+        _parsePercentage(attributeValue)
+            ?.let((strokeAlpha) => builder.strokeAlpha(strokeAlpha));
         break;
       case 'stroke-width':
-        _parseLength(attributeValue)?.let(
-          (strokeWidth) => builder.strokeLineWidth(strokeWidth),
-        );
+        _parseLength(attributeValue)
+            ?.let((strokeWidth) => builder.strokeLineWidth(strokeWidth));
         break;
       case 'stroke-linecap':
-        StrokeCap? strokeLineCap;
-        switch (attributeValue) {
-          case 'butt':
-            strokeLineCap = StrokeCap.butt;
-            break;
-          case 'round':
-            strokeLineCap = StrokeCap.round;
-            break;
-          case 'square':
-            strokeLineCap = StrokeCap.square;
-            break;
-        }
-        strokeLineCap?.let(
-          (strokeLineCap) => builder.strokeLineCap(strokeLineCap),
-        );
+        strokeCapFromString(attributeValue)
+            ?.let((strokeLineCap) => builder.strokeLineCap(strokeLineCap));
         break;
       case 'stroke-linejoin':
-        StrokeJoin? strokeLineJoin;
-        switch (attributeValue) {
-          case 'bevel':
-            strokeLineJoin = StrokeJoin.bevel;
-            break;
-          case 'miter':
-            strokeLineJoin = StrokeJoin.miter;
-            break;
-          case 'round':
-            strokeLineJoin = StrokeJoin.round;
-            break;
-        }
-        strokeLineJoin?.let(
-          (strokeLineJoin) => builder.strokeLineJoin(strokeLineJoin),
-        );
+        strokeJoinFromString(attributeValue)
+            ?.let((strokeLineJoin) => builder.strokeLineJoin(strokeLineJoin));
         break;
       case 'stroke-miterlimit':
-        double.tryParse(attributeValue)?.let(
+        attributeValue.toDouble()?.let(
             (strokeLineMiter) => builder.strokeLineMiter(strokeLineMiter));
         break;
     }
@@ -555,27 +522,14 @@ B _fillAttributes<T extends VectorNode, B extends VectorNodeBuilder<T, B>>(
 }
 
 Gradient? _parseGradient(XmlElement gradientElement) {
-  double? getAttributeAsDouble(String name) =>
-      gradientElement.getAttribute(name)?.let(double.tryParse);
-
-  final x1 = getAttributeAsDouble('x1');
-  final y1 = getAttributeAsDouble('y1');
-  final x2 = getAttributeAsDouble('x2');
-  final y2 = getAttributeAsDouble('y2');
-  final cx = getAttributeAsDouble('cx');
-  final cy = getAttributeAsDouble('cy');
-  final radius = getAttributeAsDouble('r');
   final stopElements = gradientElement.findElements('stop');
   final colors = stopElements
       .map((stopElement) {
-        final opacityAttributeValue = stopElement.getAttribute('stop-opacity');
-        final opacity = (opacityAttributeValue != null
-            ? double.tryParse(opacityAttributeValue)
-            : null);
+        final opacity = stopElement.getAttribute('stop-opacity')?.toDouble();
         final colorAttributeValue = stopElement.getAttribute('stop-color');
         final color = colorAttributeValue != null
             // we know it's not an actual gradient
-            ? _parseColor(colorAttributeValue)?.colors.singleOrNull
+            ? _parseBrush(colorAttributeValue)?.colors.singleOrNull
             : null;
         if (color != null) {
           final currentOpacity = (opacity ?? 1) * ((color >> 24) / 0xFF);
@@ -589,47 +543,35 @@ Gradient? _parseGradient(XmlElement gradientElement) {
     return null;
   }
   final stops = stopElements
-      .map((stopElement) {
-        final offsetAttributeValue = stopElement.getAttribute('offset');
-        return offsetAttributeValue != null
-            ? _parsePercentage(offsetAttributeValue)
-            : null;
-      })
+      .map((stopElement) =>
+          stopElement.getAttribute('offset')?.let(_parsePercentage) as double?)
       .whereNotNull()
       .toList();
   if (stops.isNotEmpty && colors.length != stops.length) {
     return null;
   }
-  TileMode? tileMode;
-  switch (gradientElement.getAttribute('spreadMethod')) {
-    case 'pad':
-      tileMode = TileMode.clamp;
-      break;
-    case 'repeat':
-      tileMode = TileMode.repeated;
-      break;
-    case 'reflect':
-      tileMode = TileMode.mirror;
-      break;
+  final tileMode =
+      gradientElement.getAttribute('spreadMethod')?.let(tileModeFromString);
+  if (gradientElement.name.local.startsWith('linear')) {
+    return LinearGradient(
+      colors,
+      stops: stops,
+      startX: gradientElement.getAttribute('x1')?.toDouble(),
+      startY: gradientElement.getAttribute('y1')?.toDouble(),
+      endX: gradientElement.getAttribute('x2')?.toDouble(),
+      endY: gradientElement.getAttribute('y2')?.toDouble(),
+      tileMode: tileMode,
+    );
+  } else {
+    return RadialGradient(
+      colors,
+      stops: stops,
+      centerX: gradientElement.getAttribute('cx')?.toDouble(),
+      centerY: gradientElement.getAttribute('cy')?.toDouble(),
+      radius: gradientElement.getAttribute('r')?.toDouble(),
+      tileMode: tileMode,
+    );
   }
-  return gradientElement.name.local.startsWith('linear')
-      ? LinearGradient(
-          colors,
-          stops: stops,
-          startX: x1,
-          startY: y1,
-          endX: x2,
-          endY: y2,
-          tileMode: tileMode,
-        )
-      : RadialGradient(
-          colors,
-          stops: stops,
-          centerX: cx,
-          centerY: cy,
-          radius: radius,
-          tileMode: tileMode,
-        );
 }
 
 // TODO: support more units than px?
@@ -638,24 +580,23 @@ Gradient? _parseGradient(XmlElement gradientElement) {
 double? _parseLength(String lengthAsString, {num? baseForPercentage}) {
   return baseForPercentage?.let((base) => _parsePercentage(lengthAsString)
           ?.let((percentage) => base * percentage)) ??
-      double.tryParse(lengthAsString.replaceFirst('px', ''))
+      lengthAsString
+          .replaceFirst('px', '')
+          .toDouble()
           ?.takeIf((l) => !l.isNegative);
 }
 
-// 0..1
+// 0.0..1.0
 double? _parsePercentage(String percentageAsString) {
   final trimmed = percentageAsString.trim();
   if (trimmed == '1') return 1.0;
   final valueToParse = trimmed.endsWith('%')
       ? trimmed.substring(0, trimmed.length - 1)
       : trimmed;
-  return double.tryParse(valueToParse)?.let((it) => it / 100);
+  return valueToParse.toDouble()?.let((it) => it / 100.0);
 }
 
-Gradient? _parseColor(String colorAsString) {
-  Gradient colorToGradient(int alpha, int red, int green, int blue) =>
-      LinearGradient([(alpha << 24) | (red << 16) | (green << 8) | blue]);
-
+Gradient? _parseBrush(String brushAsString) {
   Gradient? gradient;
   List<num?> extractDefinitionValues(String value, int prefixLength) => value
       .substring(prefixLength + 1, value.length - 1)
@@ -663,68 +604,37 @@ Gradient? _parseColor(String colorAsString) {
       .map(num.tryParse)
       .toList();
 
-  if (colorAsString.startsWith('#')) {
-    final valueAsList = colorAsString.substring(1).split('');
-    final List<int?> argb;
-    if (valueAsList.length == 3) {
-      argb = <int?>[
-        0xFF,
-        ...valueAsList.map((s) {
-          final digit = int.tryParse(s, radix: 16);
-          return digit != null ? digit * 10 + digit : null;
-        }),
-      ];
-    } else if (valueAsList.length >= 6) {
-      final int? alpha;
-      final List<String?> rgb;
-      if (valueAsList.length == 8) {
-        alpha = int.tryParse(valueAsList.sublist(0, 2).join(), radix: 16);
-        rgb = valueAsList.sublist(2);
-      } else {
-        alpha = 0xFF;
-        rgb = valueAsList;
-      }
-      argb = <int?>[
-        alpha,
-        ...rgb
-            .chunked(2)
-            .map((digits) => int.tryParse(digits.join(), radix: 16))
-      ];
-    } else {
-      argb = List.empty();
-    }
-    if (argb.isNotEmpty && argb.everyNotNull()) {
-      gradient = colorToGradient(argb[0]!, argb[1]!, argb[2]!, argb[3]!);
-    }
-  } else if (colorAsString.startsWith('rgb(')) {
-    final rgb = extractDefinitionValues(colorAsString, 4)
+  if (brushAsString.startsWith('#')) {
+    gradient = Gradient.fromHexString(brushAsString);
+  } else if (brushAsString.startsWith('rgb(')) {
+    final rgb = extractDefinitionValues(brushAsString, 4)
         .whereType<int>()
         .cast<int>()
         .toList();
     if (rgb.isNotEmpty && rgb.length == 3) {
-      gradient = colorToGradient(0xFF, rgb[0], rgb[1], rgb[2]);
+      gradient = Gradient.fromArgb(0xFF, rgb[0], rgb[1], rgb[2]);
     }
-  } else if (colorAsString.startsWith('rgba(')) {
+  } else if (brushAsString.startsWith('rgba(')) {
     final rgba =
-        extractDefinitionValues(colorAsString, 5).whereNotNull().toList();
+        extractDefinitionValues(brushAsString, 5).whereNotNull().toList();
     final rgb = rgba.sublist(0, 4).whereType<int>().cast<int>().toList();
     final alpha = rgba.length == 4 ? rgba[3] * 0xFF ~/ 1 : null;
     if (alpha != null && rgb.isNotEmpty && rgb.length == 3) {
-      gradient = colorToGradient(alpha, rgb[0], rgb[1], rgb[2]);
+      gradient = Gradient.fromArgb(alpha, rgb[0], rgb[1], rgb[2]);
     }
-  } else if (colorAsString.startsWith('url(#')) {
-    final id = extractIdFromUrlFunctionCall(colorAsString);
+  } else if (brushAsString.startsWith('url(#')) {
+    final id = extractIdFromUrlFunctionCall(brushAsString);
     final candidate = _definitions[id];
     if (candidate is Gradient) {
       gradient = candidate;
     }
   } else {
-    switch (colorAsString) {
+    switch (brushAsString) {
       case 'black':
-        gradient = colorToGradient(255, 0, 0, 0);
+        gradient = Gradient.fromArgb(255, 0, 0, 0);
         break;
       case 'white':
-        gradient = colorToGradient(255, 255, 255, 255);
+        gradient = Gradient.fromArgb(255, 255, 255, 255);
         break;
       // TODO: add more colors
     }

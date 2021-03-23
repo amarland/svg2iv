@@ -81,3 +81,7 @@ extension StringIndexing on String {
   int? lastIndexOfOrNull(Pattern pattern, [int? start]) =>
       lastIndexOf(pattern, start).let((it) => it > -1 ? it : null);
 }
+
+extension StringToNumberConversion on String {
+  double? toDouble() => double.tryParse(this);
+}

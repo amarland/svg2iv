@@ -5,7 +5,7 @@
       <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
     </configurations>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_14" default="false">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_14">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

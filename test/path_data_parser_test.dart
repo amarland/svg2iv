@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 void main() {
   group('parsePathData() returns the expected pathNodes', () {
     test('null', () {
-      expect(parsePathData(null), null);
+      expect(parsePathData(null), List.empty());
     });
     group('moveTo + [h|v]lineTo', () {
       test('relative', () {

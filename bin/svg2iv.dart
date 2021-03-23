@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:svg2iv/destination_file_writer.dart';
 import 'package:svg2iv/extensions.dart';
+import 'package:svg2iv/file_parser.dart';
 import 'package:svg2iv/model/image_vector.dart';
 import 'package:svg2iv/protobuf/image_vector_adapter.dart';
 import 'package:svg2iv/protobuf/image_vector_transmitter.dart';
 import 'package:svg2iv/svg2iv.dart';
-import 'package:svg2iv/file_parser.dart';
+import 'package:svg2iv/vd2iv.dart';
 import 'package:xml/xml.dart';
 
 const destinationOptionName = 'destination';
@@ -18,7 +19,9 @@ const socketAddressOptionName = 'socket-address';
 void main(List<String> args) async {
   Iterable<File> listSvgFilesRecursivelySync(Directory directory) => directory
       .listSync(recursive: true)
-      .where((fse) => fse is File && fse.path.endsWith('.svg'))
+      .where((fse) =>
+          fse is File &&
+          (fse.path.endsWith('.svg') || fse.path.endsWith('.xml')))
       .cast<File>()
       .toSet();
 
@@ -90,7 +93,7 @@ If not provided, the generated property will be declared as a top-level property
     sourceFiles = listSvgFilesRecursivelySync(Directory.current);
     if (sourceFiles.isEmpty) {
       stderr.writeln(
-        'No SVG files were found in the current working directory. Exiting.',
+        'No SVG/XML files were found in the current working directory. Exiting.',
       );
       exit(2);
     }
@@ -141,7 +144,9 @@ If not provided, the generated property will be declared as a top-level property
           p.lastIndexOfOrNull('.'),
         ),
       );
-      imageVectors[fileName] = parseSvgFile(source);
+      imageVectors[fileName] = source.path.endsWith('.svg')
+          ? parseSvgFile(source)
+          : parseVectorDrawableFile(source);
     } on FileParserException catch (e) {
       stderr
         ..writeln('An error occurred while parsing ${source.path}:')

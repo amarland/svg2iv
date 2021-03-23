@@ -16,11 +16,9 @@ class VectorPath extends VectorNode {
     this.strokeLineJoin,
     this.strokeLineMiter,
     this.pathFillType,
-    /*
     this.trimPathStart,
     this.trimPathEnd,
     this.trimPathOffset,
-    */
   }) : super(id);
 
   final List<PathNode> pathData;
@@ -33,12 +31,9 @@ class VectorPath extends VectorNode {
   final StrokeJoin? strokeLineJoin;
   final double? strokeLineMiter;
   final PathFillType? pathFillType;
-
-  /*
   final double? trimPathStart;
   final double? trimPathEnd;
   final double? trimPathOffset;
-  */
 
   bool get hasAttributes => [
         id,
@@ -87,6 +82,24 @@ class VectorPathBuilder
   VectorPathBuilder(this._pathData);
 
   final List<PathNode> _pathData;
+  double? _trimPathStart;
+  double? _trimPathEnd;
+  double? _trimPathOffset;
+
+  VectorPathBuilder trimPathStart(double trimPathStart) {
+    _trimPathStart = trimPathStart;
+    return this;
+  }
+
+  VectorPathBuilder trimPathEnd(double trimPathEnd) {
+    _trimPathEnd = trimPathEnd;
+    return this;
+  }
+
+  VectorPathBuilder trimPathOffset(double trimPathOffset) {
+    _trimPathOffset = trimPathOffset;
+    return this;
+  }
 
   @override
   VectorPath build() {
@@ -102,6 +115,9 @@ class VectorPathBuilder
       strokeLineJoin: strokeLineJoin_,
       strokeLineMiter: strokeLineMiter_,
       pathFillType: pathFillType_,
+      trimPathStart: _trimPathStart,
+      trimPathEnd: _trimPathEnd,
+      trimPathOffset: _trimPathOffset,
     );
   }
 }

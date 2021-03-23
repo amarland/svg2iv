@@ -1,16 +1,57 @@
-import 'package:svg2iv/extensions.dart';
+import 'package:meta/meta.dart';
 
 abstract class Gradient {
-  Gradient(this.colors, this.stops, this.tileMode) {
-    if ((stops != null || !stops.isNullOrEmpty) &&
-        colors.length != stops!.length) {
+  Gradient(
+    this.colors,
+    List<double>? stops,
+    this.tileMode,
+  ) : stops = stops ?? List.empty() {
+    if (this.stops.isNotEmpty && colors.length != this.stops.length) {
       throw StateError('If `stops` is provided,'
           ' it must be the same length as `colors`.');
     }
   }
 
+  @factory
+  static Gradient fromArgb(int alpha, int red, int green, int blue) =>
+      LinearGradient([(alpha << 24) | (red << 16) | (green << 8) | blue]);
+
+  @factory
+  static Gradient? fromHexString(String hexString) {
+    const alphaMask = 0xFF000000;
+    final colorAsString = hexString.substring(1);
+    final color = int.tryParse(colorAsString, radix: 16);
+    if (color == null) return null;
+    int temp;
+    switch (colorAsString.length) {
+      case 8:
+        // #AARRGGBB
+        temp = color;
+        break;
+      case 6:
+        // #RRGGBB
+        temp = color | alphaMask;
+        break;
+      case 4:
+        // #ARGB
+        temp = (color >> 12 & 0xF) * 0x11000000;
+        continue rgb;
+      rgb:
+      case 3:
+        // #RGB
+        temp = (color >> 8 & 0xF) * 0x110000;
+        temp = temp | (color >> 4 & 0xF) * 0x1100;
+        temp = temp | (color & 0xF) * 0x11;
+        temp = temp | alphaMask;
+        break;
+      default:
+        return null;
+    }
+    return LinearGradient([temp]);
+  }
+
   final List<int> colors;
-  final List<double>? stops;
+  final List<double> stops;
   final TileMode? tileMode;
 }
 
@@ -48,3 +89,14 @@ class RadialGradient extends Gradient {
 }
 
 enum TileMode { clamp, repeated, mirror }
+
+TileMode? tileModeFromString(String valueAsString) {
+  switch (valueAsString) {
+    case 'pad':
+      return TileMode.clamp;
+    case 'repeat':
+      return TileMode.repeated;
+    case 'reflect':
+      return TileMode.mirror;
+  }
+}

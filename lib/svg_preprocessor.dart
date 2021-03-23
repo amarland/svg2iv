@@ -42,7 +42,7 @@ void _inlineUseElements(XmlElement svgElement) {
         for (final attributeName in ['x', 'y']) {
           final attributeValue = useElement.getAttribute(attributeName);
           if (attributeValue.isNullOrEmpty) continue;
-          final attributeValueAsDouble = double.tryParse(attributeValue!);
+          final attributeValueAsDouble = attributeValue!.toDouble();
           if (attributeValueAsDouble == null) continue;
           if (referencedElement.name.local == 'rect') {
             final existingAttributeValue = referencedElement

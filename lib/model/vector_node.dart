@@ -1,10 +1,11 @@
 import 'package:meta/meta.dart';
 import 'package:svg2iv/extensions.dart';
 import 'package:svg2iv/model/gradient.dart';
-import 'package:svg2iv/model/identifiable.dart';
 
-abstract class VectorNode extends Identifiable {
-  VectorNode(String? id) : super(id?.toPascalCase());
+abstract class VectorNode {
+  VectorNode(String? id) : id = id?.toPascalCase();
+
+  final String? id;
 }
 
 abstract class VectorNodeBuilder<T extends VectorNode,
@@ -60,18 +61,20 @@ abstract class VectorNodeBuilder<T extends VectorNode,
   PathFillType? get pathFillType_ => _pathFillType;
 
   @protected
-  bool get hasAttributes_ => [
-        id,
-        fill,
-        fillAlpha,
-        stroke,
-        strokeAlpha,
-        strokeLineWidth,
-        strokeLineCap,
-        strokeLineJoin,
-        strokeLineMiter,
-        pathFillType,
-      ].anyNotNull();
+  bool get hasAttributes_ {
+    return [
+      id,
+      fill,
+      fillAlpha,
+      stroke,
+      strokeAlpha,
+      strokeLineWidth,
+      strokeLineCap,
+      strokeLineJoin,
+      strokeLineMiter,
+      pathFillType,
+    ].anyNotNull();
+  }
 
   /*
   double? _trimPathStart;
@@ -134,6 +137,37 @@ abstract class VectorNodeBuilder<T extends VectorNode,
 
 enum PathFillType { nonZero, evenOdd }
 
+PathFillType? pathFillTypeFromString(String valueAsString) {
+  switch (valueAsString.toLowerCase()) {
+    case 'nonzero':
+      return PathFillType.nonZero;
+    case 'evenodd':
+      return PathFillType.evenOdd;
+  }
+}
+
 enum StrokeCap { butt, round, square }
 
+StrokeCap? strokeCapFromString(String valueAsString) {
+  switch (valueAsString) {
+    case 'butt':
+      return StrokeCap.butt;
+    case 'round':
+      return StrokeCap.round;
+    case 'square':
+      return StrokeCap.square;
+  }
+}
+
 enum StrokeJoin { miter, round, bevel }
+
+StrokeJoin? strokeJoinFromString(String valueAsString) {
+  switch (valueAsString) {
+    case 'bevel':
+      return StrokeJoin.bevel;
+    case 'miter':
+      return StrokeJoin.miter;
+    case 'round':
+      return StrokeJoin.round;
+  }
+}
