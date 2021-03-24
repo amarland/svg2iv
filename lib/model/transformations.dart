@@ -10,7 +10,7 @@ class Rotation implements Transformation {
 }
 
 class Scale implements Transformation {
-  const Scale(this.x, [y]) : y = y ?? x;
+  const Scale(this.x, [double? y]) : y = y ?? x;
 
   final double x;
   final double? y;
