@@ -104,6 +104,9 @@ path(
           .strokeLineJoin(StrokeJoin.miter)
           .strokeLineMiter(3.0)
           .pathFillType(PathFillType.nonZero)
+          .trimPathStart(0.1)
+          .trimPathEnd(0.7)
+          .trimPathOffset(0.2)
           .build();
       final expected = (StringBuffer('''
 path(
@@ -131,6 +134,9 @@ path(
     strokeLineJoin = StrokeJoin.Miter,
     strokeLineMiter = 3F,
     pathFillType = PathFillType.NonZero,
+    trimPathStart = 0.1F,
+    trimPathEnd = 0.7F,
+    trimPathOffset = 0.2F,
 ) {
 ''')..writeln(pathDataAsString)..writeln('}')).toString();
       final actual = StringBuffer()

@@ -45,11 +45,15 @@ ImageVector parseVectorDrawableFile(File source) {
   )
       .width(parsedRequiredAttributes['width']!)
       .height(parsedRequiredAttributes['height']!);
-  final name = rootElement.getAndroidNSAttribute('name');
-  if (name != null) {
-    builder.name(name);
-  }
-  // TODO other attributes
+  rootElement.getAndroidNSAttribute('name')?.let(builder.name);
+  rootElement
+      .getAndroidNSAttribute('tintColor')
+      ?.let(Gradient.fromHexString)
+      ?.let(builder.tintColor);
+  rootElement
+      .getAndroidNSAttribute('tintBlendMode')
+      ?.let(blendModeFromString)
+      ?.let(builder.tintBlendMode);
   for (final element in rootElement.children.whereType<XmlElement>()) {
     switch (element.name.local) {
       case 'group':
@@ -258,6 +262,7 @@ Iterable<Tuple2<double, int>> _parseColorStops(XmlElement gradientElement) {
     return gradientElement.androidNSAttributes
         .where((attr) => attr.name.local.endsWith('Color'))
         .map((attr) {
+      // the result is a Gradient with a single value
       final colorInt = Gradient.fromHexString(attr.value)?.colors.singleOrNull;
       if (colorInt == null) return null;
       final double offset;

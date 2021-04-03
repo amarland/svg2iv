@@ -22,6 +22,17 @@ message ImageVector {
   float viewport_height = 4;
   float width = 5;
   float height = 6;
+  uint32 tint_color = 7;
+  BlendMode tint_blend_mode = 8;
+}
+
+enum BlendMode {
+  SRC_OVER = 0;
+  SRC_IN = 1;
+  SRC_ATOP = 2;
+  MODULATE = 3;
+  SCREEN = 4;
+  PLUS = 5;
 }
 
 message VectorNode {
@@ -56,6 +67,9 @@ message VectorPath {
   StrokeJoin stroke_line_join = 10;
   float stroke_line_miter = 11;
   FillType fill_type = 8;
+  float trim_path_start = 12;
+  float trim_path_end = 13;
+  float trim_path_offset = 14;
 
   enum StrokeCap {
     CAP_BUTT = 0;

@@ -9,12 +9,16 @@ class ImageVector {
     this.width,
     this.height, [
     String? name,
+    this.tintColor,
+    this.tintBlendMode,
   ]) : name = name?.toPascalCase();
 
   final List<VectorNode> nodes;
   final String? name;
   final double width, height;
   final double viewportWidth, viewportHeight;
+  final int? tintColor;
+  final BlendMode? tintBlendMode;
 
   ImageVector copyWith({
     List<VectorNode>? nodes,
@@ -23,6 +27,8 @@ class ImageVector {
     height,
     double? viewportWidth,
     viewportHeight,
+    int? tintColor,
+    BlendMode? tintBlendMode,
   }) {
     return ImageVector._init(
       nodes ?? this.nodes,
@@ -31,6 +37,8 @@ class ImageVector {
       width ?? this.width,
       height ?? this.height,
       name?.toPascalCase() ?? this.name,
+      tintColor ?? this.tintColor,
+      tintBlendMode ?? this.tintBlendMode,
     );
   }
 }
@@ -46,6 +54,8 @@ class ImageVectorBuilder {
   final double _viewportWidth, _viewportHeight;
   String? _name;
   double? _width, _height;
+  int? _tintColor;
+  BlendMode? _tintBlendMode;
 
   ImageVectorBuilder name(String name) {
     _name = name;
@@ -59,6 +69,16 @@ class ImageVectorBuilder {
 
   ImageVectorBuilder height(double height) {
     _height = height;
+    return this;
+  }
+
+  ImageVectorBuilder tintColor(int tintColor) {
+    _tintColor = tintColor;
+    return this;
+  }
+
+  ImageVectorBuilder tintBlendMode(BlendMode tintBlendMode) {
+    _tintBlendMode = tintBlendMode;
     return this;
   }
 
@@ -80,6 +100,34 @@ class ImageVectorBuilder {
       _width ?? _viewportWidth,
       _height ?? _viewportHeight,
       _name,
+      _tintColor,
+      _tintBlendMode,
     );
+  }
+}
+
+enum BlendMode {
+  srcOver,
+  srcIn,
+  srcAtop,
+  modulate,
+  screen,
+  plus,
+}
+
+BlendMode? blendModeFromString(String valueAsString) {
+  switch (valueAsString.toLowerCase()) {
+    case 'src_over':
+      return BlendMode.srcOver;
+    case 'src_in':
+      return BlendMode.srcIn;
+    case 'src_atop':
+      return BlendMode.srcAtop;
+    case 'multiply':
+      return BlendMode.modulate;
+    case 'screen':
+      return BlendMode.screen;
+    case 'add':
+      return BlendMode.plus;
   }
 }

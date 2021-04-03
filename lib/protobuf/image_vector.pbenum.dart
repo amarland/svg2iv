@@ -22,6 +22,29 @@ class Null extends $pb.ProtobufEnum {
   const Null._($core.int v, $core.String n) : super(v, n);
 }
 
+class BlendMode extends $pb.ProtobufEnum {
+  static const BlendMode SRC_OVER = BlendMode._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SRC_OVER');
+  static const BlendMode SRC_IN = BlendMode._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SRC_IN');
+  static const BlendMode SRC_ATOP = BlendMode._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SRC_ATOP');
+  static const BlendMode MODULATE = BlendMode._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MODULATE');
+  static const BlendMode SCREEN = BlendMode._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SCREEN');
+  static const BlendMode PLUS = BlendMode._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PLUS');
+
+  static const $core.List<BlendMode> values = <BlendMode> [
+    SRC_OVER,
+    SRC_IN,
+    SRC_ATOP,
+    MODULATE,
+    SCREEN,
+    PLUS,
+  ];
+
+  static final $core.Map<$core.int, BlendMode> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static BlendMode? valueOf($core.int value) => _byValue[value];
+
+  const BlendMode._($core.int v, $core.String n) : super(v, n);
+}
+
 class VectorPath_StrokeCap extends $pb.ProtobufEnum {
   static const VectorPath_StrokeCap CAP_BUTT = VectorPath_StrokeCap._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CAP_BUTT');
   static const VectorPath_StrokeCap CAP_ROUND = VectorPath_StrokeCap._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CAP_ROUND');

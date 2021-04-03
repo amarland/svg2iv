@@ -13,7 +13,10 @@ abstract class Gradient {
   }
 
   @factory
-  static Gradient fromArgb(int alpha, int red, int green, int blue) =>
+  static Gradient fromArgb(int color) => LinearGradient([color]);
+
+  @factory
+  static Gradient fromArgbComponents(int alpha, int red, int green, int blue) =>
       LinearGradient([(alpha << 24) | (red << 16) | (green << 8) | blue]);
 
   @factory

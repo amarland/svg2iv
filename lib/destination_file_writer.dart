@@ -133,6 +133,16 @@ void writeImageVector(
       'viewportHeight = '
       '${_numToKotlinFloatAsString(imageVector.viewportHeight)},',
     )
+    ..writeArgumentIfNotNull(
+      indentationLevel,
+      'tintColor',
+      imageVector.tintColor?.let(Gradient.fromArgb)
+    )
+    ..writeArgumentIfNotNull(
+      indentationLevel,
+      'tintBlendMode',
+      imageVector.tintBlendMode
+    )
     ..writelnIndent(--indentationLevel, ')')
     ..writeIndent(indentationLevel, '.');
   indentationLevel = _writeNodes(
@@ -234,7 +244,13 @@ int writePath(
       ..writeArgumentIfNotNull(
           indentationLevel, 'strokeLineMiter', path.strokeLineMiter)
       ..writeArgumentIfNotNull(
-          indentationLevel, 'pathFillType', path.pathFillType);
+          indentationLevel, 'pathFillType', path.pathFillType)
+      ..writeArgumentIfNotNull(
+          indentationLevel, 'trimPathStart', path.trimPathStart)
+      ..writeArgumentIfNotNull(
+          indentationLevel, 'trimPathEnd', path.trimPathEnd)
+      ..writeArgumentIfNotNull(
+          indentationLevel, 'trimPathOffset', path.trimPathOffset);
     sink.writeIndent(--indentationLevel, ')');
   }
   sink.writeln(' {');
@@ -393,7 +409,8 @@ extension _StringSinkWriting on StringSink {
     } else if (argument is StrokeCap ||
         argument is StrokeJoin ||
         argument is PathFillType ||
-        argument is TileMode) {
+        argument is TileMode ||
+        argument is BlendMode) {
       argumentAsString = argument
           .toString()
           .capitalizeCharAt(argument.toString().indexOf('.') + 1);

@@ -140,6 +140,8 @@ class ImageVector extends $pb.GeneratedMessage {
     ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'viewportHeight', $pb.PbFieldType.OF)
     ..a<$core.double>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'width', $pb.PbFieldType.OF)
     ..a<$core.double>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.OF)
+    ..a<$core.int>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tintColor', $pb.PbFieldType.OU3)
+    ..e<BlendMode>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tintBlendMode', $pb.PbFieldType.OE, defaultOrMaker: BlendMode.SRC_OVER, valueOf: BlendMode.valueOf, enumValues: BlendMode.values)
     ..hasRequiredFields = false
   ;
 
@@ -151,6 +153,8 @@ class ImageVector extends $pb.GeneratedMessage {
     $core.double? viewportHeight,
     $core.double? width,
     $core.double? height,
+    $core.int? tintColor,
+    BlendMode? tintBlendMode,
   }) {
     final _result = create();
     if (nodes != null) {
@@ -170,6 +174,12 @@ class ImageVector extends $pb.GeneratedMessage {
     }
     if (height != null) {
       _result.height = height;
+    }
+    if (tintColor != null) {
+      _result.tintColor = tintColor;
+    }
+    if (tintBlendMode != null) {
+      _result.tintBlendMode = tintBlendMode;
     }
     return _result;
   }
@@ -241,6 +251,24 @@ class ImageVector extends $pb.GeneratedMessage {
   $core.bool hasHeight() => $_has(5);
   @$pb.TagNumber(6)
   void clearHeight() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.int get tintColor => $_getIZ(6);
+  @$pb.TagNumber(7)
+  set tintColor($core.int v) { $_setUnsignedInt32(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasTintColor() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearTintColor() => clearField(7);
+
+  @$pb.TagNumber(8)
+  BlendMode get tintBlendMode => $_getN(7);
+  @$pb.TagNumber(8)
+  set tintBlendMode(BlendMode v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasTintBlendMode() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearTintBlendMode() => clearField(8);
 }
 
 enum VectorNode_Node {
@@ -497,6 +525,9 @@ class VectorPath extends $pb.GeneratedMessage {
     ..e<VectorPath_StrokeCap>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'strokeLineCap', $pb.PbFieldType.OE, defaultOrMaker: VectorPath_StrokeCap.CAP_BUTT, valueOf: VectorPath_StrokeCap.valueOf, enumValues: VectorPath_StrokeCap.values)
     ..e<VectorPath_StrokeJoin>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'strokeLineJoin', $pb.PbFieldType.OE, defaultOrMaker: VectorPath_StrokeJoin.JOIN_MITER, valueOf: VectorPath_StrokeJoin.valueOf, enumValues: VectorPath_StrokeJoin.values)
     ..a<$core.double>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'strokeLineMiter', $pb.PbFieldType.OF)
+    ..a<$core.double>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trimPathStart', $pb.PbFieldType.OF)
+    ..a<$core.double>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trimPathEnd', $pb.PbFieldType.OF)
+    ..a<$core.double>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trimPathOffset', $pb.PbFieldType.OF)
     ..hasRequiredFields = false
   ;
 
@@ -513,6 +544,9 @@ class VectorPath extends $pb.GeneratedMessage {
     VectorPath_StrokeCap? strokeLineCap,
     VectorPath_StrokeJoin? strokeLineJoin,
     $core.double? strokeLineMiter,
+    $core.double? trimPathStart,
+    $core.double? trimPathEnd,
+    $core.double? trimPathOffset,
   }) {
     final _result = create();
     if (pathNodes != null) {
@@ -547,6 +581,15 @@ class VectorPath extends $pb.GeneratedMessage {
     }
     if (strokeLineMiter != null) {
       _result.strokeLineMiter = strokeLineMiter;
+    }
+    if (trimPathStart != null) {
+      _result.trimPathStart = trimPathStart;
+    }
+    if (trimPathEnd != null) {
+      _result.trimPathEnd = trimPathEnd;
+    }
+    if (trimPathOffset != null) {
+      _result.trimPathOffset = trimPathOffset;
     }
     return _result;
   }
@@ -667,6 +710,33 @@ class VectorPath extends $pb.GeneratedMessage {
   $core.bool hasStrokeLineMiter() => $_has(10);
   @$pb.TagNumber(11)
   void clearStrokeLineMiter() => clearField(11);
+
+  @$pb.TagNumber(12)
+  $core.double get trimPathStart => $_getN(11);
+  @$pb.TagNumber(12)
+  set trimPathStart($core.double v) { $_setFloat(11, v); }
+  @$pb.TagNumber(12)
+  $core.bool hasTrimPathStart() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearTrimPathStart() => clearField(12);
+
+  @$pb.TagNumber(13)
+  $core.double get trimPathEnd => $_getN(12);
+  @$pb.TagNumber(13)
+  set trimPathEnd($core.double v) { $_setFloat(12, v); }
+  @$pb.TagNumber(13)
+  $core.bool hasTrimPathEnd() => $_has(12);
+  @$pb.TagNumber(13)
+  void clearTrimPathEnd() => clearField(13);
+
+  @$pb.TagNumber(14)
+  $core.double get trimPathOffset => $_getN(13);
+  @$pb.TagNumber(14)
+  set trimPathOffset($core.double v) { $_setFloat(13, v); }
+  @$pb.TagNumber(14)
+  $core.bool hasTrimPathOffset() => $_has(13);
+  @$pb.TagNumber(14)
+  void clearTrimPathOffset() => clearField(14);
 }
 
 enum PathNode_Argument_Argument {

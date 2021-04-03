@@ -18,6 +18,21 @@ const Null$json = const {
 
 /// Descriptor for `Null`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List nullDescriptor = $convert.base64Decode('CgROdWxsEgsKB05PVEhJTkcQAA==');
+@$core.Deprecated('Use blendModeDescriptor instead')
+const BlendMode$json = const {
+  '1': 'BlendMode',
+  '2': const [
+    const {'1': 'SRC_OVER', '2': 0},
+    const {'1': 'SRC_IN', '2': 1},
+    const {'1': 'SRC_ATOP', '2': 2},
+    const {'1': 'MODULATE', '2': 3},
+    const {'1': 'SCREEN', '2': 4},
+    const {'1': 'PLUS', '2': 5},
+  ],
+};
+
+/// Descriptor for `BlendMode`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List blendModeDescriptor = $convert.base64Decode('CglCbGVuZE1vZGUSDAoIU1JDX09WRVIQABIKCgZTUkNfSU4QARIMCghTUkNfQVRPUBACEgwKCE1PRFVMQVRFEAMSCgoGU0NSRUVOEAQSCAoEUExVUxAF');
 @$core.Deprecated('Use imageVectorCollectionDescriptor instead')
 const ImageVectorCollection$json = const {
   '1': 'ImageVectorCollection',
@@ -52,11 +67,13 @@ const ImageVector$json = const {
     const {'1': 'viewport_height', '3': 4, '4': 1, '5': 2, '10': 'viewportHeight'},
     const {'1': 'width', '3': 5, '4': 1, '5': 2, '10': 'width'},
     const {'1': 'height', '3': 6, '4': 1, '5': 2, '10': 'height'},
+    const {'1': 'tint_color', '3': 7, '4': 1, '5': 13, '10': 'tintColor'},
+    const {'1': 'tint_blend_mode', '3': 8, '4': 1, '5': 14, '6': '.svg2iv.protobuf.BlendMode', '10': 'tintBlendMode'},
   ],
 };
 
 /// Descriptor for `ImageVector`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List imageVectorDescriptor = $convert.base64Decode('CgtJbWFnZVZlY3RvchIxCgVub2RlcxgBIAMoCzIbLnN2ZzJpdi5wcm90b2J1Zi5WZWN0b3JOb2RlUgVub2RlcxISCgRuYW1lGAIgASgJUgRuYW1lEiUKDnZpZXdwb3J0X3dpZHRoGAMgASgCUg12aWV3cG9ydFdpZHRoEicKD3ZpZXdwb3J0X2hlaWdodBgEIAEoAlIOdmlld3BvcnRIZWlnaHQSFAoFd2lkdGgYBSABKAJSBXdpZHRoEhYKBmhlaWdodBgGIAEoAlIGaGVpZ2h0');
+final $typed_data.Uint8List imageVectorDescriptor = $convert.base64Decode('CgtJbWFnZVZlY3RvchIxCgVub2RlcxgBIAMoCzIbLnN2ZzJpdi5wcm90b2J1Zi5WZWN0b3JOb2RlUgVub2RlcxISCgRuYW1lGAIgASgJUgRuYW1lEiUKDnZpZXdwb3J0X3dpZHRoGAMgASgCUg12aWV3cG9ydFdpZHRoEicKD3ZpZXdwb3J0X2hlaWdodBgEIAEoAlIOdmlld3BvcnRIZWlnaHQSFAoFd2lkdGgYBSABKAJSBXdpZHRoEhYKBmhlaWdodBgGIAEoAlIGaGVpZ2h0Eh0KCnRpbnRfY29sb3IYByABKA1SCXRpbnRDb2xvchJCCg90aW50X2JsZW5kX21vZGUYCCABKA4yGi5zdmcyaXYucHJvdG9idWYuQmxlbmRNb2RlUg10aW50QmxlbmRNb2Rl');
 @$core.Deprecated('Use vectorNodeDescriptor instead')
 const VectorNode$json = const {
   '1': 'VectorNode',
@@ -105,6 +122,9 @@ const VectorPath$json = const {
     const {'1': 'stroke_line_join', '3': 10, '4': 1, '5': 14, '6': '.svg2iv.protobuf.VectorPath.StrokeJoin', '10': 'strokeLineJoin'},
     const {'1': 'stroke_line_miter', '3': 11, '4': 1, '5': 2, '10': 'strokeLineMiter'},
     const {'1': 'fill_type', '3': 8, '4': 1, '5': 14, '6': '.svg2iv.protobuf.VectorPath.FillType', '10': 'fillType'},
+    const {'1': 'trim_path_start', '3': 12, '4': 1, '5': 2, '10': 'trimPathStart'},
+    const {'1': 'trim_path_end', '3': 13, '4': 1, '5': 2, '10': 'trimPathEnd'},
+    const {'1': 'trim_path_offset', '3': 14, '4': 1, '5': 2, '10': 'trimPathOffset'},
   ],
   '4': const [VectorPath_StrokeCap$json, VectorPath_StrokeJoin$json, VectorPath_FillType$json],
 };
@@ -139,7 +159,7 @@ const VectorPath_FillType$json = const {
 };
 
 /// Descriptor for `VectorPath`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List vectorPathDescriptor = $convert.base64Decode('CgpWZWN0b3JQYXRoEjgKCnBhdGhfbm9kZXMYASADKAsyGS5zdmcyaXYucHJvdG9idWYuUGF0aE5vZGVSCXBhdGhOb2RlcxIOCgJpZBgCIAEoCVICaWQSKgoEZmlsbBgDIAEoCzIWLnN2ZzJpdi5wcm90b2J1Zi5CcnVzaFIEZmlsbBIdCgpmaWxsX2FscGhhGAQgASgCUglmaWxsQWxwaGESLgoGc3Ryb2tlGAUgASgLMhYuc3ZnMml2LnByb3RvYnVmLkJydXNoUgZzdHJva2USIQoMc3Ryb2tlX2FscGhhGAYgASgCUgtzdHJva2VBbHBoYRIqChFzdHJva2VfbGluZV93aWR0aBgHIAEoAlIPc3Ryb2tlTGluZVdpZHRoEk0KD3N0cm9rZV9saW5lX2NhcBgJIAEoDjIlLnN2ZzJpdi5wcm90b2J1Zi5WZWN0b3JQYXRoLlN0cm9rZUNhcFINc3Ryb2tlTGluZUNhcBJQChBzdHJva2VfbGluZV9qb2luGAogASgOMiYuc3ZnMml2LnByb3RvYnVmLlZlY3RvclBhdGguU3Ryb2tlSm9pblIOc3Ryb2tlTGluZUpvaW4SKgoRc3Ryb2tlX2xpbmVfbWl0ZXIYCyABKAJSD3N0cm9rZUxpbmVNaXRlchJBCglmaWxsX3R5cGUYCCABKA4yJC5zdmcyaXYucHJvdG9idWYuVmVjdG9yUGF0aC5GaWxsVHlwZVIIZmlsbFR5cGUiOAoJU3Ryb2tlQ2FwEgwKCENBUF9CVVRUEAASDQoJQ0FQX1JPVU5EEAESDgoKQ0FQX1NRVUFSRRACIjwKClN0cm9rZUpvaW4SDgoKSk9JTl9NSVRFUhAAEg4KCkpPSU5fUk9VTkQQARIOCgpKT0lOX0JFVkVMEAIiJgoIRmlsbFR5cGUSDAoITk9OX1pFUk8QABIMCghFVkVOX09ERBAB');
+final $typed_data.Uint8List vectorPathDescriptor = $convert.base64Decode('CgpWZWN0b3JQYXRoEjgKCnBhdGhfbm9kZXMYASADKAsyGS5zdmcyaXYucHJvdG9idWYuUGF0aE5vZGVSCXBhdGhOb2RlcxIOCgJpZBgCIAEoCVICaWQSKgoEZmlsbBgDIAEoCzIWLnN2ZzJpdi5wcm90b2J1Zi5CcnVzaFIEZmlsbBIdCgpmaWxsX2FscGhhGAQgASgCUglmaWxsQWxwaGESLgoGc3Ryb2tlGAUgASgLMhYuc3ZnMml2LnByb3RvYnVmLkJydXNoUgZzdHJva2USIQoMc3Ryb2tlX2FscGhhGAYgASgCUgtzdHJva2VBbHBoYRIqChFzdHJva2VfbGluZV93aWR0aBgHIAEoAlIPc3Ryb2tlTGluZVdpZHRoEk0KD3N0cm9rZV9saW5lX2NhcBgJIAEoDjIlLnN2ZzJpdi5wcm90b2J1Zi5WZWN0b3JQYXRoLlN0cm9rZUNhcFINc3Ryb2tlTGluZUNhcBJQChBzdHJva2VfbGluZV9qb2luGAogASgOMiYuc3ZnMml2LnByb3RvYnVmLlZlY3RvclBhdGguU3Ryb2tlSm9pblIOc3Ryb2tlTGluZUpvaW4SKgoRc3Ryb2tlX2xpbmVfbWl0ZXIYCyABKAJSD3N0cm9rZUxpbmVNaXRlchJBCglmaWxsX3R5cGUYCCABKA4yJC5zdmcyaXYucHJvdG9idWYuVmVjdG9yUGF0aC5GaWxsVHlwZVIIZmlsbFR5cGUSJgoPdHJpbV9wYXRoX3N0YXJ0GAwgASgCUg10cmltUGF0aFN0YXJ0EiIKDXRyaW1fcGF0aF9lbmQYDSABKAJSC3RyaW1QYXRoRW5kEigKEHRyaW1fcGF0aF9vZmZzZXQYDiABKAJSDnRyaW1QYXRoT2Zmc2V0IjgKCVN0cm9rZUNhcBIMCghDQVBfQlVUVBAAEg0KCUNBUF9ST1VORBABEg4KCkNBUF9TUVVBUkUQAiI8CgpTdHJva2VKb2luEg4KCkpPSU5fTUlURVIQABIOCgpKT0lOX1JPVU5EEAESDgoKSk9JTl9CRVZFTBACIiYKCEZpbGxUeXBlEgwKCE5PTl9aRVJPEAASDAoIRVZFTl9PREQQAQ==');
 @$core.Deprecated('Use pathNodeDescriptor instead')
 const PathNode$json = const {
   '1': 'PathNode',

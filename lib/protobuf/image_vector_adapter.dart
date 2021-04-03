@@ -19,6 +19,7 @@ $pb.ImageVectorCollection imageVectorIterableAsProtobuf(
 }
 
 $pb.ImageVector imageVectorAsProtobuf(ImageVector imageVector) {
+  final tintBlendMode = imageVector.tintBlendMode;
   return $pb.ImageVector(
     nodes: _mapVectorNodes(imageVector.nodes),
     name: imageVector.name,
@@ -26,6 +27,10 @@ $pb.ImageVector imageVectorAsProtobuf(ImageVector imageVector) {
     viewportHeight: imageVector.viewportHeight,
     width: imageVector.width,
     height: imageVector.height,
+    tintColor: imageVector.tintColor,
+    tintBlendMode: tintBlendMode != null
+        ? $pb.BlendMode.values[tintBlendMode.index]
+        : $pb.BlendMode.SRC_IN,
   );
 }
 
@@ -73,6 +78,9 @@ $pb.VectorPath _mapVectorPath(VectorPath path) {
     fillType: pathFillType != null
         ? $pb.VectorPath_FillType.values[pathFillType.index]
         : $pb.VectorPath_FillType.NON_ZERO,
+    trimPathStart: path.trimPathStart,
+    trimPathEnd: path.trimPathEnd,
+    trimPathOffset: path.trimPathOffset,
   );
 }
 

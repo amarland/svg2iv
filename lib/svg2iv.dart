@@ -528,7 +528,7 @@ Gradient? _parseGradient(XmlElement gradientElement) {
         final opacity = stopElement.getAttribute('stop-opacity')?.toDouble();
         final colorAttributeValue = stopElement.getAttribute('stop-color');
         final color = colorAttributeValue != null
-            // we know it's not an actual gradient
+            // the result is a Gradient with a single value
             ? _parseBrush(colorAttributeValue)?.colors.singleOrNull
             : null;
         if (color != null) {
@@ -612,7 +612,7 @@ Gradient? _parseBrush(String brushAsString) {
         .cast<int>()
         .toList();
     if (rgb.isNotEmpty && rgb.length == 3) {
-      gradient = Gradient.fromArgb(0xFF, rgb[0], rgb[1], rgb[2]);
+      gradient = Gradient.fromArgbComponents(0xFF, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('rgba(')) {
     final rgba =
@@ -620,7 +620,7 @@ Gradient? _parseBrush(String brushAsString) {
     final rgb = rgba.sublist(0, 4).whereType<int>().cast<int>().toList();
     final alpha = rgba.length == 4 ? rgba[3] * 0xFF ~/ 1 : null;
     if (alpha != null && rgb.isNotEmpty && rgb.length == 3) {
-      gradient = Gradient.fromArgb(alpha, rgb[0], rgb[1], rgb[2]);
+      gradient = Gradient.fromArgbComponents(alpha, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('url(#')) {
     final id = extractIdFromUrlFunctionCall(brushAsString);
@@ -631,10 +631,10 @@ Gradient? _parseBrush(String brushAsString) {
   } else {
     switch (brushAsString) {
       case 'black':
-        gradient = Gradient.fromArgb(255, 0, 0, 0);
+        gradient = Gradient.fromArgbComponents(255, 0, 0, 0);
         break;
       case 'white':
-        gradient = Gradient.fromArgb(255, 255, 255, 255);
+        gradient = Gradient.fromArgbComponents(255, 255, 255, 255);
         break;
       // TODO: add more colors
     }
