@@ -19,7 +19,8 @@ $pb.ImageVectorCollection imageVectorIterableAsProtobuf(
 }
 
 $pb.ImageVector imageVectorAsProtobuf(ImageVector imageVector) {
-  final tintBlendMode = imageVector.tintBlendMode;
+  final tintBlendMode =
+      imageVector.tintBlendMode ?? ImageVector.defaultTintBlendMode;
   return $pb.ImageVector(
     nodes: _mapVectorNodes(imageVector.nodes),
     name: imageVector.name,
@@ -28,9 +29,7 @@ $pb.ImageVector imageVectorAsProtobuf(ImageVector imageVector) {
     width: imageVector.width,
     height: imageVector.height,
     tintColor: imageVector.tintColor,
-    tintBlendMode: tintBlendMode != null
-        ? $pb.BlendMode.values[tintBlendMode.index]
-        : $pb.BlendMode.SRC_IN,
+    tintBlendMode: $pb.BlendMode.values[tintBlendMode.index],
   );
 }
 
@@ -48,8 +47,8 @@ $pb.VectorGroup _mapVectorGroup(VectorGroup group) {
     rotation: group.rotation?.angle,
     pivotX: group.rotation?.pivotX,
     pivotY: group.rotation?.pivotY,
-    scaleX: group.scale?.x ?? 1.0,
-    scaleY: group.scale?.y ?? 1.0,
+    scaleX: group.scale?.x ?? VectorGroup.defaultScaleX,
+    scaleY: group.scale?.y ?? VectorGroup.defaultScaleY,
     translationX: group.translation?.x,
     translationY: group.translation?.y,
     clipPathData: group.clipPathData?.map(_mapPathNode),
@@ -57,30 +56,25 @@ $pb.VectorGroup _mapVectorGroup(VectorGroup group) {
 }
 
 $pb.VectorPath _mapVectorPath(VectorPath path) {
-  final strokeLineCap = path.strokeLineCap;
-  final strokeLineJoin = path.strokeLineJoin;
-  final pathFillType = path.pathFillType;
+  final strokeLineCap = path.strokeLineCap ?? VectorPath.defaultStrokeLineCap;
+  final strokeLineJoin =
+      path.strokeLineJoin ?? VectorPath.defaultStrokeLineJoin;
+  final pathFillType = path.pathFillType ?? VectorPath.defaultPathFillType;
   return $pb.VectorPath(
     pathNodes: path.pathData.map(_mapPathNode),
     id: path.id,
-    fill: _mapGradient(path.fill),
-    fillAlpha: path.fillAlpha ?? 1.0,
+    fill: _mapGradient(path.fill ?? VectorPath.defaultFill),
+    fillAlpha: path.fillAlpha ?? VectorPath.defaultFillAlpha,
     stroke: _mapGradient(path.stroke),
-    strokeAlpha: path.strokeAlpha ?? 1.0,
+    strokeAlpha: path.strokeAlpha ?? VectorPath.defaultStrokeAlpha,
     strokeLineWidth: path.strokeLineWidth,
-    strokeLineCap: strokeLineCap != null
-        ? $pb.VectorPath_StrokeCap.values[strokeLineCap.index]
-        : $pb.VectorPath_StrokeCap.CAP_BUTT,
-    strokeLineJoin: strokeLineJoin != null
-        ? $pb.VectorPath_StrokeJoin.values[strokeLineJoin.index]
-        : $pb.VectorPath_StrokeJoin.JOIN_MITER,
-    strokeLineMiter: path.strokeLineMiter ?? 4.0,
-    fillType: pathFillType != null
-        ? $pb.VectorPath_FillType.values[pathFillType.index]
-        : $pb.VectorPath_FillType.NON_ZERO,
-    trimPathStart: path.trimPathStart,
-    trimPathEnd: path.trimPathEnd,
-    trimPathOffset: path.trimPathOffset,
+    strokeLineCap: $pb.VectorPath_StrokeCap.values[strokeLineCap.index],
+    strokeLineJoin: $pb.VectorPath_StrokeJoin.values[strokeLineJoin.index],
+    strokeLineMiter: path.strokeLineMiter ?? VectorPath.defaultStrokeLineMiter,
+    fillType: $pb.VectorPath_FillType.values[pathFillType.index],
+    trimPathStart: path.trimPathStart ?? VectorPath.defaultTrimPathStart,
+    trimPathEnd: path.trimPathEnd ?? VectorPath.defaultTrimPathEnd,
+    trimPathOffset: path.trimPathOffset ?? VectorPath.defaultTrimPathOffset,
   );
 }
 

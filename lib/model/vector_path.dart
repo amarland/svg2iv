@@ -4,6 +4,18 @@ import 'package:svg2iv/model/gradient.dart';
 import 'package:svg2iv/model/vector_node.dart';
 
 class VectorPath extends VectorNode {
+  static final defaultFill = Gradient.fromArgb(0xFF000000);
+  static const defaultFillAlpha = 1.0;
+  static const defaultStrokeAlpha = 1.0;
+  static const defaultStrokeLineWidth = 1.0;
+  static const defaultStrokeLineCap = StrokeCap.butt;
+  static const defaultStrokeLineJoin = StrokeJoin.miter;
+  static const defaultStrokeLineMiter = 4.0;
+  static const defaultPathFillType = PathFillType.nonZero;
+  static const defaultTrimPathStart = 0.0;
+  static const defaultTrimPathEnd = 1.0;
+  static const defaultTrimPathOffset = 0.0;
+
   VectorPath._init(
     this.pathData, {
     String? id,
@@ -46,6 +58,9 @@ class VectorPath extends VectorNode {
         strokeLineJoin,
         strokeLineMiter,
         pathFillType,
+        trimPathStart,
+        trimPathEnd,
+        trimPathOffset,
       ].anyNotNull();
 
   VectorPath copyWith({
@@ -60,6 +75,9 @@ class VectorPath extends VectorNode {
     StrokeJoin? strokeLineJoin,
     double? strokeLineMiter,
     PathFillType? pathFillType,
+    double? trimPathStart,
+    double? trimPathEnd,
+    double? trimPathOffset,
   }) {
     return VectorPath._init(
       pathData ?? this.pathData,
@@ -73,6 +91,9 @@ class VectorPath extends VectorNode {
       strokeLineJoin: strokeLineJoin ?? this.strokeLineJoin,
       strokeLineMiter: strokeLineMiter ?? this.strokeLineMiter,
       pathFillType: pathFillType ?? this.pathFillType,
+      trimPathStart: trimPathStart ?? this.trimPathStart,
+      trimPathEnd: trimPathEnd ?? this.trimPathEnd,
+      trimPathOffset: trimPathOffset ?? this.trimPathOffset,
     );
   }
 }

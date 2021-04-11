@@ -5,6 +5,9 @@ import 'package:svg2iv/model/vector_node.dart';
 import 'package:svg2iv/model/vector_path.dart';
 
 class VectorGroup extends VectorNode {
+  static const defaultScaleX = 1.0;
+  static const defaultScaleY = 1.0;
+
   VectorGroup._init(
     this.nodes, {
     String? id,

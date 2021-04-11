@@ -2,6 +2,8 @@ import 'package:svg2iv/extensions.dart';
 import 'package:svg2iv/model/vector_node.dart';
 
 class ImageVector {
+  static const defaultTintBlendMode = BlendMode.srcIn;
+
   ImageVector._init(
     this.nodes,
     this.viewportWidth,

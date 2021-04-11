@@ -136,12 +136,12 @@ void writeImageVector(
     ..writeArgumentIfNotNull(
       indentationLevel,
       'tintColor',
-      imageVector.tintColor?.let(Gradient.fromArgb)
+      imageVector.tintColor?.let(Gradient.fromArgb),
     )
     ..writeArgumentIfNotNull(
       indentationLevel,
       'tintBlendMode',
-      imageVector.tintBlendMode
+      imageVector.tintBlendMode ?? ImageVector.defaultTintBlendMode,
     )
     ..writelnIndent(--indentationLevel, ')')
     ..writeIndent(indentationLevel, '.');
@@ -203,8 +203,16 @@ int writeGroup(
           indentationLevel, 'pivotX', group.rotation?.pivotX)
       ..writeArgumentIfNotNull(
           indentationLevel, 'pivotY', group.rotation?.pivotY)
-      ..writeArgumentIfNotNull(indentationLevel, 'scaleX', group.scale?.x)
-      ..writeArgumentIfNotNull(indentationLevel, 'scaleY', group.scale?.y)
+      ..writeArgumentIfNotNull(
+        indentationLevel,
+        'scaleX',
+        group.scale?.x ?? VectorGroup.defaultScaleX,
+      )
+      ..writeArgumentIfNotNull(
+        indentationLevel,
+        'scaleY',
+        group.scale?.y ?? VectorGroup.defaultScaleY,
+      )
       ..writeArgumentIfNotNull(
           indentationLevel, 'translationX', group.translation?.x)
       ..writeArgumentIfNotNull(
@@ -230,27 +238,62 @@ int writePath(
     sink.writeln('(');
     sink
       ..writeArgumentIfNotNull(++indentationLevel, 'name', path.id)
-      ..writeArgumentIfNotNull(indentationLevel, 'fill', path.fill)
-      ..writeArgumentIfNotNull(indentationLevel, 'fillAlpha', path.fillAlpha)
+      ..writeArgumentIfNotNull(
+        indentationLevel,
+        'fill',
+        path.fill ?? VectorPath.defaultFill,
+      )
+      ..writeArgumentIfNotNull(
+        indentationLevel,
+        'fillAlpha',
+        path.fillAlpha ?? VectorPath.defaultFillAlpha,
+      )
       ..writeArgumentIfNotNull(indentationLevel, 'stroke', path.stroke)
       ..writeArgumentIfNotNull(
-          indentationLevel, 'strokeAlpha', path.strokeAlpha)
+        indentationLevel,
+        'strokeAlpha',
+        path.strokeAlpha ?? VectorPath.defaultStrokeAlpha,
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'strokeLineWidth', path.strokeLineWidth)
+        indentationLevel,
+        'strokeLineWidth',
+        path.strokeLineWidth ?? VectorPath.defaultStrokeLineWidth,
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'strokeLineCap', path.strokeLineCap)
+        indentationLevel,
+        'strokeLineCap',
+        path.strokeLineCap ?? VectorPath.defaultStrokeLineCap,
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'strokeLineJoin', path.strokeLineJoin)
+        indentationLevel,
+        'strokeLineJoin',
+        path.strokeLineJoin ?? VectorPath.defaultStrokeLineJoin,
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'strokeLineMiter', path.strokeLineMiter)
+        indentationLevel,
+        'strokeLineMiter',
+        path.strokeLineMiter ?? VectorPath.defaultStrokeLineMiter,
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'pathFillType', path.pathFillType)
+        indentationLevel,
+        'pathFillType',
+        path.pathFillType ?? VectorPath.defaultPathFillType,
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'trimPathStart', path.trimPathStart)
+        indentationLevel,
+        'trimPathStart',
+        path.trimPathStart ?? VectorPath.defaultTrimPathStart,
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'trimPathEnd', path.trimPathEnd)
+        indentationLevel,
+        'trimPathEnd',
+        path.trimPathEnd ?? VectorPath.defaultTrimPathEnd,
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'trimPathOffset', path.trimPathOffset);
+        indentationLevel,
+        'trimPathOffset',
+        path.trimPathOffset ?? VectorPath.defaultTrimPathOffset,
+      );
     sink.writeIndent(--indentationLevel, ')');
   }
   sink.writeln(' {');
