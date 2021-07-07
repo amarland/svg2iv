@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv/svg2iv.dart';
+import 'package:svg2iv_common/extensions.dart';
 import 'package:xml/xml.dart';
 
 const useElementCustomAttributePrefix = 'use_';
@@ -9,6 +9,7 @@ void preprocessSvg(XmlElement svgElement) {
   _moveDefsElementToFirstPositionIfAny(svgElement);
   _inlineUseElements(svgElement);
   _reorderClipPathElementsIfNeeded(svgElement);
+  _convertCssStyleAttributesToSvgPresentationAttributes(svgElement);
 }
 
 void _moveDefsElementToFirstPositionIfAny(XmlElement svgElement) {
@@ -118,7 +119,7 @@ void _wrapClippedPathsIntoGroups(XmlElement svgElement) {
 
 void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
   for (final clipPathElement in svgElement.findAllElements('clipPath')) {
-    final defsElement = getOrCreateDefsElement(svgElement);
+    final defsElement = _getOrCreateDefsElement(svgElement);
     final clipPathElementIdNode = clipPathElement.getAttributeNode('id');
     final clipPathElementId = clipPathElementIdNode?.value;
     if (clipPathElementId.isNullOrEmpty) continue;
@@ -158,6 +159,27 @@ void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
   }
 }
 
-XmlElement getOrCreateDefsElement(XmlElement svgElement) =>
+XmlElement _getOrCreateDefsElement(XmlElement svgElement) =>
     svgElement.getElement('defs') ??
     XmlElement(XmlName('defs')).also((e) => svgElement.children.insert(0, e));
+
+void _convertCssStyleAttributesToSvgPresentationAttributes(
+    XmlElement svgElement) {
+  for (final element in svgElement.children.whereType<XmlElement>()) {
+    final styleAttributeNode = element.getAttributeNode('style');
+    final styleAttributeValues = styleAttributeNode?.value
+        .split(RegExp(r';\s*'))
+        .takeIf((it) => it.isNotEmpty);
+    if (styleAttributeValues != null) {
+      element.attributes.remove(styleAttributeNode);
+      for (final keyValuePairAsString in styleAttributeValues) {
+        final keyValuePair = keyValuePairAsString.split(RegExp(r':\s*'));
+        if (keyValuePair.length == 2) {
+          element.attributes.add(
+            XmlAttribute(XmlName(keyValuePair[0]), keyValuePair[1]),
+          );
+        }
+      }
+    }
+  }
+}

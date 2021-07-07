@@ -87,7 +87,12 @@ class _MainPageState extends State<MainPage> {
           Expanded(
             child: FractionallySizedBox(
               widthFactor: 0.65,
-              child: Checkerboard(),
+              child: AspectRatio(
+                aspectRatio: 1.0,
+                child: Checkerboard(
+                  child: Container(color: Colors.amber.withOpacity(0.5)),
+                ),
+              ),
             ),
           ),
         ],

@@ -1,7 +1,10 @@
-import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv/svg_preprocessor.dart';
+import 'package:svg2iv_common/extensions.dart';
 import 'package:test/test.dart';
 import 'package:xml/xml.dart';
+
+final sortAttributes = (XmlAttribute attr1, XmlAttribute attr2) =>
+    attr1.name.qualified.compareTo(attr2.name.qualified);
 
 void main() {
   group('<defs> elements are moved if needed', () {
@@ -34,7 +37,8 @@ void main() {
   <use href="#ref_circle" x="30" stroke-opacity="0.7" />
 </svg>''';
       const expectedDocument = '''
-<svg viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg">
+  <!--suppress HtmlUnknownAttribute-->
+  <svg viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg">
   <circle cx="5" cy="5" r="4"              stroke="blue" id="circle" />
   <circle cx="5" cy="5" r="4" fill="blue"  stroke="blue" use_x="10.0" />
   <circle cx="5" cy="5" r="4" fill="white" stroke="blue" use_x="20.0"
@@ -49,8 +53,7 @@ void main() {
       final prettify = (XmlElement element) {
         return element.toXmlString(
           pretty: true,
-          sortAttributes: (XmlAttribute attr1, XmlAttribute attr2) =>
-              attr1.name.qualified.compareTo(attr2.name.qualified),
+          sortAttributes: sortAttributes,
         );
       };
       expect(prettify(actualSvgElement), prettify(expectedSvgElement));
@@ -133,64 +136,31 @@ void main() {
       );
     },
   );
+
+  test(
+    'CSS style attributes are converted to SVG presentation attributes',
+    () {
+      const sourceDocument = '''
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <rect width="80" height="40" x="10" y="10"
+        style="fill: blue; stroke: yellow; stroke-width: 2;" />
+</svg>''';
+      const expectedDocument = '''
+<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+  <rect width="80" height="40" x="10" y="10"
+        fill="blue" stroke="yellow" stroke-width="2" />
+</svg>''';
+      final expectedSvgElement =
+          XmlDocument.parse(expectedDocument).rootElement;
+      final actualSvgElement = XmlDocument.parse(sourceDocument).rootElement;
+      preprocessSvg(actualSvgElement);
+      final prettify = (XmlElement element) {
+        return element.toXmlString(
+          pretty: true,
+          sortAttributes: sortAttributes,
+        );
+      };
+      expect(prettify(actualSvgElement), prettify(expectedSvgElement));
+    },
+  );
 }
-
-/*
-class _XmlElementEquality implements Equality<XmlElement> {
-  _XmlElementEquality()
-      : _attributeIterableEquality =
-            UnorderedIterableEquality<XmlAttribute>(_XmlAttributeEquality()) {
-    _elementIterableEquality = UnorderedIterableEquality<XmlElement>(this);
-  }
-
-  final UnorderedIterableEquality<XmlAttribute> _attributeIterableEquality;
-  late final UnorderedIterableEquality<XmlElement> _elementIterableEquality;
-
-  @override
-  bool equals(XmlElement? element1, XmlElement? element2) {
-    if (identical(element1, element2)) return true;
-    if (element1 == null || element2 == null) return false;
-    return element1.name == element2.name &&
-        _attributeIterableEquality.equals(
-          element1.attributes,
-          element2.attributes,
-        ) &&
-        _elementIterableEquality.equals(
-          element1.children.whereType<XmlElement>(),
-          element2.children.whereType<XmlElement>(),
-        ) &&
-        element1.isSelfClosing == element2.isSelfClosing;
-  }
-
-  @override
-  int hash(XmlElement? element) {
-    if (element == null) return null.hashCode;
-    return element.name.hashCode +
-        _attributeIterableEquality.hash(element.attributes) +
-        _elementIterableEquality
-            .hash(element.children.whereType<XmlElement>()) +
-        element.isSelfClosing.hashCode;
-  }
-
-  @override
-  bool isValidKey(Object? o) => o is XmlElement;
-}
-
-class _XmlAttributeEquality implements Equality<XmlAttribute> {
-  @override
-  bool equals(XmlAttribute? attribute1, XmlAttribute? attribute2) {
-    if (identical(attribute1, attribute2)) return true;
-    if (attribute1 == null || attribute2 == null) return false;
-    return attribute1.name == attribute2.name &&
-        attribute1.value == attribute2.value;
-  }
-
-  @override
-  int hash(XmlAttribute? attribute) => attribute == null
-      ? null.hashCode
-      : attribute.name.hashCode + attribute.value.hashCode;
-
-  @override
-  bool isValidKey(Object? o) => o is XmlAttribute;
-}
-*/

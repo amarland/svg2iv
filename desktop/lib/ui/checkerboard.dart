@@ -29,8 +29,9 @@ class _CheckerboardPainter extends CustomPainter {
     const squareSize = 8.0;
     final actualWidth = size.width - size.width % squareSize;
     final actualHeight = size.height - size.height % squareSize;
-    double x = (size.width - actualWidth) / 2,
-        y = (size.height - actualHeight) / 2;
+    final offsetX = (size.width - actualWidth) / 2,
+        offsetY = (size.height - actualHeight) / 2;
+    double x = offsetX, y = offsetY;
     final paint = Paint()..color = squareColor;
     while (y < actualHeight) {
       canvas.drawRect(
@@ -42,7 +43,9 @@ class _CheckerboardPainter extends CustomPainter {
       } else {
         x = (y + squareSize) % (squareSize * 2);
       }
-      if (x <= squareSize) y += squareSize;
+      if (x <= squareSize + offsetX) {
+        y += squareSize;
+      }
     }
   }
 
