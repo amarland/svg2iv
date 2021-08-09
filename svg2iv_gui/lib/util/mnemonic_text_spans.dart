@@ -10,7 +10,7 @@ extension MnemonicTextSpansCreation on String {
     spans.add(
       TextSpan(
         text: this[charIndex],
-        style: TextStyle(decoration: TextDecoration.underline),
+        style: const TextStyle(decoration: TextDecoration.underline),
       ),
     );
     spans.add(TextSpan(text: substring(charIndex + 1)));

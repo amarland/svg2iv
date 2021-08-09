@@ -11,7 +11,7 @@ XmlElement parseXmlFile(File source, {String? expectedRootName}) {
   } on XmlParserException {
     throw FileParserException('The contents of the file could not be parsed.');
   }
-  final rootElement;
+  final XmlElement rootElement;
   try {
     rootElement = document.rootElement;
     if (expectedRootName != null &&

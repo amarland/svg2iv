@@ -1,32 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:svg2iv_gui/state/main_page_bloc.dart';
+import 'package:svg2iv_gui/state/main_page_event.dart';
+import 'package:svg2iv_gui/state/main_page_state.dart';
 import 'package:svg2iv_gui/ui/checkerboard.dart';
-import 'package:svg2iv_gui/ui/circular_reveal.dart';
 import 'package:svg2iv_gui/ui/file_system_entity_selection_field.dart';
 import 'package:svg2iv_gui/ui/file_system_entity_selection_mode.dart';
 import 'package:svg2iv_gui/ui/preview_selection_button.dart';
 
-const _android_green = Color(0xFF00DE7A);
-const _android_blue = Color(0xFF2196F3);
+const _androidGreen = Color(0xFF00DE7A);
+const _androidBlue = Color(0xFF2196F3);
 
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: const MainPage(),
-      title: 'svg2iv',
-      theme: ThemeData(
-        colorScheme: ColorScheme.light(
-          primary: _android_blue,
-          secondary: _android_green,
-        ),
+    return BlocProvider(
+      create: (context) => MainPageBloc(),
+      child: BlocBuilder<MainPageBloc, MainPageState>(
+        builder: (context, state) {
+          return MaterialApp(
+            home: const MainPage(),
+            title: 'svg2iv',
+            theme: ThemeData(
+              colorScheme: const ColorScheme.light(
+                primary: _androidBlue,
+                secondary: _androidGreen,
+              ),
+            ),
+            darkTheme: ThemeData(
+              colorScheme: const ColorScheme.dark(
+                primary: _androidGreen,
+                secondary: _androidBlue,
+              ),
+            ),
+            themeMode: state.isThemeDark ? ThemeMode.dark : ThemeMode.light,
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.dark(
-          primary: _android_green,
-          secondary: _android_blue,
-        ),
-      ),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -38,7 +49,8 @@ class MainPage extends StatefulWidget {
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin<MainPage> {
+class _MainPageState extends State<MainPage>
+    with SingleTickerProviderStateMixin<MainPage> {
   late AnimationController _animationController;
   late Animation<double> _animation;
 
@@ -47,7 +59,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
     );
     _animation = CurvedAnimation(
       parent: _animationController,
@@ -57,23 +69,24 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    return CircularRevealAnimation(
+    return /*CircularRevealAnimation(
       animation: _animation,
-      child: Scaffold(
+      child: */Scaffold(
         appBar: AppBar(
-          title: Text('SVG to ImageVector conversion tool'),
+          title: const Text('SVG to ImageVector conversion tool'),
           actions: [
             IconButton(
               onPressed: () {
-                /* TODO */
-              },
-              icon: Icon(Icons.dark_mode_outlined),
+                BlocProvider.of<MainPageBloc>(context)
+                  .add(ToggleThemeButtonClicked());
+            },
+              icon: const Icon(Icons.dark_mode_outlined),
             ),
             IconButton(
               onPressed: () {
                 /* TODO */
               },
-              icon: Icon(Icons.info_outlined),
+              icon: const Icon(Icons.info_outlined),
             ),
           ],
         ),
@@ -86,8 +99,8 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    FileSystemEntitySelectionField(
-                      selectionMode: FileSystemEntitySelectionMode.source_files,
+                    const FileSystemEntitySelectionField(
+                      selectionMode: FileSystemEntitySelectionMode.sourceFiles,
                     ),
                     Row(
                       children: [
@@ -97,16 +110,16 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                             /* TODO */
                           },
                         ),
-                        SizedBox(width: 8.0),
-                        Text('Generate all assets in a single file'),
+                        const SizedBox(width: 8.0),
+                        const Text('Generate all assets in a single file'),
                       ],
                     ),
-                    FileSystemEntitySelectionField(
+                    const FileSystemEntitySelectionField(
                       selectionMode:
-                          FileSystemEntitySelectionMode.destination_directory,
+                          FileSystemEntitySelectionMode.destinationDirectory,
                     ),
-                    SizedBox(height: 8.0),
-                    TextField(
+                    const SizedBox(height: 8.0),
+                    const TextField(
                       decoration: InputDecoration(
                         labelText: 'Extension receiver (optional)',
                         border: OutlineInputBorder(),
@@ -131,7 +144,9 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                       child: AspectRatio(
                         aspectRatio: 1.0,
                         child: Checkerboard(
-                          child: Container(color: Colors.amber.withOpacity(0.5)),
+                          child: Container(
+                            color: Colors.amber.withOpacity(0.5),
+                          ),
                         ),
                       ),
                     ),
@@ -163,10 +178,13 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
           onPressed: () {
             /* TODO */
           },
-          icon: Icon(Icons.build_outlined),
-          label: Text('Convert', style: TextStyle(fontWeight: FontWeight.w600)),
+          icon: const Icon(Icons.build_outlined),
+          label: const Text(
+            'Convert',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
-      ),
+      //),
     );
   }
 }

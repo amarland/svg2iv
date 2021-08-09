@@ -1,1 +1,1 @@
-enum FileSystemEntitySelectionMode { source_files, destination_directory }
+enum FileSystemEntitySelectionMode { sourceFiles, destinationDirectory }

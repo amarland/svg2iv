@@ -68,6 +68,7 @@ void writeImageVectorsToFile(
     ..writeln('package $packageName')
     ..writeln()
     ..writeln('androidx.compose.ui.graphics.*')
+    ..writeln('androidx.compose.ui.graphics.vector.*')
     ..writeln('androidx.compose.ui.unit.dp')
     ..writeln();
   imageVectors.forEach(

@@ -7,17 +7,18 @@ class CircularRevealAnimation extends StatelessWidget {
   final Offset? center;
   final Widget child;
 
-  CircularRevealAnimation({
+  const CircularRevealAnimation({
+    Key? key,
     required this.animation,
     this.center,
     required this.child,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext _, Widget? __) {
+      builder: (BuildContext context, Widget? _) {
         return ClipPath(
           clipper: _CircularRevealClipper(
             progress: animation.value,
@@ -41,7 +42,9 @@ class _CircularRevealClipper extends CustomClipper<Path> {
     final offset = center ?? Offset(size.width / 2, size.height / 2);
     final maxRadius = _computeMaxRadius(size, offset);
     return Path()
-      ..addOval(Rect.fromCircle(center: offset, radius: maxRadius * progress));
+      ..addOval(
+        Rect.fromCircle(center: offset, radius: maxRadius * progress),
+      );
   }
 
   @override

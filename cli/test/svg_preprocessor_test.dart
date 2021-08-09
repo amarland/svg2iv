@@ -3,9 +3,6 @@ import 'package:svg2iv_common/extensions.dart';
 import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 
-final sortAttributes = (XmlAttribute attr1, XmlAttribute attr2) =>
-    attr1.name.qualified.compareTo(attr2.name.qualified);
-
 void main() {
   group('<defs> elements are moved if needed', () {
     void actualTest(String description, String svgAsString) {
@@ -27,7 +24,7 @@ void main() {
   });
 
   test(
-    '<use> elements are inlined and their attributes properly \"propagated\"',
+    '<use> elements are inlined and their attributes properly "propagated"',
     () {
       const sourceDocument = '''
 <svg viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg">
@@ -50,13 +47,7 @@ void main() {
           XmlDocument.parse(expectedDocument).rootElement;
       final actualSvgElement = XmlDocument.parse(sourceDocument).rootElement;
       preprocessSvg(actualSvgElement);
-      final prettify = (XmlElement element) {
-        return element.toXmlString(
-          pretty: true,
-          sortAttributes: sortAttributes,
-        );
-      };
-      expect(prettify(actualSvgElement), prettify(expectedSvgElement));
+      expect(_prettify(actualSvgElement), _prettify(expectedSvgElement));
     },
   );
 
@@ -120,16 +111,8 @@ void main() {
           XmlDocument.parse(expectedDocument).rootElement;
       final actualSvgElement = XmlDocument.parse(sourceDocument).rootElement;
       preprocessSvg(actualSvgElement);
-      final sortDefinitions = (XmlElement rootElement) {
-        rootElement.firstElementChild!.children.sort(
-          (e1, e2) => e1
-              .getAttribute('id')
-              .orEmpty()
-              .compareTo(e2.getAttribute('id').orEmpty()),
-        );
-      };
-      sortDefinitions(actualSvgElement);
-      sortDefinitions(expectedSvgElement);
+      _sortDefinitions(actualSvgElement);
+      _sortDefinitions(expectedSvgElement);
       expect(
         actualSvgElement.toXmlString(pretty: true),
         expectedSvgElement.toXmlString(pretty: true),
@@ -154,13 +137,24 @@ void main() {
           XmlDocument.parse(expectedDocument).rootElement;
       final actualSvgElement = XmlDocument.parse(sourceDocument).rootElement;
       preprocessSvg(actualSvgElement);
-      final prettify = (XmlElement element) {
-        return element.toXmlString(
-          pretty: true,
-          sortAttributes: sortAttributes,
-        );
-      };
-      expect(prettify(actualSvgElement), prettify(expectedSvgElement));
+      expect(_prettify(actualSvgElement), _prettify(expectedSvgElement));
     },
+  );
+}
+
+int _sortAttributes(XmlAttribute attr1, XmlAttribute attr2) =>
+    attr1.name.qualified.compareTo(attr2.name.qualified);
+
+String _prettify(XmlElement element) => element.toXmlString(
+      pretty: true,
+      sortAttributes: _sortAttributes,
+    );
+
+void _sortDefinitions(XmlElement rootElement) {
+  rootElement.firstElementChild!.children.sort(
+    (e1, e2) => e1
+        .getAttribute('id')
+        .orEmpty()
+        .compareTo(e2.getAttribute('id').orEmpty()),
   );
 }

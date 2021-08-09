@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:svg2iv_gui/ui/main_window.dart';
+import 'package:svg2iv_gui/ui/main_page.dart';
 import 'package:window_size/window_size.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  const windowSize = const Size(800.0, 350.0);
+  const windowSize = Size(800.0, 350.0);
   final screenFrame = (await getWindowInfo()).screen?.visibleFrame;
   if (screenFrame != null) {
     setWindowFrame(

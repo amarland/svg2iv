@@ -15,8 +15,8 @@ class PreviewSelectionButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        minimumSize: Size.square(56.0),
-        shape: CircleBorder(),
+        minimumSize: const Size.square(56.0),
+        shape: const CircleBorder(),
       ),
       child: Icon(iconData),
     );

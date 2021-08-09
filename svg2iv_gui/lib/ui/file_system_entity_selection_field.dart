@@ -22,12 +22,12 @@ class FileSystemEntitySelectionField extends StatelessWidget {
     // final List<TextSpan> labelSpans;
     final String label;
     switch (selectionMode) {
-      case FileSystemEntitySelectionMode.source_files:
+      case FileSystemEntitySelectionMode.sourceFiles:
         icon = Icons.upload_file_outlined;
         // labelSpans = 'Source files'.asMnemonic();
         label = 'Source files';
         break;
-      case FileSystemEntitySelectionMode.destination_directory:
+      case FileSystemEntitySelectionMode.destinationDirectory:
         icon = Icons.snippet_folder_outlined;
         // labelSpans = 'Destination directory'.asMnemonic();
         label = 'Destination directory';
@@ -40,21 +40,21 @@ class FileSystemEntitySelectionField extends StatelessWidget {
             decoration: InputDecoration(
               labelText: label,
               prefixIcon: Icon(icon),
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
             ),
             readOnly: true,
           ),
         ),
-        SizedBox(width: 8.0),
+        const SizedBox(width: 8.0),
         SizedBox.fromSize(
-          size: Size.square(50.0),
+          size: const Size.square(50.0),
           child: OutlinedButton(
             onPressed: isButtonEnabled
                 ? () {
                     /* TODO */
                   }
                 : null,
-            child: Icon(Icons.folder_outlined),
+            child: const Icon(Icons.folder_outlined),
           ),
         ),
       ],

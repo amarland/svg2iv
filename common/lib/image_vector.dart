@@ -26,9 +26,9 @@ class ImageVector {
     List<VectorNode>? nodes,
     String? name,
     double? width,
-    height,
+    double? height,
     double? viewportWidth,
-    viewportHeight,
+    double? viewportHeight,
     int? tintColor,
     BlendMode? tintBlendMode,
   }) {
