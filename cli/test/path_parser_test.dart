@@ -5,8 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:svg2iv/image_vector.dart';
 import 'package:svg2iv/path_parser.dart';
 import 'package:svg_path_parser/svg_path_parser.dart' as third_party;
+*/
 
 void main() {
+  /*
   test(
     'PathParser.parse() returns an object whose pathNodes'
     ' can be used to build a Path equal to the one'
@@ -134,5 +136,5 @@ Path? _pathFrompathNodes(Iterable<PathDataInstruction>? pathNodes) {
     }
   }
   return path;
+  */
 }
-*/

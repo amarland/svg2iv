@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:svg2iv/destination_file_writer.dart';
-import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv/file_parser.dart';
-import 'package:svg2iv_common/image_vector.dart';
 import 'package:svg2iv/protobuf/image_vector_adapter.dart';
 import 'package:svg2iv/protobuf/image_vector_transmitter.dart';
 import 'package:svg2iv/svg2iv.dart';
 import 'package:svg2iv/vd2iv.dart';
+import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common/image_vector.dart';
 import 'package:xml/xml.dart';
 
 const destinationOptionName = 'destination';
@@ -167,18 +167,20 @@ If not provided, the generated property will be declared as a top-level property
   if (destination != null && imageVectors.isNotEmpty) {
     final extensionReceiver = argResults[receiverOptionName] as String?;
     if (destination is File) {
-      writeImageVectorsToFile(
+      await writeImageVectorsToFile(
         destination.path,
         imageVectors,
-        extensionReceiver,
+        extensionReceiver: extensionReceiver,
       );
     } else {
       imageVectors.forEach(
-        (name, imageVector) => writeImageVectorsToFile(
-          destination!.path + Platform.pathSeparator + name,
-          {name: imageVector},
-          extensionReceiver,
-        ),
+        (name, imageVector) async {
+          return await writeImageVectorsToFile(
+            destination!.path + Platform.pathSeparator + name,
+            {name: imageVector},
+            extensionReceiver: extensionReceiver,
+          );
+        },
       );
     }
   }

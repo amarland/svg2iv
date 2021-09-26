@@ -38,12 +38,13 @@ const _commandsToFunctionAndClassNames = {
   PathDataCommand.relativeArcTo: Tuple2('arcToRelative', 'RelativeArcTo'),
 };
 
-void writeImageVectorsToFile(
+Future<void> writeImageVectorsToFile(
   String destinationPath,
-  Map<String, ImageVector> imageVectors, [
+  Map<String, ImageVector> imageVectors, {
   String? extensionReceiver,
-]) async {
-  if (!destinationPath.endsWith('.kt')) {
+  String? heading,
+}) async {
+  if (!destinationPath.endsWith('.kt') && !destinationPath.endsWith('.kts')) {
     destinationPath += '.kt';
   }
   final file = File(destinationPath).absolute;
@@ -56,7 +57,7 @@ void writeImageVectorsToFile(
           .firstMatch(absoluteFilePath)
           ?.end;
   if (startOfPackageName == null) {
-    packageName = '<package>';
+    packageName = '_your_._package_._name_';
   } else {
     final endOfPackageName = absoluteFilePath.lastIndexOfOrNull('.') ??
         absoluteFilePath.lastIndexOfOrNull(pathSeparator) ??
@@ -64,23 +65,44 @@ void writeImageVectorsToFile(
     packageName =
         absoluteFilePath.substring(startOfPackageName, endOfPackageName);
   }
-  fileSink
-    ..writeln('package $packageName')
-    ..writeln()
-    ..writeln('androidx.compose.ui.graphics.*')
-    ..writeln('androidx.compose.ui.graphics.vector.*')
-    ..writeln('androidx.compose.ui.unit.dp')
+  writeFileContents(
+    fileSink,
+    imageVectors,
+    packageName: packageName,
+    extensionReceiver: extensionReceiver,
+    heading: heading,
+  );
+  await fileSink.flush();
+  await fileSink.close();
+}
+
+void writeFileContents(
+  StringSink sink,
+  Map<String, ImageVector> imageVectors, {
+  String? packageName,
+  String? extensionReceiver,
+  String? heading,
+}) {
+  if (!heading.isNullOrEmpty) {
+    sink..writeln(heading)..writeln();
+  }
+  if (!packageName.isNullOrEmpty) {
+    sink..writeln('package $packageName')..writeln();
+  }
+  sink
+    ..writeln('import androidx.compose.ui.geometry.Offset')
+    ..writeln('import androidx.compose.ui.graphics.*')
+    ..writeln('import androidx.compose.ui.graphics.vector.*')
+    ..writeln('import androidx.compose.ui.unit.dp')
     ..writeln();
   imageVectors.forEach(
     (sourceFileName, imageVector) => writeImageVector(
-      fileSink,
+      sink,
       imageVector,
       sourceFileName.toPascalCase(),
       extensionReceiver,
     ),
   );
-  await fileSink.flush();
-  await fileSink.close();
 }
 
 void writeImageVector(
@@ -110,10 +132,7 @@ void writeImageVector(
     );
   indentationLevel++;
   imageVector.name?.let(
-    (name) => sink.writelnIndent(
-      indentationLevel,
-      'name = "${name.toPascalCase()}",',
-    ),
+    (name) => sink.writelnIndent(indentationLevel, 'name = "$name",'),
   );
   sink
     ..writelnIndent(
@@ -137,25 +156,25 @@ void writeImageVector(
     ..writeArgumentIfNotNull(
       indentationLevel,
       'tintColor',
-      imageVector.tintColor?.let(Gradient.fromArgb),
+      imageVector.tintColor?.let(_colorToString),
     )
     ..writeArgumentIfNotNull(
       indentationLevel,
       'tintBlendMode',
-      imageVector.tintBlendMode ?? ImageVector.defaultTintBlendMode,
+      imageVector.tintBlendMode
+          .takeIf((it) => it != ImageVector.defaultTintBlendMode),
     )
-    ..writelnIndent(--indentationLevel, ')')
-    ..writeIndent(indentationLevel, '.');
+    ..writelnIndent(--indentationLevel, ')');
   indentationLevel = _writeNodes(
     sink,
     imageVector.nodes,
     ++indentationLevel,
-    shouldFirstDeclarationBeIndented: false,
+    shouldStatementBePrecededByPoint: true,
   );
   sink
     ..writelnIndent(indentationLevel, '.build()')
     ..writelnIndent(--indentationLevel, '}')
-    ..writelnIndent(indentationLevel, 'return $backingPropertyName')
+    ..writelnIndent(indentationLevel, 'return $backingPropertyName!!')
     ..writelnIndent(--indentationLevel, '}');
 }
 
@@ -163,24 +182,22 @@ int _writeNodes(
   StringSink sink,
   Iterable<VectorNode> nodes,
   int indentationLevel, {
-  bool shouldFirstDeclarationBeIndented = true,
+  bool shouldStatementBePrecededByPoint = false,
 }) {
   nodes.forEachIndexed((index, node) {
-    final shouldDeclarationBeIndented =
-        shouldFirstDeclarationBeIndented || index > 0;
     if (node is VectorGroup) {
       indentationLevel = writeGroup(
         sink,
         node,
         indentationLevel,
-        shouldDeclarationBeIndented: shouldDeclarationBeIndented,
+        shouldStatementBePrecededByPoint: shouldStatementBePrecededByPoint,
       );
     } else if (node is VectorPath) {
       indentationLevel = writePath(
         sink,
         node,
         indentationLevel,
-        shouldDeclarationBeIndented: shouldDeclarationBeIndented,
+        shouldStatementBePrecededByPoint: shouldStatementBePrecededByPoint,
       );
     }
   });
@@ -191,9 +208,12 @@ int writeGroup(
   StringSink sink,
   VectorGroup group,
   int indentationLevel, {
-  bool shouldDeclarationBeIndented = false,
+  bool shouldStatementBePrecededByPoint = false,
 }) {
-  sink.writeIndent(shouldDeclarationBeIndented ? indentationLevel : 0, 'group');
+  sink.writeIndent(
+    indentationLevel,
+    shouldStatementBePrecededByPoint ? '.group' : 'group',
+  );
   if (group.hasAttributes) {
     sink.writeln('(');
     sink
@@ -207,12 +227,12 @@ int writeGroup(
       ..writeArgumentIfNotNull(
         indentationLevel,
         'scaleX',
-        group.scale?.x ?? VectorGroup.defaultScaleX,
+        group.scale?.x.takeIf((it) => it != VectorGroup.defaultScaleX),
       )
       ..writeArgumentIfNotNull(
         indentationLevel,
         'scaleY',
-        group.scale?.y ?? VectorGroup.defaultScaleY,
+        group.scale?.y.takeIf((it) => it != VectorGroup.defaultScaleY),
       )
       ..writeArgumentIfNotNull(
           indentationLevel, 'translationX', group.translation?.x)
@@ -223,7 +243,12 @@ int writeGroup(
     sink.writeIndent(--indentationLevel, ')');
   }
   sink.writeln(' {');
-  indentationLevel = _writeNodes(sink, group.nodes, ++indentationLevel);
+  indentationLevel = _writeNodes(
+    sink,
+    group.nodes,
+    ++indentationLevel,
+    shouldStatementBePrecededByPoint: false,
+  );
   sink.writelnIndent(--indentationLevel, '}');
   return indentationLevel;
 }
@@ -232,74 +257,107 @@ int writePath(
   StringSink sink,
   VectorPath path,
   int indentationLevel, {
-  bool shouldDeclarationBeIndented = true,
+  bool shouldStatementBePrecededByPoint = false,
 }) {
-  sink.writeIndent(shouldDeclarationBeIndented ? indentationLevel : 0, 'path');
-  if (path.hasAttributes) {
+  final isPathTrimmed = path.trimPathStart != null ||
+      path.trimPathEnd != null ||
+      path.trimPathOffset != null;
+  sink.writeIndent(
+    indentationLevel,
+    (shouldStatementBePrecededByPoint ? '.' : '') +
+        (isPathTrimmed ? 'addPath' : 'path'),
+  );
+  if (path.hasAttributes || isPathTrimmed) {
     sink.writeln('(');
+    if (isPathTrimmed) {
+      sink.writeArgumentIfNotNull(
+        ++indentationLevel,
+        'pathData',
+        path.pathData,
+      );
+    }
     sink
-      ..writeArgumentIfNotNull(++indentationLevel, 'name', path.id)
+      ..writeArgumentIfNotNull(
+        isPathTrimmed ? indentationLevel : ++indentationLevel,
+        'name',
+        path.id,
+      )
       ..writeArgumentIfNotNull(
         indentationLevel,
         'fill',
-        path.fill ?? VectorPath.defaultFill,
+        path.fill.takeIf((it) => it != VectorPath.defaultFill),
       )
       ..writeArgumentIfNotNull(
         indentationLevel,
         'fillAlpha',
-        path.fillAlpha ?? VectorPath.defaultFillAlpha,
+        path.fillAlpha.takeIf((it) => it != VectorPath.defaultFillAlpha),
       )
       ..writeArgumentIfNotNull(indentationLevel, 'stroke', path.stroke)
       ..writeArgumentIfNotNull(
         indentationLevel,
         'strokeAlpha',
-        path.strokeAlpha ?? VectorPath.defaultStrokeAlpha,
+        path.strokeAlpha.takeIf((it) => it != VectorPath.defaultStrokeAlpha),
       )
       ..writeArgumentIfNotNull(
         indentationLevel,
         'strokeLineWidth',
-        path.strokeLineWidth ?? VectorPath.defaultStrokeLineWidth,
+        path.strokeLineWidth
+            .takeIf((it) => it != VectorPath.defaultStrokeLineWidth),
       )
       ..writeArgumentIfNotNull(
         indentationLevel,
         'strokeLineCap',
-        path.strokeLineCap ?? VectorPath.defaultStrokeLineCap,
+        path.strokeLineCap
+            .takeIf((it) => it != VectorPath.defaultStrokeLineCap),
       )
       ..writeArgumentIfNotNull(
         indentationLevel,
         'strokeLineJoin',
-        path.strokeLineJoin ?? VectorPath.defaultStrokeLineJoin,
+        path.strokeLineJoin
+            .takeIf((it) => it != VectorPath.defaultStrokeLineJoin),
       )
       ..writeArgumentIfNotNull(
         indentationLevel,
         'strokeLineMiter',
-        path.strokeLineMiter ?? VectorPath.defaultStrokeLineMiter,
+        path.strokeLineMiter
+            .takeIf((it) => it != VectorPath.defaultStrokeLineMiter),
       )
       ..writeArgumentIfNotNull(
         indentationLevel,
         'pathFillType',
-        path.pathFillType ?? VectorPath.defaultPathFillType,
-      )
-      ..writeArgumentIfNotNull(
-        indentationLevel,
-        'trimPathStart',
-        path.trimPathStart ?? VectorPath.defaultTrimPathStart,
-      )
-      ..writeArgumentIfNotNull(
-        indentationLevel,
-        'trimPathEnd',
-        path.trimPathEnd ?? VectorPath.defaultTrimPathEnd,
-      )
-      ..writeArgumentIfNotNull(
-        indentationLevel,
-        'trimPathOffset',
-        path.trimPathOffset ?? VectorPath.defaultTrimPathOffset,
+        path.pathFillType.takeIf((it) => it != VectorPath.defaultPathFillType),
       );
-    sink.writeIndent(--indentationLevel, ')');
+    if (isPathTrimmed) {
+      sink
+        ..writeArgumentIfNotNull(
+          indentationLevel,
+          'trimPathStart',
+          path.trimPathStart
+              .takeIf((it) => it != VectorPath.defaultTrimPathStart),
+        )
+        ..writeArgumentIfNotNull(
+          indentationLevel,
+          'trimPathEnd',
+          path.trimPathEnd.takeIf((it) => it != VectorPath.defaultTrimPathEnd),
+        )
+        ..writeArgumentIfNotNull(
+          indentationLevel,
+          'trimPathOffset',
+          path.trimPathOffset
+              .takeIf((it) => it != VectorPath.defaultTrimPathOffset),
+        );
+    }
+    if (!isPathTrimmed) {
+      sink.writeIndent(--indentationLevel, ')');
+    } else {
+      sink.writelnIndent(--indentationLevel, ')');
+    }
   }
-  sink.writeln(' {');
-  _writePathNodes(sink, path.pathData, ++indentationLevel);
-  sink.writelnIndent(--indentationLevel, '}');
+  if (!isPathTrimmed) {
+    sink.writeln(' {');
+    _writePathNodes(sink, path.pathData, ++indentationLevel);
+    sink.writelnIndent(--indentationLevel, '}');
+  }
   return indentationLevel;
 }
 
@@ -317,32 +375,36 @@ void _writePathNodes(
       (pair) {
         final name =
             asClassConstructorCall ? 'PathNode.${pair.item2}' : pair.item1;
-        sink
-          ..writeIndent(indentationLevel, '$name(')
-          ..writeAll(
-            node.arguments.map(
-              (argument) => argument is double
-                  ? _numToKotlinFloatAsString(argument)
-                  : argument,
-            ),
-            ', ',
-          )
-          ..write(')');
-        if (asClassConstructorCall) sink.write(',');
+        if (node.command == PathDataCommand.close && asClassConstructorCall) {
+          sink.writeIndent(indentationLevel, '$name,');
+        } else {
+          sink
+            ..writeIndent(indentationLevel, '$name(')
+            ..writeAll(
+              node.arguments.map(
+                (argument) => argument is double
+                    ? _numToKotlinFloatAsString(argument)
+                    : argument,
+              ),
+              ', ',
+            )
+            ..write(')');
+          if (asClassConstructorCall) sink.write(',');
+        }
         sink.writeln();
       },
     );
   }
 }
 
-String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
-  String colorToString(int color) =>
-      'Color(0x${color.toRadixString(16).toUpperCase()})';
+String _colorToString(int color) =>
+    'Color(0x${color.toRadixString(16).toUpperCase()})';
 
+String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
   final buffer = StringBuffer();
   final colors = gradient.colors;
   if (colors.length == 1 || colors.every((c) => c == colors[0])) {
-    buffer.write('SolidColor(${colorToString(colors[0])})');
+    buffer.write('SolidColor(${_colorToString(colors[0])})');
   } else {
     final isGradientLinear = gradient is LinearGradient;
     buffer
@@ -353,7 +415,7 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
     if (gradient.stops.isEmpty) {
       buffer.writelnIndent(indentationLevel, 'listOf(');
       indentationLevel++;
-      for (final color in colors.map(colorToString)) {
+      for (final color in colors.map(_colorToString)) {
         buffer
           ..writeIndent(indentationLevel, color)
           ..writeln(',');
@@ -367,7 +429,7 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
             _numToKotlinFloatAsString(gradient.stops[i]),
           )
           ..write(' to ')
-          ..write(colorToString(colors[i]))
+          ..write(_colorToString(colors[i]))
           ..writeln(',');
       }
     }
@@ -465,7 +527,11 @@ extension _StringSinkWriting on StringSink {
       final y = _numToKotlinFloatAsString(argument.item2);
       argumentAsString = 'Offset($x, $y)';
     } else if (argument is String) {
-      argumentAsString = '"$argument"';
+      if (argument.startsWith('Color(')) {
+        argumentAsString = argument;
+      } else {
+        argumentAsString = '"$argument"';
+      }
     } else {
       argumentAsString = argument.toString();
     }
