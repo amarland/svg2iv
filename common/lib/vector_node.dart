@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:svg2iv_common/extensions.dart';
+
 import 'gradient.dart';
 
 abstract class VectorNode {
@@ -19,6 +20,11 @@ abstract class VectorNodeBuilder<T extends VectorNode,
 
   @protected
   Gradient? get fill_ => _fill;
+
+  double? _alpha;
+
+  @protected
+  double? get alpha_ => _alpha;
 
   double? _fillAlpha;
 
@@ -89,6 +95,11 @@ abstract class VectorNodeBuilder<T extends VectorNode,
 
   B fill(Gradient fill) {
     _fill = fill;
+    return this as B;
+  }
+
+  B alpha(double alpha) {
+    _alpha = alpha;
     return this as B;
   }
 
@@ -171,3 +182,7 @@ StrokeJoin? strokeJoinFromString(String valueAsString) {
       return StrokeJoin.round;
   }
 }
+
+@protected
+double? multiplyAlphas(double? alpha1, double? alpha2) =>
+    alpha1 == null ? alpha2 : (alpha2 == null ? alpha1 : alpha1 * alpha2);

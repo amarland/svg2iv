@@ -1,12 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:svg2iv_common/extensions.dart';
-import 'transformations.dart';
 import 'package:svg2iv_common/vector_node.dart';
 import 'package:svg2iv_common/vector_path.dart';
+
+import 'transformations.dart';
 
 class VectorGroup extends VectorNode {
   static const defaultScaleX = 1.0;
   static const defaultScaleY = 1.0;
+  static const defaultPivotX = 0.0;
+  static const defaultPivotY = 0.0;
 
   VectorGroup._init(
     this.nodes, {
@@ -79,25 +82,36 @@ class VectorGroupBuilder
   }
 
   List<VectorNode> _mergePresentationAttributes(List<VectorNode> nodes) {
-    double? multiplyAlphas(double? alpha1, double? alpha2) =>
-        alpha1 == null ? alpha2 : (alpha2 == null ? alpha1 : alpha1 * alpha2);
-
     // "merge" presentation attributes, even when non-applicable
-    return nodes
-        .map((node) => node is VectorPath
-            ? node.copyWith(
-                fill: node.fill ?? fill_,
-                fillAlpha: multiplyAlphas(node.fillAlpha, fillAlpha_),
-                stroke: node.stroke ?? stroke_,
-                strokeAlpha: multiplyAlphas(node.strokeAlpha, strokeAlpha_),
-                strokeLineWidth: node.strokeLineWidth ?? strokeLineWidth_,
-                strokeLineCap: node.strokeLineCap ?? strokeLineCap_,
-                strokeLineJoin: node.strokeLineJoin ?? strokeLineJoin_,
-                strokeLineMiter: node.strokeLineMiter ?? strokeLineMiter_,
-                pathFillType: node.pathFillType ?? pathFillType_,
-              )
-            : node)
-        .toList();
+    return nodes.map(
+      (node) {
+        if (node is VectorPath) {
+          final newFill = node.fill ?? fill_;
+          var newStroke = node.stroke ?? stroke_;
+          return node.copyWith(
+            fill: newFill,
+            fillAlpha: multiplyAlphas(
+              multiplyAlphas(node.fillAlpha, fillAlpha_),
+              alpha_?.takeIf((_) => newFill != null),
+            ),
+            stroke: newStroke,
+            strokeAlpha: multiplyAlphas(
+              multiplyAlphas(node.strokeAlpha, strokeAlpha_),
+              alpha_?.takeIf((_) => newStroke != null),
+            ),
+            strokeLineWidth: node.strokeLineWidth ?? strokeLineWidth_,
+            strokeLineCap: node.strokeLineCap ?? strokeLineCap_,
+            strokeLineJoin: node.strokeLineJoin ?? strokeLineJoin_,
+            strokeLineMiter: node.strokeLineMiter ?? strokeLineMiter_,
+            pathFillType: node.pathFillType ?? pathFillType_,
+          );
+        } else {
+          return (node as VectorGroup).copyWith(
+            nodes: _mergePresentationAttributes(node.nodes),
+          );
+        }
+      },
+    ).toList();
   }
 
   @override

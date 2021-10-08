@@ -1,16 +1,16 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv/file_parser.dart';
+import 'package:svg2iv/path_data_parser.dart';
+import 'package:svg2iv/svg_preprocessor.dart';
+import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/gradient.dart';
 import 'package:svg2iv_common/image_vector.dart';
 import 'package:svg2iv_common/transformations.dart';
 import 'package:svg2iv_common/vector_group.dart';
 import 'package:svg2iv_common/vector_node.dart';
 import 'package:svg2iv_common/vector_path.dart';
-import 'package:svg2iv/path_data_parser.dart';
-import 'package:svg2iv/svg_preprocessor.dart';
 import 'package:xml/xml.dart';
 
 final _definitionSeparatorPattern = RegExp(r'[,\s]\s*');
@@ -83,7 +83,7 @@ Iterable<VectorNode> _extractNodesOfInterest(XmlElement rootElement) sync* {
         }
         break;
       case 'g':
-        nodes.addAll(_parseGroupElement(element));
+        nodes.add(_parseGroupElement(element));
         break;
       case 'path':
         nodes.add(_parsePathElement(element));
@@ -138,17 +138,14 @@ Iterable<VectorNode> _extractNodesOfInterest(XmlElement rootElement) sync* {
   }
 }
 
-// can be a single group or the list of its nodes if it's considered "redundant"
-Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
-  var builder = VectorGroupBuilder();
+VectorGroup _parseGroupElement(XmlElement groupElement) {
+  final builder = VectorGroupBuilder();
   _parseTransformations(groupElement)?.let((t) => builder.transformations(t));
   for (final childNode in _extractNodesOfInterest(groupElement)) {
     builder.addNode(childNode);
   }
-  builder = _fillPresentationAttributes(groupElement, builder);
-  final group =
-      _handleClipPathAttribute(groupElement, builder) ?? builder.build();
-  return group.hasAttributes ? [group] : group.nodes;
+  _fillPresentationAttributes(groupElement, builder);
+  return _handleClipPathAttribute(groupElement, builder) ?? builder.build();
 }
 
 Transformations? _parseTransformations(XmlElement element) {
@@ -402,7 +399,9 @@ VectorNode? _buildVectorNodeFromPathData(
   // if transformations (other than a "simple" translation) are defined
   // for this path, wrap it in a group
   final nodeBuilder = (transformations != null
-      ? VectorGroupBuilder().addNode(pathBuilder.build())
+      ? VectorGroupBuilder()
+          .transformations(transformations)
+          .addNode(pathBuilder.build())
       : pathBuilder) as VectorNodeBuilder;
   return _handleClipPathAttribute(sourceElement, nodeBuilder) ??
       nodeBuilder.build();
@@ -485,6 +484,9 @@ B _fillPresentationAttributes<T extends VectorNode,
         break;
       case 'id':
         builder.id(attributeValue);
+        break;
+      case 'opacity':
+        _parsePercentage(attributeValue)?.let((alpha) => builder.alpha(alpha));
         break;
       case 'fill':
         _parseBrush(attributeValue)?.let((fill) => builder.fill(fill));
@@ -597,7 +599,11 @@ double? _parsePercentage(String percentageAsString) {
   final valueToParse = trimmed.endsWith('%')
       ? trimmed.substring(0, trimmed.length - 1)
       : trimmed;
-  return valueToParse.toDouble()?.let((it) => it / 100.0);
+  return valueToParse.toDouble()?.let((it) {
+    if (it.isNaN || it.isNegative || it > 100.0) return null;
+    if (it >= 1.0) return it / 100.0;
+    return it;
+  });
 }
 
 Gradient? _parseBrush(String brushAsString) {

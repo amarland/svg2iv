@@ -72,7 +72,7 @@ If not provided, the generated property will be declared as a top-level property
     return;
   }
   var sourceFiles = argResults.rest.expand(
-    (rest) => rest.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).expand(
+    (rest) => rest.split(RegExp(',+')).where((s) => s.isNotEmpty).expand(
       (path) {
         if (FileSystemEntity.isFileSync(path)) {
           return [File(path)];

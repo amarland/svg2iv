@@ -84,10 +84,14 @@ void writeFileContents(
   String? heading,
 }) {
   if (!heading.isNullOrEmpty) {
-    sink..writeln(heading)..writeln();
+    sink
+      ..writeln(heading)
+      ..writeln();
   }
   if (!packageName.isNullOrEmpty) {
-    sink..writeln('package $packageName')..writeln();
+    sink
+      ..writeln('package $packageName')
+      ..writeln();
   }
   sink
     ..writeln('import androidx.compose.ui.geometry.Offset')
@@ -221,9 +225,15 @@ int writeGroup(
       ..writeArgumentIfNotNull(
           indentationLevel, 'rotate', group.rotation?.angle)
       ..writeArgumentIfNotNull(
-          indentationLevel, 'pivotX', group.rotation?.pivotX)
+        indentationLevel,
+        'pivotX',
+        group.rotation?.pivotX.takeIf((it) => it != VectorGroup.defaultPivotX),
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'pivotY', group.rotation?.pivotY)
+        indentationLevel,
+        'pivotY',
+        group.rotation?.pivotY.takeIf((it) => it != VectorGroup.defaultPivotY),
+      )
       ..writeArgumentIfNotNull(
         indentationLevel,
         'scaleX',

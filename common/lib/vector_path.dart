@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:svg2iv_common/extensions.dart';
+
 import 'gradient.dart';
 import 'vector_node.dart';
 
@@ -128,9 +129,9 @@ class VectorPathBuilder
       _pathData,
       id: id_,
       fill: fill_,
-      fillAlpha: fillAlpha_,
+      fillAlpha: multiplyAlphas(fillAlpha_, alpha_),
       stroke: stroke_,
-      strokeAlpha: strokeAlpha_,
+      strokeAlpha: multiplyAlphas(strokeAlpha_, alpha_),
       strokeLineWidth: strokeLineWidth_,
       strokeLineCap: strokeLineCap_,
       strokeLineJoin: strokeLineJoin_,
