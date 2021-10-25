@@ -245,9 +245,17 @@ int writeGroup(
         group.scale?.y.takeIf((it) => it != VectorGroup.defaultScaleY),
       )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'translationX', group.translation?.x)
+        indentationLevel,
+        'translationX',
+        group.translation?.x
+            .takeIf((it) => it != VectorGroup.defaultTranslationX),
+      )
       ..writeArgumentIfNotNull(
-          indentationLevel, 'translationY', group.translation?.y)
+        indentationLevel,
+        'translationY',
+        group.translation?.y
+            .takeIf((it) => it != VectorGroup.defaultTranslationY),
+      )
       ..writeArgumentIfNotNull(
           indentationLevel, 'clipPathData', group.clipPathData);
     sink.writeIndent(--indentationLevel, ')');

@@ -66,9 +66,9 @@ path(
           .id('test_group')
           .transformations(
             TransformationsBuilder()
-                .rotation(const Rotation(30.0, pivotX: 5.0, pivotY: 5.0))
-                .scale(Scale(1.2))
-                .addTranslation(const Translation(9.0))
+                .rotate(angleInDegrees: 30.0, pivotX: 5.0, pivotY: 5.0)
+                .scale(x: 1.2)
+                .translate(x: 9.0)
                 .build()!,
           )
           .clipPathData(
@@ -104,7 +104,6 @@ group(
     scaleX = 1.2F,
     scaleY = 1.2F,
     translationX = 9F,
-    translationY = 0F,
     clipPathData = listOf(
         PathNode.HorizontalTo(12F),
     ),
@@ -136,7 +135,9 @@ group(
             VectorGroupBuilder()
                 .id('test_group')
                 .transformations(
-                  TransformationsBuilder().rotation(Rotation(90.0)).build()!,
+                  TransformationsBuilder()
+                      .rotate(angleInDegrees: 90.0)
+                      .build()!,
                 )
                 .addNode(_buildVectorPath(trimPath: false))
                 .build(),

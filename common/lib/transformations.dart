@@ -1,3 +1,6 @@
+import 'package:vector_math/vector_math.dart'
+    show degrees, radians, Vector3, Quaternion, Matrix4;
+
 abstract class Transformation {}
 
 class Rotation implements Transformation {
@@ -48,28 +51,77 @@ extension TranslationExtensions on Translation? {
 }
 
 class TransformationsBuilder {
-  Rotation? _rotation;
-  Scale? _scale;
-  Translation? _translation;
+  Matrix4 _matrix = Matrix4.identity();
 
-  TransformationsBuilder rotation(Rotation rotation) {
-    _rotation = rotation;
+  TransformationsBuilder rotate({
+    required double angleInDegrees,
+    double? pivotX,
+    double? pivotY,
+  }) {
+    final angleInRadians = radians(angleInDegrees);
+    if (pivotX != null || pivotY != null) {
+      pivotX ??= 0.0;
+      pivotY ??= 0.0;
+      _matrix
+        ..translate(pivotX, pivotY)
+        ..multiply(Matrix4.rotationZ(angleInRadians))
+        ..translate(-pivotX, -pivotY);
+    } else {
+      _matrix.rotateZ(angleInRadians);
+    }
     return this;
   }
 
-  TransformationsBuilder scale(Scale scale) {
-    _scale = scale;
+  TransformationsBuilder scale({required double x, double? y}) {
+    _matrix.scale(x, y ?? x);
     return this;
   }
 
-  TransformationsBuilder addTranslation(Translation translation) {
-    _translation =
-        _translation == null ? translation : _translation! + translation;
+  TransformationsBuilder translate({required double x, double? y}) {
+    _matrix.translate(x, y ?? 0.0);
     return this;
   }
 
-  Transformations? build() =>
-      _rotation != null || _scale != null || _translation != null
-          ? Transformations._init(_rotation, _scale, _translation)
-          : null;
+  TransformationsBuilder skewX(double x) {
+    _matrix = Matrix4.skewX(x).multiplied(_matrix);
+    return this;
+  }
+
+  TransformationsBuilder skewY(double y) {
+    _matrix = Matrix4.skewY(y).multiplied(_matrix);
+    return this;
+  }
+
+  Transformations? build() {
+    if (_matrix.isIdentity()) {
+      return null;
+    } else {
+      Quaternion rotationQuaternion = Quaternion.identity();
+      Vector3 scaleVector = Vector3.zero();
+      Vector3 translationVector = Vector3.zero();
+      _matrix.decompose(translationVector, rotationQuaternion, scaleVector);
+      final rotationAxis = rotationQuaternion.axis;
+      final rotation = _isQuaternionIdentity(rotationQuaternion)
+          ? null
+          : Rotation(
+              degrees(rotationQuaternion.radians),
+              pivotX: rotationAxis.x,
+              pivotY: rotationAxis.y,
+            );
+      final scale = scaleVector.x == 1.0 && scaleVector.y == 1.0
+          ? null
+          : Scale(scaleVector.x, scaleVector.y);
+      final translation =
+          translationVector.x == 0.0 && translationVector.y == 0.0
+              ? null
+              : Translation(translationVector.x, translationVector.y);
+      return Transformations._init(rotation, scale, translation);
+    }
+  }
+
+  static bool _isQuaternionIdentity(Quaternion quaternion) =>
+      quaternion.x == 0.0 &&
+      quaternion.y == 0.0 &&
+      quaternion.z == 0.0 &&
+      quaternion.w == 1.0;
 }

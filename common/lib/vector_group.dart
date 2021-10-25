@@ -10,6 +10,8 @@ class VectorGroup extends VectorNode {
   static const defaultScaleY = 1.0;
   static const defaultPivotX = 0.0;
   static const defaultPivotY = 0.0;
+  static const defaultTranslationX = 0.0;
+  static const defaultTranslationY = 0.0;
 
   VectorGroup._init(
     this.nodes, {

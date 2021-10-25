@@ -20,10 +20,6 @@ final _definitions = <String, dynamic>{};
 ImageVector parseSvgFile(File source) {
   final rootElement = parseXmlFile(source, expectedRootName: 'svg');
   preprocessSvg(rootElement);
-  double? viewportWidth;
-  double? viewportHeight;
-  double? width;
-  double? height;
   final viewBox = rootElement
       .getAttribute('viewBox')
       ?.split(_definitionSeparatorPattern)
@@ -34,10 +30,17 @@ ImageVector parseSvgFile(File source) {
       );
   final widthAsString = rootElement.getAttribute('width');
   final heightAsString = rootElement.getAttribute('height');
+  double? viewportWidth, viewportHeight;
+  double? width, height;
+  double? minX, minY;
   if (viewBox != null) {
+    minX = viewBox[0];
+    minY = viewBox[1];
     viewportWidth = viewBox[2]!;
     viewportHeight = viewBox[3]!;
   }
+  minX ??= 0.0;
+  minY ??= 0.0;
   if (!widthAsString.isNullOrEmpty &&
       !widthAsString!.endsWith('%') &&
       !heightAsString.isNullOrEmpty &&
@@ -62,7 +65,35 @@ ImageVector parseSvgFile(File source) {
   }
   width?.let(builder.width);
   height?.let(builder.height);
-  builder.addNodes(_extractNodesOfInterest(rootElement));
+  // possible translation resulting from having non-zero min coordinates
+  final rootGroupTranslation =
+      minX != 0.0 || minY != 0.0 ? Translation(-minX, -minY) : null;
+  final nodes = _extractNodesOfInterest(rootElement);
+  if (rootGroupTranslation != null) {
+    final singleNode = nodes.singleOrNull;
+    if (singleNode is VectorGroup) {
+      final existingTranslation = singleNode.translation;
+      builder.addNode(
+        singleNode.copyWith(
+            translation: existingTranslation != null
+                ? existingTranslation + rootGroupTranslation
+                : rootGroupTranslation),
+      );
+    } else {
+      final rootGroupBuilder = VectorGroupBuilder();
+      nodes.forEach(rootGroupBuilder.addNode);
+      final transformations = TransformationsBuilder()
+          .translate(
+            x: rootGroupTranslation.x,
+            y: rootGroupTranslation.y,
+          )
+          .build()!;
+      rootGroupBuilder.transformations(transformations);
+      builder.addNode(rootGroupBuilder.build());
+    }
+  } else {
+    builder.addNodes(nodes);
+  }
   _definitions.clear();
   return builder.build();
 }
@@ -171,11 +202,9 @@ Transformations? _parseTransformations(XmlElement element) {
       case 'translate':
         final count = parsedValues.length;
         if (parsedValues.isNotEmpty && count <= 2) {
-          builder.addTranslation(
-            Translation(
-              parsedValues[0],
-              count == 2 ? parsedValues[1] : null,
-            ),
+          builder.translate(
+            x: parsedValues[0],
+            y: count == 2 ? parsedValues[1] : null,
           );
         }
         break;
@@ -183,23 +212,34 @@ Transformations? _parseTransformations(XmlElement element) {
         final count = parsedValues.length;
         if (parsedValues.isNotEmpty && count <= 2) {
           builder.scale(
-            Scale(
-              parsedValues[0],
-              count == 2 ? parsedValues[1] : null,
-            ),
+            x: parsedValues[0],
+            y: count == 2 ? parsedValues[1] : null,
           );
         }
         break;
       case 'rotate':
         final count = parsedValues.length;
         if (parsedValues.isNotEmpty && count <= 3) {
-          builder.rotation(
-            Rotation(
-              parsedValues[0],
-              pivotX: count >= 2 ? parsedValues[1] : null,
-              pivotY: count == 3 ? parsedValues[2] : null,
-            ),
+          builder.rotate(
+            angleInDegrees: parsedValues[0],
+            pivotX: count >= 2 ? parsedValues[1] : null,
+            pivotY: count == 3 ? parsedValues[2] : null,
           );
+        }
+        break;
+      default:
+        if (name.startsWith('skew')) {
+          final value = parsedValues.singleOrNull;
+          if (value != null) {
+            switch (name[name.length - 1]) {
+              case 'X':
+                builder.skewX(value);
+                break;
+              case 'Y':
+                builder.skewY(value);
+                break;
+            }
+          }
         }
         break;
     }
@@ -215,7 +255,7 @@ Transformations? _parseTransformations(XmlElement element) {
   final offsetX = customAttributes['x'];
   final offsetY = customAttributes['y'];
   if (offsetX != null && offsetY != null) {
-    builder.addTranslation(Translation(offsetX, offsetY));
+    builder.translate(x: offsetX, y: offsetY);
   }
   return builder.build();
 }
@@ -489,7 +529,11 @@ B _fillPresentationAttributes<T extends VectorNode,
         _parsePercentage(attributeValue)?.let((alpha) => builder.alpha(alpha));
         break;
       case 'fill':
-        _parseBrush(attributeValue)?.let((fill) => builder.fill(fill));
+        if (attributeValue == 'none') {
+          builder.fillAlpha(0.0);
+        } else {
+          _parseBrush(attributeValue)?.let((fill) => builder.fill(fill));
+        }
         break;
       case 'fill-opacity':
         _parsePercentage(attributeValue)

@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv/file_parser.dart';
+import 'package:svg2iv/path_data_parser.dart';
+import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/gradient.dart';
 import 'package:svg2iv_common/image_vector.dart';
 import 'package:svg2iv_common/transformations.dart';
 import 'package:svg2iv_common/vector_group.dart';
 import 'package:svg2iv_common/vector_node.dart';
 import 'package:svg2iv_common/vector_path.dart';
-import 'package:svg2iv/path_data_parser.dart';
 import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
 
@@ -80,24 +80,24 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
   final transformationsBuilder = TransformationsBuilder();
   final rotationAngle = attributes['rotation']?.toDouble();
   if (rotationAngle != null) {
-    transformationsBuilder.rotation(
-      Rotation(
-        rotationAngle,
-        pivotX: attributes['pivotX']?.toDouble(),
-        pivotY: attributes['pivotY']?.toDouble(),
-      ),
+    transformationsBuilder.rotate(
+      angleInDegrees: rotationAngle,
+      pivotX: attributes['pivotX']?.toDouble(),
+      pivotY: attributes['pivotY']?.toDouble(),
     );
   }
   final scaleX = attributes['scaleX']?.toDouble();
   if (scaleX != null) {
     transformationsBuilder.scale(
-      Scale(scaleX, attributes['scaleY']?.toDouble()),
+      x: scaleX,
+      y: attributes['scaleY']?.toDouble(),
     );
   }
   final translationX = attributes['translateX']?.toDouble();
   if (translationX != null) {
-    transformationsBuilder.addTranslation(
-      Translation(translationX, attributes['translateY']?.toDouble()),
+    transformationsBuilder.translate(
+      x: translationX,
+      y: attributes['translateY']?.toDouble(),
     );
   }
   final transformations = transformationsBuilder.build();
