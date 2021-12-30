@@ -464,7 +464,7 @@ VectorGroup? _handleClipPathAttribute(
             final isCurrentElementAGroup =
                 index == 0 && currentBuilder is VectorGroupBuilder;
             final groupBuilder = (isCurrentElementAGroup
-                    ? currentBuilder as VectorGroupBuilder
+                    ? currentBuilder
                     : VectorGroupBuilder())
                 .clipPathData(e.pathData);
             if (!isCurrentElementAGroup) {

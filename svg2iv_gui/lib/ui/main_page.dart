@@ -11,6 +11,7 @@ import 'package:svg2iv_gui/ui/preview_selection_button.dart';
 const _androidGreen = Color(0xFF00DE7A);
 const _androidBlue = Color(0xFF2196F3);
 
+// ignore: use_key_in_widget_constructors
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

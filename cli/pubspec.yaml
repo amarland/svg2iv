@@ -3,11 +3,11 @@ description: A command-line application to convert SVG files to Jetpack Compose 
 # version: 1.0.0
 
 environment:
-  sdk: '>=2.12.0-0 <3.0.0'
+  sdk: '>=2.15.0 <3.0.0'
 
 dependencies:
   args: ^2.1.1
-  path_parsing: ^0.2.1
+  path_parsing: ^1.0.0
   protobuf: ^2.0.0
   svg2iv_common:
     path: ../common

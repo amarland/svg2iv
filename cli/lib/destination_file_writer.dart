@@ -452,11 +452,10 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
       }
     }
     if (isGradientLinear) {
-      final linearGradient = gradient as LinearGradient;
-      final startX = linearGradient.startX;
-      final startY = linearGradient.startY;
-      final endX = linearGradient.endX;
-      final endY = linearGradient.endY;
+      final startX = gradient.startX;
+      final startY = gradient.startY;
+      final endX = gradient.endX;
+      final endY = gradient.endY;
       buffer
         ..writeArgumentIfNotNull(
           indentationLevel,
@@ -535,9 +534,9 @@ extension _StringSinkWriting on StringSink {
         argument is PathFillType ||
         argument is TileMode ||
         argument is BlendMode) {
-      argumentAsString = argument
-          .toString()
-          .capitalizeCharAt(argument.toString().indexOf('.') + 1);
+      final enumAsString = argument.toString();
+      argumentAsString = enumAsString
+          .capitalizeCharAt(enumAsString.indexOf('.') + 1);
     } else if (argument is Gradient) {
       argumentAsString = gradientToBrushAsString(argument, indentationLevel);
     } else if (argument is Tuple2<double, double>) {
