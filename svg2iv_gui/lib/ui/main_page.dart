@@ -4,8 +4,10 @@ import 'package:svg2iv_gui/state/main_page_bloc.dart';
 import 'package:svg2iv_gui/state/main_page_event.dart';
 import 'package:svg2iv_gui/state/main_page_state.dart';
 import 'package:svg2iv_gui/ui/checkerboard.dart';
+import 'package:svg2iv_gui/ui/face_icon.dart';
 import 'package:svg2iv_gui/ui/file_system_entity_selection_field.dart';
 import 'package:svg2iv_gui/ui/file_system_entity_selection_mode.dart';
+import 'package:svg2iv_gui/ui/image_vector_painter.dart';
 import 'package:svg2iv_gui/ui/preview_selection_button.dart';
 
 const _androidGreen = Color(0xFF00DE7A);
@@ -72,119 +74,120 @@ class _MainPageState extends State<MainPage>
   Widget build(BuildContext context) {
     return /*CircularRevealAnimation(
       animation: _animation,
-      child: */Scaffold(
-        appBar: AppBar(
-          title: const Text('SVG to ImageVector conversion tool'),
-          actions: [
-            IconButton(
-              onPressed: () {
-                BlocProvider.of<MainPageBloc>(context)
+      child: */
+        Scaffold(
+      appBar: AppBar(
+        title: const Text('SVG to ImageVector conversion tool'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              BlocProvider.of<MainPageBloc>(context)
                   .add(ToggleThemeButtonClicked());
             },
-              icon: const Icon(Icons.dark_mode_outlined),
-            ),
-            IconButton(
-              onPressed: () {
-                /* TODO */
-              },
-              icon: const Icon(Icons.info_outlined),
-            ),
-          ],
-        ),
-        body: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const FileSystemEntitySelectionField(
-                      selectionMode: FileSystemEntitySelectionMode.sourceFiles,
-                    ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: false,
-                          onChanged: (value) {
-                            /* TODO */
-                          },
-                        ),
-                        const SizedBox(width: 8.0),
-                        const Text('Generate all assets in a single file'),
-                      ],
-                    ),
-                    const FileSystemEntitySelectionField(
-                      selectionMode:
-                          FileSystemEntitySelectionMode.destinationDirectory,
-                    ),
-                    const SizedBox(height: 8.0),
-                    const TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Extension receiver (optional)',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 16.0,
-                  right: 16.0,
-                  bottom: 16.0,
-                ),
-                child: Stack(
-                  alignment: AlignmentDirectional.center,
-                  children: [
-                    FractionallySizedBox(
-                      widthFactor: 0.65,
-                      child: AspectRatio(
-                        aspectRatio: 1.0,
-                        child: Checkerboard(
-                          child: Container(
-                            color: Colors.amber.withOpacity(0.5),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: PreviewSelectionButton(
-                        onPressed: () {
-                          /* TODO */
-                        },
-                        iconData: Icons.keyboard_arrow_left_outlined,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: PreviewSelectionButton(
-                        onPressed: () {
-                          /* TODO */
-                        },
-                        iconData: Icons.keyboard_arrow_right_outlined,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            /* TODO */
-          },
-          icon: const Icon(Icons.build_outlined),
-          label: const Text(
-            'Convert',
-            style: TextStyle(fontWeight: FontWeight.w600),
+            icon: const Icon(Icons.dark_mode_outlined),
           ),
+          IconButton(
+            onPressed: () {
+              /* TODO */
+            },
+            icon: const Icon(Icons.info_outlined),
+          ),
+        ],
+      ),
+      body: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const FileSystemEntitySelectionField(
+                    selectionMode: FileSystemEntitySelectionMode.sourceFiles,
+                  ),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: false,
+                        onChanged: (value) {
+                          /* TODO */
+                        },
+                      ),
+                      const SizedBox(width: 8.0),
+                      const Text('Generate all assets in a single file'),
+                    ],
+                  ),
+                  const FileSystemEntitySelectionField(
+                    selectionMode:
+                        FileSystemEntitySelectionMode.destinationDirectory,
+                  ),
+                  const SizedBox(height: 8.0),
+                  const TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Extension receiver (optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 16.0,
+                right: 16.0,
+                bottom: 16.0,
+              ),
+              child: Stack(
+                alignment: AlignmentDirectional.center,
+                children: [
+                  FractionallySizedBox(
+                    widthFactor: 0.65,
+                    child: AspectRatio(
+                      aspectRatio: 1.0,
+                      child: Checkerboard(
+                        child: ImageVectorPainter(
+                          imageVector: CustomIcons.faceIcon,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: PreviewSelectionButton(
+                      onPressed: () {
+                        /* TODO */
+                      },
+                      iconData: Icons.keyboard_arrow_left_outlined,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: PreviewSelectionButton(
+                      onPressed: () {
+                        /* TODO */
+                      },
+                      iconData: Icons.keyboard_arrow_right_outlined,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          /* TODO */
+        },
+        icon: const Icon(Icons.build_outlined),
+        label: const Text(
+          'Convert',
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
+      ),
       //),
     );
   }

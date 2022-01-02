@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
+  svg2iv_common:
+    path: ../common
   window_size:
     git:
       url: git://github.com/google/flutter-desktop-embedding.git

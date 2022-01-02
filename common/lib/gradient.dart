@@ -80,14 +80,16 @@ class RadialGradient extends Gradient {
   RadialGradient(
     List<int> colors, {
     List<double>? stops,
-    this.centerX,
-    this.centerY,
+    double? centerX,
+    double? centerY,
     double? radius,
     TileMode? tileMode,
   })  : radius = radius ?? double.infinity,
+        centerX = centerX ?? 0.0,
+        centerY = centerY ?? 0.0,
         super(colors, stops, tileMode);
 
-  final double? centerX, centerY;
+  final double centerX, centerY;
   final double radius;
 }
 
