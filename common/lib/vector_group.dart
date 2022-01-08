@@ -50,6 +50,25 @@ class VectorGroup extends VectorNode {
       clipPathData: clipPathData ?? this.clipPathData,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VectorGroup &&
+          runtimeType == other.runtimeType &&
+          const ListEquality().equals(nodes, other.nodes) &&
+          rotation == other.rotation &&
+          scale == other.scale &&
+          translation == other.translation &&
+          const ListEquality().equals(clipPathData, other.clipPathData);
+
+  @override
+  int get hashCode =>
+      const ListEquality().hash(nodes) ^
+      rotation.hashCode ^
+      scale.hashCode ^
+      translation.hashCode ^
+      const ListEquality().hash(clipPathData);
 }
 
 class VectorGroupBuilder

@@ -1,26 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:svg2iv_gui/ui/file_system_entity_selection_mode.dart';
 
-class FileSystemEntitySelectionField extends StatelessWidget {
+class FileSystemEntitySelectionField extends StatefulWidget {
   const FileSystemEntitySelectionField({
     Key? key,
+    required this.onButtonPressed,
     required this.selectionMode,
     this.value = '',
     this.isError = false,
-    this.isButtonEnabled = true,
   }) : super(key: key);
 
+  final VoidCallback? onButtonPressed;
   final FileSystemEntitySelectionMode selectionMode;
   final String value;
   final bool isError;
-  final bool isButtonEnabled;
+
+  @override
+  State<StatefulWidget> createState() => _State();
+}
+
+class _State extends State<FileSystemEntitySelectionField> {
+  late TextEditingController _textEditingController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textEditingController = TextEditingController();
+  }
+
+  @override
+  void didUpdateWidget(FileSystemEntitySelectionField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _textEditingController.text = widget.value;
+  }
 
   @override
   Widget build(BuildContext context) {
     final IconData icon;
     // final List<TextSpan> labelSpans;
     final String label;
-    switch (selectionMode) {
+    switch (widget.selectionMode) {
       case FileSystemEntitySelectionMode.sourceFiles:
         icon = Icons.upload_file_outlined;
         // labelSpans = 'Source files'.asMnemonic();
@@ -36,10 +55,12 @@ class FileSystemEntitySelectionField extends StatelessWidget {
       children: [
         Flexible(
           child: TextField(
+            controller: _textEditingController,
             decoration: InputDecoration(
-              labelText: label,
+              labelText: widget.isError ? null : label,
               prefixIcon: Icon(icon),
               border: const OutlineInputBorder(),
+              errorText: widget.isError ? label : null,
             ),
             readOnly: true,
           ),
@@ -48,15 +69,17 @@ class FileSystemEntitySelectionField extends StatelessWidget {
         SizedBox.fromSize(
           size: const Size.square(50.0),
           child: OutlinedButton(
-            onPressed: isButtonEnabled
-                ? () {
-                    /* TODO */
-                  }
-                : null,
+            onPressed: widget.onButtonPressed,
             child: const Icon(Icons.folder_outlined),
           ),
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
   }
 }

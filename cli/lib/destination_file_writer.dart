@@ -470,19 +470,14 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
               : null,
         );
     } else {
-      final radialGradient = gradient as RadialGradient;
-      final centerX = radialGradient.centerX;
-      final centerY = radialGradient.centerY;
+      gradient as RadialGradient;
       buffer
         ..writeArgumentIfNotNull(
           indentationLevel,
           'center',
-          centerX != null || centerY != null
-              ? Tuple2(centerX ?? 0.0, centerY ?? 0.0)
-              : null,
+          Tuple2(gradient.centerX, gradient.centerY),
         )
-        ..writeArgumentIfNotNull(
-            indentationLevel, 'radius', radialGradient.radius);
+        ..writeArgumentIfNotNull(indentationLevel, 'radius', gradient.radius);
     }
     buffer
       ..writeArgumentIfNotNull(indentationLevel, 'tileMode', gradient.tileMode)
@@ -535,8 +530,8 @@ extension _StringSinkWriting on StringSink {
         argument is TileMode ||
         argument is BlendMode) {
       final enumAsString = argument.toString();
-      argumentAsString = enumAsString
-          .capitalizeCharAt(enumAsString.indexOf('.') + 1);
+      argumentAsString =
+          enumAsString.capitalizeCharAt(enumAsString.indexOf('.') + 1);
     } else if (argument is Gradient) {
       argumentAsString = gradientToBrushAsString(argument, indentationLevel);
     } else if (argument is Tuple2<double, double>) {

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 abstract class Gradient {
@@ -56,6 +57,25 @@ abstract class Gradient {
   final List<int> colors;
   final List<double> stops;
   final TileMode? tileMode;
+
+  @override
+  bool operator ==(Object other) {
+    const listEquality = ListEquality();
+    return identical(this, other) ||
+        other is Gradient &&
+            runtimeType == other.runtimeType &&
+            listEquality.equals(colors, other.colors) &&
+            listEquality.equals(stops, other.stops) &&
+            tileMode == other.tileMode;
+  }
+
+  @override
+  int get hashCode {
+    const listEquality = ListEquality();
+    return listEquality.hash(colors) ^
+        listEquality.hash(stops) ^
+        tileMode.hashCode;
+  }
 }
 
 class LinearGradient extends Gradient {
@@ -74,6 +94,25 @@ class LinearGradient extends Gradient {
         super(colors, stops, tileMode);
 
   final double startX, startY, endX, endY;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      super == other &&
+          other is LinearGradient &&
+          runtimeType == other.runtimeType &&
+          startX == other.startX &&
+          startY == other.startY &&
+          endX == other.endX &&
+          endY == other.endY;
+
+  @override
+  int get hashCode =>
+      super.hashCode ^
+      startX.hashCode ^
+      startY.hashCode ^
+      endX.hashCode ^
+      endY.hashCode;
 }
 
 class RadialGradient extends Gradient {
@@ -91,6 +130,20 @@ class RadialGradient extends Gradient {
 
   final double centerX, centerY;
   final double radius;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      super == other &&
+          other is RadialGradient &&
+          runtimeType == other.runtimeType &&
+          centerX == other.centerX &&
+          centerY == other.centerY &&
+          radius == other.radius;
+
+  @override
+  int get hashCode =>
+      super.hashCode ^ centerX.hashCode ^ centerY.hashCode ^ radius.hashCode;
 }
 
 enum TileMode { clamp, repeated, mirror }

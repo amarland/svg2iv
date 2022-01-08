@@ -97,6 +97,41 @@ class VectorPath extends VectorNode {
       trimPathOffset: trimPathOffset ?? this.trimPathOffset,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VectorPath &&
+          runtimeType == other.runtimeType &&
+          const ListEquality().equals(pathData, other.pathData) &&
+          fill == other.fill &&
+          fillAlpha == other.fillAlpha &&
+          stroke == other.stroke &&
+          strokeAlpha == other.strokeAlpha &&
+          strokeLineWidth == other.strokeLineWidth &&
+          strokeLineCap == other.strokeLineCap &&
+          strokeLineJoin == other.strokeLineJoin &&
+          strokeLineMiter == other.strokeLineMiter &&
+          pathFillType == other.pathFillType &&
+          trimPathStart == other.trimPathStart &&
+          trimPathEnd == other.trimPathEnd &&
+          trimPathOffset == other.trimPathOffset;
+
+  @override
+  int get hashCode =>
+      const ListEquality().hash(pathData) ^
+      fill.hashCode ^
+      fillAlpha.hashCode ^
+      stroke.hashCode ^
+      strokeAlpha.hashCode ^
+      strokeLineWidth.hashCode ^
+      strokeLineCap.hashCode ^
+      strokeLineJoin.hashCode ^
+      strokeLineMiter.hashCode ^
+      pathFillType.hashCode ^
+      trimPathStart.hashCode ^
+      trimPathEnd.hashCode ^
+      trimPathOffset.hashCode;
 }
 
 class VectorPathBuilder
@@ -179,8 +214,8 @@ class PathNode {
       other is PathNode &&
           runtimeType == other.runtimeType &&
           command == other.command &&
-          ListEquality().equals(arguments, other.arguments);
+          const ListEquality().equals(arguments, other.arguments);
 
   @override
-  int get hashCode => command.hashCode ^ arguments.hashCode;
+  int get hashCode => command.hashCode ^ const ListEquality().hash(arguments);
 }

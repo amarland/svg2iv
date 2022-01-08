@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/vector_node.dart';
 
@@ -43,6 +44,31 @@ class ImageVector {
       tintBlendMode ?? this.tintBlendMode,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImageVector &&
+          runtimeType == other.runtimeType &&
+          const ListEquality().equals(nodes, other.nodes) &&
+          name == other.name &&
+          width == other.width &&
+          height == other.height &&
+          viewportWidth == other.viewportWidth &&
+          viewportHeight == other.viewportHeight &&
+          tintColor == other.tintColor &&
+          tintBlendMode == other.tintBlendMode;
+
+  @override
+  int get hashCode =>
+      const ListEquality().hash(nodes) ^
+      name.hashCode ^
+      width.hashCode ^
+      height.hashCode ^
+      viewportWidth.hashCode ^
+      viewportHeight.hashCode ^
+      tintColor.hashCode ^
+      tintBlendMode.hashCode;
 }
 
 class ImageVectorBuilder {

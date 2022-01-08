@@ -25,3 +25,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/jetbrains_mono_regular.ttf
+    - family: WorkSans
+      fonts:
+        - asset: assets/fonts/work_sans_variable.ttf
