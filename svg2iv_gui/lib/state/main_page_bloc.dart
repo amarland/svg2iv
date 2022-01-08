@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:svg2iv_gui/state/main_page_event.dart';
 import 'package:svg2iv_gui/state/main_page_state.dart';
+import 'package:svg2iv_gui/state/preferences.dart';
 
 class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
   MainPageBloc() : super(const MainPageState.initial(isThemeDark: false)) {
@@ -14,7 +15,9 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
 
   FutureOr<MainPageState> mapEventToState(MainPageEvent event) async {
     if (event is ToggleThemeButtonPressed) {
-      return state.copyWith(isThemeDark: !state.isThemeDark);
+      final isDarkModeEnabled = !state.isThemeDark;
+      await setDarkModeEnabled(isDarkModeEnabled);
+      return state.copyWith(isThemeDark: isDarkModeEnabled);
     } else if (event is SelectSourceButtonPressed) {
       return state.copyWith(visibleDialog: VisibleDialog.sourceSelection);
     } else if (event is SelectDestinationButtonPressed) {
