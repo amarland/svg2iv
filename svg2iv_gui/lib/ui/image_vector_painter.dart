@@ -2,11 +2,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/gradient.dart' as svg2iv_gradient;
-import 'package:svg2iv_common/image_vector.dart';
-import 'package:svg2iv_common/vector_group.dart';
-import 'package:svg2iv_common/vector_node.dart';
-import 'package:svg2iv_common/vector_path.dart';
+import 'package:svg2iv_common/model/gradient.dart' as svg2iv_gradient;
+import 'package:svg2iv_common/model/image_vector.dart';
+import 'package:svg2iv_common/model/vector_group.dart';
+import 'package:svg2iv_common/model/vector_node.dart';
+import 'package:svg2iv_common/model/vector_path.dart';
 import 'package:svg2iv_gui/util/vector_path_command_interpreter.dart';
 
 class ImageVectorPainter extends StatelessWidget {
@@ -52,35 +52,40 @@ class _ImageVectorPainter extends CustomPainter {
 
   void _paintVectorNode(VectorNode vectorNode, Canvas canvas) {
     if (vectorNode is VectorGroup) {
-      final areAllChildrenPaths =
-          vectorNode.nodes.every((child) => child is VectorPath);
-      if (areAllChildrenPaths) {
+      final applyTransformations = vectorNode.definesTransformations;
+      if (applyTransformations) {
         canvas.save();
+        _matrix.setIdentity();
+        final translationX =
+            vectorNode.translation?.x ?? VectorGroup.defaultTranslationX;
+        final translationY =
+            vectorNode.translation?.y ?? VectorGroup.defaultTranslationY;
+        final scaleX = vectorNode.scale?.x ?? VectorGroup.defaultScaleX;
+        final scaleY = vectorNode.scale?.y ?? VectorGroup.defaultScaleY;
+        final pivotX = vectorNode.rotation?.pivotX ?? VectorGroup.defaultPivotX;
+        final pivotY = vectorNode.rotation?.pivotY ?? VectorGroup.defaultPivotY;
+        final angle = vectorNode.rotation?.angle ?? 0.0;
+        _matrix.translate(translationX + pivotX, translationY + pivotY);
+        _matrix.rotateZ(angle);
+        _matrix.scale(scaleX, scaleY, 1.0);
+        _matrix.translate(-pivotX, -pivotY);
+        canvas.transform(_matrix.storage);
+        final clipPathData = vectorNode.clipPathData;
+        if (clipPathData != null && clipPathData.isNotEmpty) {
+          interpretPathCommands(clipPathData, _path);
+          canvas.clipPath(_path);
+          _path.reset();
+        }
       }
-      _matrix.setIdentity();
-      final translationX =
-          vectorNode.translation?.x ?? VectorGroup.defaultTranslationX;
-      final translationY =
-          vectorNode.translation?.y ?? VectorGroup.defaultTranslationY;
-      final scaleX = vectorNode.scale?.x ?? VectorGroup.defaultScaleX;
-      final scaleY = vectorNode.scale?.y ?? VectorGroup.defaultScaleY;
-      final pivotX = vectorNode.rotation?.pivotX ?? VectorGroup.defaultPivotX;
-      final pivotY = vectorNode.rotation?.pivotY ?? VectorGroup.defaultPivotY;
-      final angle = vectorNode.rotation?.angle ?? 0.0;
-      _matrix.translate(translationX + pivotX, translationY + pivotY);
-      _matrix.rotateZ(angle);
-      _matrix.scale(scaleX, scaleY, 1.0);
-      _matrix.translate(-pivotX, -pivotY);
-      canvas.transform(_matrix.storage);
       for (final node in vectorNode.nodes) {
         _paintVectorNode(node, canvas);
       }
-      if (areAllChildrenPaths) {
+      if (applyTransformations) {
         canvas.restore();
       }
     } else {
       vectorNode as VectorPath;
-      interpretPathCommands(vectorNode, _path);
+      interpretPathCommands(vectorNode.pathData, _path);
       final pathFillType = vectorNode.pathFillType ?? PathFillType.nonZero;
       _path.fillType = pathFillType == PathFillType.nonZero
           ? ui.PathFillType.nonZero
@@ -105,6 +110,7 @@ class _ImageVectorPainter extends CustomPainter {
             vectorNode.strokeLineWidth ?? VectorPath.defaultStrokeLineWidth;
         canvas.drawPath(_path, strokePaint);
       }
+      _path.reset();
     }
   }
 
@@ -116,7 +122,7 @@ class _ImageVectorPainter extends CustomPainter {
     if (fill == null) return paint;
     if (fill is svg2iv_gradient.LinearGradient) {
       if (fill.colors.length == 1) {
-        paint.color = Color(fill.colors.single);
+        paint.color = Color(fill.colors[0]);
       } else {
         paint.shader = ui.Gradient.linear(
           ui.Offset(fill.startX, fill.startY),

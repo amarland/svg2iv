@@ -1,12 +1,12 @@
 import 'dart:ui';
 
-import 'package:svg2iv_common/vector_path.dart';
+import 'package:svg2iv_common/model/vector_path.dart';
 
 class _Point {
   double x = 0.0, y = 0.0;
 }
 
-void interpretPathCommands(VectorPath vectorPath, Path path) {
+void interpretPathCommands(List<PathNode> pathNodes, Path path) {
   final currentPoint = _Point();
   final controlPoint = _Point();
   final segmentPoint = _Point();
@@ -258,7 +258,7 @@ void interpretPathCommands(VectorPath vectorPath, Path path) {
     isPreviousNodeACurve = false;
   }
 
-  for (final pathNode in vectorPath.pathData) {
+  for (final pathNode in pathNodes) {
     final arguments = pathNode.arguments;
     switch (pathNode.command) {
       case PathDataCommand.moveTo:
