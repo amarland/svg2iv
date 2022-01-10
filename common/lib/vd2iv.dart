@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:svg2iv/file_parser.dart';
-import 'package:svg2iv/path_data_parser.dart';
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/gradient.dart';
-import 'package:svg2iv_common/image_vector.dart';
-import 'package:svg2iv_common/transformations.dart';
-import 'package:svg2iv_common/vector_group.dart';
-import 'package:svg2iv_common/vector_node.dart';
-import 'package:svg2iv_common/vector_path.dart';
 import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
+
+import 'extensions.dart';
+import 'file_parser.dart';
+import 'model/gradient.dart';
+import 'model/image_vector.dart';
+import 'model/transformations.dart';
+import 'model/vector_group.dart';
+import 'model/vector_node.dart';
+import 'model/vector_path.dart';
+import 'path_data_parser.dart';
 
 const _aaptNamespaceUri = 'http://schemas.android.com/aapt';
 const _androidNamespaceUri = 'http://schemas.android.com/apk/res/android';
@@ -105,7 +106,9 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
     groupBuilder.transformations(transformations);
   }
   final group = groupBuilder.build();
-  return group.hasAttributes ? [group] : group.nodes;
+  return group.id != null || group.definesTransformations
+      ? [group]
+      : group.nodes;
 }
 
 VectorPath? _parsePathElement(XmlElement pathElement) {

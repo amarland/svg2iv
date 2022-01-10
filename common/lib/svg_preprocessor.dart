@@ -1,7 +1,8 @@
 import 'package:collection/collection.dart';
-import 'package:svg2iv/svg2iv.dart';
-import 'package:svg2iv_common/extensions.dart';
 import 'package:xml/xml.dart';
+
+import 'extensions.dart';
+import 'svg2iv.dart';
 
 const useElementCustomAttributePrefix = 'use_';
 

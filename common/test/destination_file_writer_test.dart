@@ -1,14 +1,15 @@
 import 'dart:io';
 
-import 'package:svg2iv/destination_file_writer.dart';
+import 'package:svg2iv_common/destination_file_writer.dart';
 import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/gradient.dart';
-import 'package:svg2iv_common/image_vector.dart';
-import 'package:svg2iv_common/transformations.dart';
-import 'package:svg2iv_common/vector_group.dart';
-import 'package:svg2iv_common/vector_node.dart';
-import 'package:svg2iv_common/vector_path.dart';
+import 'package:svg2iv_common/model/gradient.dart';
+import 'package:svg2iv_common/model/image_vector.dart';
+import 'package:svg2iv_common/model/transformations.dart';
+import 'package:svg2iv_common/model/vector_group.dart';
+import 'package:svg2iv_common/model/vector_node.dart';
+import 'package:svg2iv_common/model/vector_path.dart';
 import 'package:test/test.dart';
+import 'package:tuple/tuple.dart';
 
 void main() {
   group('writePath() writes a DSL-compliant path declaration', () {
@@ -147,7 +148,7 @@ group(
       final generatedSourceBuffer = StringBuffer();
       writeFileContents(
         generatedSourceBuffer,
-        {'test_vector.svg': imageVector},
+        [Tuple2('test_vector.svg', imageVector)],
       );
       final dependencyAnnotations = '''
 @file:Repository("https://maven.pkg.jetbrains.space/public/p/compose/dev/")

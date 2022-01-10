@@ -1,36 +1,37 @@
+import 'package:svg2iv_common/model/image_vector.dart';
+
 abstract class MainPageEvent {
   const MainPageEvent();
 }
 
-class ToggleThemeButtonPressed extends MainPageEvent {
-  @override
-  String toString() => 'ToggleThemeButtonPressed';
-}
+class ToggleThemeButtonPressed extends MainPageEvent {}
 
-class SelectSourceButtonPressed extends MainPageEvent {
-  @override
-  String toString() => 'SelectSourceButtonPressed';
-}
+class SelectSourceButtonPressed extends MainPageEvent {}
 
 class SourceSelectionDialogClosed extends MainPageEvent {
   const SourceSelectionDialogClosed(this.paths);
 
   final List<String>? paths;
-
-  @override
-  String toString() => 'SourceSelectionDialogClosed';
 }
 
-class SelectDestinationButtonPressed extends MainPageEvent {
-  @override
-  String toString() => 'SelectDestinationButtonPressed';
-}
+class SelectDestinationButtonPressed extends MainPageEvent {}
 
 class DestinationSelectionDialogClosed extends MainPageEvent {
   const DestinationSelectionDialogClosed(this.path);
 
   final String? path;
-
-  @override
-  String toString() => 'DestinationSelectionDialogClosed';
 }
+
+class SourceFilesParsed extends MainPageEvent {
+  const SourceFilesParsed({
+    required this.imageVectors,
+    required this.errorMessages,
+  });
+
+  final List<ImageVector?> imageVectors;
+  final List<String> errorMessages;
+}
+
+class PreviousPreviewButtonClicked extends MainPageEvent {}
+
+class NextPreviewButtonClicked extends MainPageEvent {}

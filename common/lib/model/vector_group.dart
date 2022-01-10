@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/vector_node.dart';
-import 'package:svg2iv_common/vector_path.dart';
+import '../extensions.dart';
+import 'vector_node.dart';
+import 'vector_path.dart';
 
 import 'transformations.dart';
 
@@ -28,8 +28,7 @@ class VectorGroup extends VectorNode {
   final Translation? translation;
   final List<PathNode>? clipPathData;
 
-  bool get hasAttributes =>
-      !id.isNullOrEmpty ||
+  bool get definesTransformations =>
       rotation != null ||
       scale != null ||
       translation != null ||

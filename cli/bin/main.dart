@@ -1,15 +1,13 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:svg2iv/destination_file_writer.dart';
-import 'package:svg2iv/file_parser.dart';
 import 'package:svg2iv/protobuf/image_vector_adapter.dart';
 import 'package:svg2iv/protobuf/image_vector_transmitter.dart';
-import 'package:svg2iv/svg2iv.dart';
-import 'package:svg2iv/vd2iv.dart';
+import 'package:svg2iv_common/common_entry_point.dart';
+import 'package:svg2iv_common/destination_file_writer.dart';
 import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/image_vector.dart';
-import 'package:xml/xml.dart';
+import 'package:svg2iv_common/model/image_vector.dart';
+import 'package:tuple/tuple.dart';
 
 const destinationOptionName = 'destination';
 const helpFlagName = 'help';
@@ -17,13 +15,13 @@ const receiverOptionName = 'receiver';
 const socketAddressOptionName = 'socket-address';
 
 void main(List<String> args) async {
-  Iterable<File> listSvgFilesRecursivelySync(Directory directory) => directory
+  List<File> listSvgFilesRecursivelySync(Directory directory) => directory
       .listSync(recursive: true)
       .where((fse) =>
           fse is File &&
           (fse.path.endsWith('.svg') || fse.path.endsWith('.xml')))
       .cast<File>()
-      .toSet();
+      .toList(growable: false);
 
   final argParser = ArgParser()
     ..addOption(
@@ -71,20 +69,22 @@ If not provided, the generated property will be declared as a top-level property
       ..writeln(argParser.usage);
     return;
   }
-  var sourceFiles = argResults.rest.expand(
-    (rest) => rest.split(RegExp(',+')).where((s) => s.isNotEmpty).expand(
-      (path) {
-        if (FileSystemEntity.isFileSync(path)) {
-          return [File(path)];
-        } else {
-          final directory = Directory(path);
-          return directory.existsSync()
-              ? listSvgFilesRecursivelySync(directory)
-              : Iterable<File>.empty();
-        }
-      },
-    ),
-  );
+  var sourceFiles = argResults.rest
+      .expand(
+        (rest) => rest.split(RegExp(',+')).where((s) => s.isNotEmpty).expand(
+          (path) {
+            if (FileSystemEntity.isFileSync(path)) {
+              return [File(path)];
+            } else {
+              final directory = Directory(path);
+              return directory.existsSync()
+                  ? listSvgFilesRecursivelySync(directory)
+                  : Iterable<File>.empty();
+            }
+          },
+        ),
+      )
+      .toList(growable: false);
   if (sourceFiles.isEmpty) {
     stdout.writeln(
       'No source file(s) specified;'
@@ -124,45 +124,31 @@ If not provided, the generated property will be declared as a top-level property
         try {
           destinationDirectory.createSync(recursive: true);
         } on FileSystemException {
-          stderr
-              .writeln('Destination directory could not be created. Exiting.');
+          stderr.writeln(
+            'Destination directory could not be created. Exiting.',
+          );
           exit(2);
         }
       }
     }
   }
-  final imageVectors = <String, ImageVector>{};
-  for (final source in sourceFiles) {
-    if (!source.existsSync()) {
-      stderr.writeln('${source.path} does not exist!');
-      exitCode = 1;
-    }
-    try {
-      final fileName = source.path.let(
-        (p) => p.substring(
-          p.lastIndexOf(Platform.pathSeparator) + 1,
-          p.lastIndexOfOrNull('.'),
-        ),
+  final parseResult = parseFiles(sourceFiles);
+  final imageVectors = Iterable.generate(
+    parseResult.item1.length,
+    (index) {
+      final filePath = sourceFiles[index].path;
+      final fileName = filePath.substring(
+        filePath.lastIndexOf(Platform.pathSeparator) + 1,
+        filePath.lastIndexOfOrNull('.'),
       );
-      imageVectors[fileName] = source.path.endsWith('.svg')
-          ? parseSvgFile(source)
-          : parseVectorDrawableFile(source);
-    } on FileParserException catch (e) {
-      stderr
-        ..writeln('An error occurred while parsing ${source.path}:')
-        ..writeln(e.message);
-      exitCode = 1;
-    } catch (e) {
-      stderr
-        ..writeln('An unexpected error occurred while parsing ${source.path}:')
-        ..writeln(e.runtimeType);
-      if (e is Error) {
-        stderr.writeln(e.stackTrace);
-      } else if (e is XmlException) {
-        stderr.writeln(e.message);
-      }
-      exitCode = 1;
-    }
+      return Tuple2(fileName, parseResult.item1[index]);
+    },
+  ).where((pair) => pair.item2 != null).toList(growable: false)
+      as List<Tuple2<String, ImageVector>>;
+  final errorMessages = parseResult.item2;
+  if (errorMessages.isNotEmpty) {
+    exitCode = 1;
+    errorMessages.forEach(stderr.writeln);
   }
   if (destination != null && imageVectors.isNotEmpty) {
     final extensionReceiver = argResults[receiverOptionName] as String?;
@@ -173,15 +159,13 @@ If not provided, the generated property will be declared as a top-level property
         extensionReceiver: extensionReceiver,
       );
     } else {
-      imageVectors.forEach(
-        (name, imageVector) async {
-          return await writeImageVectorsToFile(
-            destination!.path + Platform.pathSeparator + name,
-            {name: imageVector},
-            extensionReceiver: extensionReceiver,
-          );
-        },
-      );
+      for (final pair in imageVectors) {
+        await writeImageVectorsToFile(
+          destination.path + Platform.pathSeparator + pair.item1,
+          [pair],
+          extensionReceiver: extensionReceiver,
+        );
+      }
     }
   }
   if (socketAddress != null && socketAddress.every((it) => it.isNotEmpty)) {
@@ -192,7 +176,7 @@ If not provided, the generated property will be declared as a top-level property
       exit(1);
     }
     await transmitProtobufImageVector(
-      imageVectorIterableAsProtobuf(imageVectors.values),
+      imageVectorIterableAsProtobuf(imageVectors.map((pair) => pair.item2)),
       host,
       portNumber,
     ).catchError((_, stackTrace) => stderr.writeln(stackTrace));

@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:svg2iv/file_parser.dart';
-import 'package:svg2iv/path_data_parser.dart';
-import 'package:svg2iv/svg_preprocessor.dart';
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/gradient.dart';
-import 'package:svg2iv_common/image_vector.dart';
-import 'package:svg2iv_common/transformations.dart';
-import 'package:svg2iv_common/vector_group.dart';
-import 'package:svg2iv_common/vector_node.dart';
-import 'package:svg2iv_common/vector_path.dart';
 import 'package:xml/xml.dart';
+
+import 'extensions.dart';
+import 'file_parser.dart';
+import 'model/gradient.dart';
+import 'model/image_vector.dart';
+import 'model/transformations.dart';
+import 'model/vector_group.dart';
+import 'model/vector_node.dart';
+import 'model/vector_path.dart';
+import 'path_data_parser.dart';
+import 'svg_preprocessor.dart';
 
 final _definitionSeparatorPattern = RegExp(r'[,\s]\s*');
 
@@ -463,10 +464,9 @@ VectorGroup? _handleClipPathAttribute(
             // if currentElement is a group, don't wrap it unnecessarily
             final isCurrentElementAGroup =
                 index == 0 && currentBuilder is VectorGroupBuilder;
-            final groupBuilder = (isCurrentElementAGroup
-                    ? currentBuilder
-                    : VectorGroupBuilder())
-                .clipPathData(e.pathData);
+            final groupBuilder =
+                (isCurrentElementAGroup ? currentBuilder : VectorGroupBuilder())
+                    .clipPathData(e.pathData);
             if (!isCurrentElementAGroup) {
               groupBuilder.addNode(currentBuilder.build());
             }

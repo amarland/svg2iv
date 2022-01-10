@@ -5,7 +5,6 @@ import 'package:svg2iv_gui/state/main_page_bloc.dart';
 import 'package:svg2iv_gui/state/main_page_event.dart';
 import 'package:svg2iv_gui/state/main_page_state.dart';
 import 'package:svg2iv_gui/ui/checkerboard.dart';
-import 'package:svg2iv_gui/ui/face_icon.dart';
 import 'package:svg2iv_gui/ui/file_system_entity_selection_field.dart';
 import 'package:svg2iv_gui/ui/file_system_entity_selection_mode.dart';
 import 'package:svg2iv_gui/ui/image_vector_painter.dart';
@@ -167,10 +166,12 @@ class _MainPageState extends State<MainPage>
                             state.destinationSelectionTextFieldState.isError,
                       ),
                       const SizedBox(height: 8.0),
-                      const TextField(
+                      TextField(
                         decoration: InputDecoration(
                           labelText: 'Extension receiver (optional)',
-                          border: OutlineInputBorder(),
+                          hintText:
+                              state.extensionReceiverTextFieldState.placeholder,
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                     ],
@@ -193,7 +194,8 @@ class _MainPageState extends State<MainPage>
                           aspectRatio: 1.0,
                           child: Checkerboard(
                             child: ImageVectorPainter(
-                              imageVector: CustomIcons.faceIcon,
+                              imageVector:
+                                  state.imageVectors[state.currentPreviewIndex],
                             ),
                           ),
                         ),
@@ -201,18 +203,18 @@ class _MainPageState extends State<MainPage>
                       Align(
                         alignment: Alignment.centerLeft,
                         child: PreviewSelectionButton(
-                          onPressed: () {
-                            /* TODO */
-                          },
+                          onPressed: state.isPreviousPreviewButtonEnabled
+                              ? () => bloc.add(PreviousPreviewButtonClicked())
+                              : null,
                           iconData: Icons.keyboard_arrow_left_outlined,
                         ),
                       ),
                       Align(
                         alignment: Alignment.centerRight,
                         child: PreviewSelectionButton(
-                          onPressed: () {
-                            /* TODO */
-                          },
+                          onPressed: state.isNextPreviewButtonEnabled
+                              ? () => bloc.add(NextPreviewButtonClicked())
+                              : null,
                           iconData: Icons.keyboard_arrow_right_outlined,
                         ),
                       ),

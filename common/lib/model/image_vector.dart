@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/vector_node.dart';
+import '../extensions.dart';
+import 'vector_node.dart';
 
 class ImageVector {
   static const defaultTintBlendMode = BlendMode.srcIn;

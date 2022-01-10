@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/gradient.dart';
-import 'package:svg2iv_common/image_vector.dart';
-import 'package:svg2iv_common/vector_group.dart';
-import 'package:svg2iv_common/vector_node.dart';
-import 'package:svg2iv_common/vector_path.dart';
 import 'package:tuple/tuple.dart';
+
+import 'extensions.dart';
+import 'model/gradient.dart';
+import 'model/image_vector.dart';
+import 'model/vector_group.dart';
+import 'model/vector_node.dart';
+import 'model/vector_path.dart';
 
 const _commandsToFunctionAndClassNames = {
   PathDataCommand.close: Tuple2('close', 'Close'),
@@ -40,7 +41,7 @@ const _commandsToFunctionAndClassNames = {
 
 Future<void> writeImageVectorsToFile(
   String destinationPath,
-  Map<String, ImageVector> imageVectors, {
+  List<Tuple2<String, ImageVector>> imageVectors, {
   String? extensionReceiver,
   String? heading,
 }) async {
@@ -78,7 +79,7 @@ Future<void> writeImageVectorsToFile(
 
 void writeFileContents(
   StringSink sink,
-  Map<String, ImageVector> imageVectors, {
+  List<Tuple2<String, ImageVector>> imageVectors, {
   String? packageName,
   String? extensionReceiver,
   String? heading,
@@ -99,14 +100,16 @@ void writeFileContents(
     ..writeln('import androidx.compose.ui.graphics.vector.*')
     ..writeln('import androidx.compose.ui.unit.dp')
     ..writeln();
-  imageVectors.forEach(
-    (sourceFileName, imageVector) => writeImageVector(
+  for (final pair in imageVectors) {
+    final sourceFileName = pair.item1;
+    final imageVector = pair.item2;
+    writeImageVector(
       sink,
       imageVector,
       sourceFileName.toPascalCase(),
       extensionReceiver,
-    ),
-  );
+    );
+  }
 }
 
 void writeImageVector(
@@ -218,7 +221,7 @@ int writeGroup(
     indentationLevel,
     shouldStatementBePrecededByPoint ? '.group' : 'group',
   );
-  if (group.hasAttributes) {
+  if (group.id != null || group.definesTransformations) {
     sink.writeln('(');
     sink
       ..writeArgumentIfNotNull(++indentationLevel, 'name', group.id)

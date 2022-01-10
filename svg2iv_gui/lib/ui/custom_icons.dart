@@ -1,6 +1,5 @@
-import 'package:svg2iv_common/gradient.dart';
-import 'package:svg2iv_common/image_vector.dart';
-import 'package:svg2iv_common/vector_path.dart';
+import 'package:svg2iv_common/model/image_vector.dart';
+import 'package:svg2iv_common/model/vector_path.dart';
 
 class CustomIcons {
   CustomIcons._();
@@ -122,7 +121,49 @@ class CustomIcons {
             ),
             const PathNode(PathDataCommand.close, []),
           ],
-        ).fill(Gradient.fromArgb(0xFF000000)).build(),
+        ).build(),
+      )
+      .build();
+
+  static final errorCircle = ImageVectorBuilder(24.0, 24.0)
+      .addNode(
+        VectorPathBuilder(
+          [
+            const PathNode(PathDataCommand.moveTo, [11.0, 15.0]),
+            const PathNode(PathDataCommand.horizontalLineTo, [13.0]),
+            const PathNode(PathDataCommand.verticalLineTo, [17.0]),
+            const PathNode(PathDataCommand.horizontalLineTo, [11.0]),
+            const PathNode(PathDataCommand.verticalLineTo, [15.0]),
+            const PathNode(PathDataCommand.moveTo, [11.0, 7.0]),
+            const PathNode(PathDataCommand.horizontalLineTo, [13.0]),
+            const PathNode(PathDataCommand.verticalLineTo, [13.0]),
+            const PathNode(PathDataCommand.horizontalLineTo, [11.0]),
+            const PathNode(PathDataCommand.verticalLineTo, [7.0]),
+            const PathNode(PathDataCommand.moveTo, [12.0, 2.0]),
+            const PathNode(
+              PathDataCommand.curveTo,
+              [6.47, 2.0, 2.0, 6.5, 2.0, 12.0],
+            ),
+            const PathNode(
+              PathDataCommand.arcTo,
+              [10.0, 10.0, 0.0, false, false, 22.0, 12.0],
+            ),
+            const PathNode(
+              PathDataCommand.arcTo,
+              [10.0, 10.0, 0.0, false, false, 12.0, 2.0],
+            ),
+            const PathNode(PathDataCommand.moveTo, [12.0, 20.0]),
+            const PathNode(
+              PathDataCommand.arcTo,
+              [8.0, 8.0, 0.0, false, true, 4.0, 12.0],
+            ),
+            const PathNode(
+              PathDataCommand.arcTo,
+              [8.0, 8.0, 0.0, false, true, 12.0, 20.0],
+            ),
+            const PathNode(PathDataCommand.close, []),
+          ],
+        ).build(),
       )
       .build();
 }

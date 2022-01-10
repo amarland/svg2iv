@@ -7,7 +7,7 @@ class PreviewSelectionButton extends StatelessWidget {
     required this.iconData,
   }) : super(key: key);
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final IconData iconData;
 
   @override
