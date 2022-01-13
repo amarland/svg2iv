@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:svg2iv_gui/outerworld/file_selector.dart';
-import 'package:svg2iv_gui/state/main_page_bloc.dart';
-import 'package:svg2iv_gui/state/main_page_event.dart';
-import 'package:svg2iv_gui/state/main_page_state.dart';
-import 'package:svg2iv_gui/ui/checkerboard.dart';
-import 'package:svg2iv_gui/ui/file_system_entity_selection_field.dart';
-import 'package:svg2iv_gui/ui/file_system_entity_selection_mode.dart';
-import 'package:svg2iv_gui/ui/image_vector_painter.dart';
-import 'package:svg2iv_gui/ui/preview_selection_button.dart';
+
+import '../outerworld/file_selector.dart';
+import '../state/main_page_bloc.dart';
+import '../state/main_page_event.dart';
+import '../state/main_page_state.dart';
+import 'callback_shortcuts.dart' as fixed_cs;
+import 'checkerboard.dart';
+import 'file_system_entity_selection_field.dart';
+import 'file_system_entity_selection_mode.dart';
+import 'image_vector_painter.dart';
+import 'preview_selection_button.dart';
 
 const _androidGreen = Color(0xFF00DE7A);
 const _androidBlue = Color(0xFF2196F3);
@@ -104,139 +106,152 @@ class _MainPageState extends State<MainPage>
     return /*CircularRevealAnimation(
       animation: _animation,
       child: */
-        BlocBuilder<MainPageBloc, MainPageState>(
-      bloc: bloc,
-      builder: (context, state) {
-        final areSelectionFieldButtonsEnabled =
-            state.visibleDialog == VisibleDialog.none;
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('SVG to ImageVector conversion tool'),
-            actions: [
-              IconButton(
-                onPressed: () => bloc.add(ToggleThemeButtonPressed()),
-                icon: const Icon(Icons.dark_mode_outlined),
-              ),
-              IconButton(
-                onPressed: () {
-                  /* TODO */
-                },
-                icon: const Icon(Icons.info_outlined),
-              ),
-            ],
+    fixed_cs.CallbackShortcuts(
+      bindings: MainPageBloc.shortcutBindings
+          .map((trigger, action) => MapEntry(trigger, () => action(bloc))),
+      child: Focus(
+        autofocus: true,
+        child: BlocBuilder<MainPageBloc, MainPageState>(
+          bloc: bloc,
+          builder: (context, _) => _buildScaffold(context),
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildScaffold(BuildContext context) {
+    final bloc = BlocProvider.of<MainPageBloc>(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('SVG to ImageVector conversion tool'),
+        actions: [
+          IconButton(
+            onPressed: () => bloc.add(ToggleThemeButtonPressed()),
+            icon: const Icon(Icons.dark_mode_outlined),
           ),
-          body: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FileSystemEntitySelectionField(
-                        onButtonPressed: areSelectionFieldButtonsEnabled
-                            ? () => bloc.add(SelectSourceButtonPressed())
-                            : null,
-                        selectionMode:
-                            FileSystemEntitySelectionMode.sourceFiles,
-                        value: state.sourceSelectionTextFieldState.value,
-                        isError: state.sourceSelectionTextFieldState.isError,
-                      ),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: false,
-                            onChanged: (value) {
-                              /* TODO */
-                            },
-                          ),
-                          const SizedBox(width: 8.0),
-                          const Text('Generate all assets in a single file'),
-                        ],
-                      ),
-                      FileSystemEntitySelectionField(
-                        onButtonPressed: areSelectionFieldButtonsEnabled
-                            ? () => bloc.add(SelectDestinationButtonPressed())
-                            : null,
-                        selectionMode:
-                            FileSystemEntitySelectionMode.destinationDirectory,
-                        value: state.destinationSelectionTextFieldState.value,
-                        isError:
-                            state.destinationSelectionTextFieldState.isError,
-                      ),
-                      const SizedBox(height: 8.0),
-                      TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Extension receiver (optional)',
-                          hintText:
-                              state.extensionReceiverTextFieldState.placeholder,
-                          border: const OutlineInputBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 16.0,
-                    right: 16.0,
-                    bottom: 16.0,
-                  ),
-                  child: Stack(
-                    alignment: AlignmentDirectional.center,
-                    children: [
-                      FractionallySizedBox(
-                        widthFactor: 0.65,
-                        child: AspectRatio(
-                          aspectRatio: 1.0,
-                          child: Checkerboard(
-                            child: ImageVectorPainter(
-                              imageVector:
-                                  state.imageVectors[state.currentPreviewIndex],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: PreviewSelectionButton(
-                          onPressed: state.isPreviousPreviewButtonEnabled
-                              ? () => bloc.add(PreviousPreviewButtonClicked())
-                              : null,
-                          iconData: Icons.keyboard_arrow_left_outlined,
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: PreviewSelectionButton(
-                          onPressed: state.isNextPreviewButtonEnabled
-                              ? () => bloc.add(NextPreviewButtonClicked())
-                              : null,
-                          iconData: Icons.keyboard_arrow_right_outlined,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton.extended(
+          IconButton(
             onPressed: () {
               /* TODO */
             },
-            icon: const Icon(Icons.build_outlined),
-            label: const Text(
-              'Convert',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
+            icon: const Icon(Icons.info_outlined),
           ),
-          //),
-        );
-      },
+        ],
+      ),
+      body: Row(
+        children: [
+          _buildLeftPanel(context),
+          _buildRightPanel(context),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          /* TODO */
+        },
+        icon: const Icon(Icons.build_outlined),
+        label: const Text(
+          'Convert',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+      //),
+    );
+  }
+
+  static Widget _buildLeftPanel(BuildContext context) {
+    final bloc = BlocProvider.of<MainPageBloc>(context);
+    final state = bloc.state;
+    final areSelectionFieldButtonsEnabled =
+        state.visibleDialog == VisibleDialog.none;
+    return Expanded(
+      flex: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FileSystemEntitySelectionField(
+              onButtonPressed: areSelectionFieldButtonsEnabled
+                  ? () => bloc.add(SelectSourceButtonPressed())
+                  : null,
+              selectionMode: FileSystemEntitySelectionMode.sourceFiles,
+              value: state.sourceSelectionTextFieldState.value,
+              isError: state.sourceSelectionTextFieldState.isError,
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: false,
+                  onChanged: (value) {
+                    /* TODO */
+                  },
+                ),
+                const SizedBox(width: 8.0),
+                const Text('Generate all assets in a single file'),
+              ],
+            ),
+            FileSystemEntitySelectionField(
+              onButtonPressed: areSelectionFieldButtonsEnabled
+                  ? () => bloc.add(SelectDestinationButtonPressed())
+                  : null,
+              selectionMode: FileSystemEntitySelectionMode.destinationDirectory,
+              value: state.destinationSelectionTextFieldState.value,
+              isError: state.destinationSelectionTextFieldState.isError,
+            ),
+            const SizedBox(height: 8.0),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Extension receiver (optional)',
+                hintText: state.extensionReceiverTextFieldState.placeholder,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildRightPanel(BuildContext context) {
+    final bloc = BlocProvider.of<MainPageBloc>(context);
+    final state = bloc.state;
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16.0, right: 16.0, bottom: 16.0),
+        child: Stack(
+          alignment: AlignmentDirectional.center,
+          children: [
+            FractionallySizedBox(
+              widthFactor: 0.65,
+              child: AspectRatio(
+                aspectRatio: 1.0,
+                child: Checkerboard(
+                  child: ImageVectorPainter(
+                    imageVector: state.imageVectors[state.currentPreviewIndex],
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: PreviewSelectionButton(
+                onPressed: state.isPreviousPreviewButtonEnabled
+                    ? () => bloc.add(PreviousPreviewButtonClicked())
+                    : null,
+                iconData: Icons.keyboard_arrow_left_outlined,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: PreviewSelectionButton(
+                onPressed: state.isNextPreviewButtonEnabled
+                    ? () => bloc.add(NextPreviewButtonClicked())
+                    : null,
+                iconData: Icons.keyboard_arrow_right_outlined,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

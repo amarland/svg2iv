@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:svg2iv_gui/ui/file_system_entity_selection_mode.dart';
+
+import '../ui/file_system_entity_selection_mode.dart';
+import '../util/mnemonic_text_spans.dart';
 
 class FileSystemEntitySelectionField extends StatefulWidget {
   const FileSystemEntitySelectionField({
@@ -37,18 +39,15 @@ class _State extends State<FileSystemEntitySelectionField> {
   @override
   Widget build(BuildContext context) {
     final IconData icon;
-    // final List<TextSpan> labelSpans;
-    final String label;
+    final TextSpan labelSpan;
     switch (widget.selectionMode) {
       case FileSystemEntitySelectionMode.sourceFiles:
         icon = Icons.upload_file_outlined;
-        // labelSpans = 'Source files'.asMnemonic();
-        label = 'Source files';
+        labelSpan = 'Source files'.asMnemonic();
         break;
       case FileSystemEntitySelectionMode.destinationDirectory:
         icon = Icons.snippet_folder_outlined;
-        // labelSpans = 'Destination directory'.asMnemonic();
-        label = 'Destination directory';
+        labelSpan = 'Destination directory'.asMnemonic();
         break;
     }
     return Row(
@@ -57,10 +56,12 @@ class _State extends State<FileSystemEntitySelectionField> {
           child: TextField(
             controller: _textEditingController,
             decoration: InputDecoration(
-              labelText: widget.isError ? null : label,
+              label: widget.isError
+                  ? null
+                  : Text.rich(labelSpan, overflow: TextOverflow.ellipsis),
               prefixIcon: Icon(icon),
               border: const OutlineInputBorder(),
-              errorText: widget.isError ? label : null,
+              errorText: widget.isError ? labelSpan.text : null,
             ),
             readOnly: true,
           ),

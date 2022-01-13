@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:svg2iv_common/common_entry_point.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
@@ -14,6 +16,13 @@ import 'main_page_state.dart';
 import 'preferences.dart';
 
 class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
+  static final shortcutBindings = {
+    const SingleActivator(LogicalKeyboardKey.keyS, alt: true):
+        (MainPageBloc bloc) => bloc.add(SelectSourceButtonPressed()),
+    const SingleActivator(LogicalKeyboardKey.keyD, alt: true):
+        (MainPageBloc bloc) => bloc.add(SelectDestinationButtonPressed()),
+  };
+
   MainPageBloc() : super(MainPageState.initial(isThemeDark: false)) {
     on<MainPageEvent>(
       (event, emit) async => emit(await mapEventToState(event)),

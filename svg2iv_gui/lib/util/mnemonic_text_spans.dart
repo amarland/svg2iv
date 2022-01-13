@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 extension MnemonicTextSpansCreation on String {
-  List<TextSpan> asMnemonic({int charIndex = 0}) {
+  TextSpan asMnemonic({int charIndex = 0}) {
     if (charIndex >= length) throw ArgumentError.value(charIndex, "charIndex");
     final spans = <TextSpan>[];
     if (charIndex > 0) {
@@ -14,6 +14,6 @@ extension MnemonicTextSpansCreation on String {
       ),
     );
     spans.add(TextSpan(text: substring(charIndex + 1)));
-    return spans;
+    return TextSpan(children: spans);
   }
 }
