@@ -8,6 +8,7 @@ import 'package:svg2iv_common/model/vector_group.dart';
 import 'package:svg2iv_common/model/vector_node.dart';
 import 'package:svg2iv_common/model/vector_path.dart';
 import 'package:svg2iv_gui/util/vector_path_command_interpreter.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 class ImageVectorPainter extends StatelessWidget {
   const ImageVectorPainter({
@@ -66,7 +67,7 @@ class _ImageVectorPainter extends CustomPainter {
         final pivotY = vectorNode.rotation?.pivotY ?? VectorGroup.defaultPivotY;
         final angle = vectorNode.rotation?.angle ?? 0.0;
         _matrix.translate(translationX + pivotX, translationY + pivotY);
-        _matrix.rotateZ(angle);
+        _matrix.rotateZ(radians(angle));
         _matrix.scale(scaleX, scaleY, 1.0);
         _matrix.translate(-pivotX, -pivotY);
         canvas.transform(_matrix.storage);
