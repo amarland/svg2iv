@@ -22,8 +22,11 @@ extension IterableItemSelection<E> on Iterable<E> {
   }
 
   Map<K, V> associate<K, V>(
-          K Function(E) keySelector, V Function(E) valueSelector) =>
-      {for (final e in this) keySelector(e): valueSelector(e)};
+    K Function(E) keySelector,
+    V Function(E) valueSelector,
+  ) {
+    return {for (final e in this) keySelector(e): valueSelector(e)};
+  }
 }
 
 extension NullableElementsIterableNullChecking<E> on Iterable<E?> {

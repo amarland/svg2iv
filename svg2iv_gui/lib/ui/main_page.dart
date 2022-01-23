@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:svg2iv_gui/util/image_vector_to_picture.dart';
 
 import '../outerworld/file_selector.dart';
 import '../state/main_page_bloc.dart';
@@ -9,17 +10,19 @@ import 'callback_shortcuts.dart' as fixed_cs;
 import 'checkerboard.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
-import 'image_vector_painter.dart';
 import 'preview_selection_button.dart';
 
 const _androidGreen = Color(0xFF00DE7A);
 const _androidBlue = Color(0xFF2196F3);
 
-// ignore: use_key_in_widget_constructors
 class App extends StatelessWidget {
+  // ignore: use_key_in_widget_constructors
+  const App(this.bloc);
+
+  final MainPageBloc bloc;
+
   @override
   Widget build(BuildContext context) {
-    final bloc = MainPageBloc();
     return BlocProvider(
       create: (context) => bloc,
       child: BlocConsumer<MainPageBloc, MainPageState>(
@@ -225,9 +228,15 @@ class _MainPageState extends State<MainPage>
               child: AspectRatio(
                 aspectRatio: 1.0,
                 child: Checkerboard(
-                  child: ImageVectorPainter(
+                  /*child: ImageVectorPainter(
                     imageVector: state.imageVectors[state.currentPreviewIndex],
-                  ),
+                  ),*/
+                  foregroundPictureBuilder: (Size size) {
+                    return imageVectorToPicture(
+                      state.imageVectors[state.currentPreviewIndex],
+                      size,
+                    );
+                  },
                 ),
               ),
             ),

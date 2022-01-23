@@ -23,7 +23,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         (MainPageBloc bloc) => bloc.add(SelectDestinationButtonPressed()),
   };
 
-  MainPageBloc() : super(MainPageState.initial(isThemeDark: false)) {
+  MainPageBloc({required bool isThemeDark})
+      : super(MainPageState.initial(isThemeDark: isThemeDark)) {
     on<MainPageEvent>(
       (event, emit) async => emit(await mapEventToState(event)),
     );

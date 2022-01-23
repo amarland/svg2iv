@@ -1,14 +1,18 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+
+typedef PictureBuilder = Picture Function(Size size);
 
 class Checkerboard extends StatelessWidget {
   const Checkerboard({
     Key? key,
     this.squareColor,
-    this.child,
+    this.foregroundPictureBuilder,
   }) : super(key: key);
 
   final Color? squareColor;
-  final Widget? child;
+  final PictureBuilder? foregroundPictureBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +21,9 @@ class Checkerboard extends StatelessWidget {
         squareColor ??
             Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
       ),
-      child: child,
+      foregroundPainter: foregroundPictureBuilder != null
+          ? _PicturePainter(foregroundPictureBuilder!)
+          : null,
     );
   }
 }
@@ -35,11 +41,10 @@ class _CheckerboardPainter extends CustomPainter {
     final offsetX = (size.width - actualWidth) / 2,
         offsetY = (size.height - actualHeight) / 2;
     double x = offsetX, y = offsetY;
-    final paint = Paint()..color = squareColor;
     while (y < actualHeight) {
       canvas.drawRect(
         Rect.fromLTWH(x, y, squareSize, squareSize),
-        paint,
+        Paint()..color = squareColor,
       );
       if (x < actualWidth - squareSize * 2) {
         x += squareSize * 2;
@@ -54,4 +59,18 @@ class _CheckerboardPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _PicturePainter extends CustomPainter {
+  const _PicturePainter(this.pictureBuilder);
+
+  final PictureBuilder pictureBuilder;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawPicture(pictureBuilder(size));
+  }
+
+  @override
+  bool shouldRepaint(_PicturePainter oldPainter) => false;
 }

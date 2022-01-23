@@ -133,18 +133,18 @@ If not provided, the generated property will be declared as a top-level property
     }
   }
   final parseResult = parseFiles(sourceFiles);
-  final imageVectors = Iterable.generate(
-    parseResult.item1.length,
-    (index) {
+  final imageVectors = <Tuple2<String, ImageVector>>[];
+  for (int index = 0; index < parseResult.item1.length; index++) {
+    final imageVector = parseResult.item1[index];
+    if (imageVector != null) {
       final filePath = sourceFiles[index].path;
       final fileName = filePath.substring(
         filePath.lastIndexOf(Platform.pathSeparator) + 1,
         filePath.lastIndexOfOrNull('.'),
       );
-      return Tuple2(fileName, parseResult.item1[index]);
-    },
-  ).where((pair) => pair.item2 != null).toList(growable: false)
-      as List<Tuple2<String, ImageVector>>;
+      imageVectors.add(Tuple2(fileName, imageVector));
+    }
+  }
   final errorMessages = parseResult.item2;
   if (errorMessages.isNotEmpty) {
     exitCode = 1;
@@ -176,7 +176,7 @@ If not provided, the generated property will be declared as a top-level property
       exit(1);
     }
     await transmitProtobufImageVector(
-      imageVectorIterableAsProtobuf(imageVectors.map((pair) => pair.item2)),
+      imageVectorIterableAsProtobuf(parseResult.item1),
       host,
       portNumber,
     ).catchError((_, stackTrace) => stderr.writeln(stackTrace));

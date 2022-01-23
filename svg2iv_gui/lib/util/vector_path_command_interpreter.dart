@@ -225,27 +225,21 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
       largeArc: arguments[3],
       clockwise: arguments[4],
     );
-    currentPoint.x = arguments[5];
-    currentPoint.y = arguments[6];
-    controlPoint.x = currentPoint.x;
-    controlPoint.y = currentPoint.y;
+    controlPoint.x = currentPoint.x = arguments[5];
+    controlPoint.y = currentPoint.y = arguments[6];
     isPreviousNodeACurve = false;
   }
 
   void _onRelativeArcToCommandReceived(List<dynamic> arguments) {
-    final arcStartX = arguments[5] + currentPoint.x;
-    final arcStartY = arguments[6] + currentPoint.y;
     path.relativeArcToPoint(
-      Offset(arcStartX, arcStartY),
+      Offset(arguments[5], arguments[6]),
       radius: Radius.elliptical(arguments[0], arguments[1]),
       rotation: arguments[2],
       largeArc: arguments[3],
       clockwise: arguments[4],
     );
-    currentPoint.x = arcStartX;
-    currentPoint.y = arcStartY;
-    controlPoint.x = currentPoint.x;
-    controlPoint.y = currentPoint.y;
+    controlPoint.x = currentPoint.x = arguments[5];
+    controlPoint.y = currentPoint.y = arguments[6];
     isPreviousNodeACurve = false;
   }
 

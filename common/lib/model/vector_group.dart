@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
+
 import '../extensions.dart';
+import 'transformations.dart';
 import 'vector_node.dart';
 import 'vector_path.dart';
-
-import 'transformations.dart';
 
 class VectorGroup extends VectorNode {
   static const defaultScaleX = 1.0;
@@ -13,7 +13,7 @@ class VectorGroup extends VectorNode {
   static const defaultTranslationX = 0.0;
   static const defaultTranslationY = 0.0;
 
-  VectorGroup._init(
+  const VectorGroup._init(
     this.nodes, {
     String? id,
     this.rotation,
@@ -141,7 +141,11 @@ class VectorGroupBuilder
       _nodes
         ..clear()
         ..addAll(newNodes);
-    } else if (_rotation == null && _scale == null && _translation == null) {
+    }
+    if (_rotation == null &&
+        _scale == null &&
+        _translation == null &&
+        _clipPathData.isNullOrEmpty) {
       final onlyChild = _nodes.singleOrNull;
       if (onlyChild is VectorGroup) {
         // the current group is useless, merge it with its only child
@@ -152,6 +156,19 @@ class VectorGroupBuilder
         _rotation = onlyChild.rotation;
         _scale = onlyChild.scale;
         _translation = onlyChild.translation;
+        _clipPathData = onlyChild.clipPathData;
+      }
+    }
+    for (final group in _nodes.whereType<VectorGroup>()) {
+      if (group.rotation == null &&
+          group.scale == null &&
+          group.translation == null &&
+          group.clipPathData.isNullOrEmpty) {
+        // the child is useless, merge it with its parent (the current group)
+        _nodes
+          ..removeAt(0)
+          ..addAll(group.nodes);
+        group.id?.let((id) => this.id(id));
       }
     }
     return VectorGroup._init(

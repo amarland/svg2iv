@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:svg2iv_gui/state/main_page_bloc.dart';
+import 'package:svg2iv_gui/state/preferences.dart';
 import 'package:svg2iv_gui/ui/main_page.dart';
 import 'package:window_size/window_size.dart';
 
@@ -21,5 +23,5 @@ void main() async {
   setWindowMinSize(windowSize);
   setWindowMaxSize(windowSize);
   setWindowTitle('svg2iv_gui');
-  runApp(App());
+  runApp(App(MainPageBloc(isThemeDark: await isDarkModeEnabled())));
 }

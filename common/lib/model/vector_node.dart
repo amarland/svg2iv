@@ -4,7 +4,7 @@ import 'package:svg2iv_common/extensions.dart';
 import 'gradient.dart';
 
 abstract class VectorNode {
-  VectorNode(String? id) : id = id?.toPascalCase();
+  const VectorNode(this.id);
 
   final String? id;
 }
@@ -69,7 +69,6 @@ abstract class VectorNodeBuilder<T extends VectorNode,
   @protected
   bool get hasAttributes_ {
     return [
-      id,
       fill,
       fillAlpha,
       stroke,

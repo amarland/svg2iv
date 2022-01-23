@@ -17,7 +17,7 @@ class VectorPath extends VectorNode {
   static const defaultTrimPathEnd = 1.0;
   static const defaultTrimPathOffset = 0.0;
 
-  VectorPath._init(
+  const VectorPath._init(
     this.pathData, {
     String? id,
     this.fill,
