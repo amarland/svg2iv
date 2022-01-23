@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -30,6 +31,9 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
     );
   }
 
+  final _imageVectors = <ImageVector>[];
+  int _previewIndex = 0;
+
   FutureOr<MainPageState> mapEventToState(MainPageEvent event) async {
     if (event is ToggleThemeButtonPressed) {
       final isDarkModeEnabled = !state.isThemeDark;
@@ -55,12 +59,10 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           Tuple2<List<ImageVector?>, List<String>> parse(List<String> paths) =>
               parseFiles(paths.map(File.new).toList(growable: false));
           final parseResult = await compute(parse, p);
-          add(
-            SourceFilesParsed(
-              imageVectors: parseResult.item1,
-              errorMessages: parseResult.item2,
-            ),
-          );
+          for (final imageVector in parseResult.item1) {
+            _imageVectors.add(imageVector ?? CustomIcons.errorCircle);
+          }
+          add(SourceFilesParsed(errorMessages: parseResult.item2));
         },
       );
       return state.copyWith(
@@ -83,36 +85,31 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         ),
       );
     } else if (event is SourceFilesParsed) {
+      _imageVectors.clear();
+      _previewIndex = 0;
       return state.copyWith(
           sourceSelectionTextFieldState: state.sourceSelectionTextFieldState
               .copyWith(isError: event.errorMessages.isNotEmpty),
           extensionReceiverTextFieldState:
               state.extensionReceiverTextFieldState.copyWith(
-            placeholder: event.imageVectors
-                .let((it) => it.length == 1 ? it[0]?.name : null),
+            placeholder: _imageVectors.singleOrNull?.name,
           ),
-          imageVectors: event.imageVectors
-                  .map((it) => it ?? CustomIcons.errorCircle)
-                  .takeIf((it) => it.isNotEmpty)
-                  ?.toList(growable: false) ??
-              state.imageVectors,
-          currentPreviewIndex: 0,
+          imageVector: _imageVectors.isNotEmpty
+              ? _imageVectors[_previewIndex]
+              : state.imageVector,
           isPreviousPreviewButtonEnabled: false,
-          isNextPreviewButtonEnabled: event.imageVectors.length > 1);
+          isNextPreviewButtonEnabled: _imageVectors.length > 1);
     } else if (event is PreviousPreviewButtonClicked) {
-      final previewIndex = state.currentPreviewIndex - 1;
       return state.copyWith(
-        currentPreviewIndex: previewIndex,
-        isPreviousPreviewButtonEnabled: previewIndex > 0,
+        imageVector: _imageVectors[--_previewIndex],
+        isPreviousPreviewButtonEnabled: _previewIndex > 0,
         isNextPreviewButtonEnabled: true,
       );
     } else if (event is NextPreviewButtonClicked) {
-      final previewIndex = state.currentPreviewIndex + 1;
       return state.copyWith(
-        currentPreviewIndex: previewIndex,
+        imageVector: _imageVectors[++_previewIndex],
         isPreviousPreviewButtonEnabled: true,
-        isNextPreviewButtonEnabled:
-            previewIndex < state.imageVectors.length - 1,
+        isNextPreviewButtonEnabled: _previewIndex < _imageVectors.length - 1,
       );
     } else {
       throw UnimplementedError();

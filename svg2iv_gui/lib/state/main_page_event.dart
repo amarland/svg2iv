@@ -1,5 +1,3 @@
-import 'package:svg2iv_common/model/image_vector.dart';
-
 abstract class MainPageEvent {
   const MainPageEvent();
 }
@@ -23,12 +21,8 @@ class DestinationSelectionDialogClosed extends MainPageEvent {
 }
 
 class SourceFilesParsed extends MainPageEvent {
-  const SourceFilesParsed({
-    required this.imageVectors,
-    required this.errorMessages,
-  });
+  const SourceFilesParsed({required this.errorMessages});
 
-  final List<ImageVector?> imageVectors;
   final List<String> errorMessages;
 }
 

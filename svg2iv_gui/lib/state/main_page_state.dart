@@ -8,8 +8,7 @@ class MainPageState {
     this.sourceSelectionTextFieldState,
     this.destinationSelectionTextFieldState,
     this.extensionReceiverTextFieldState,
-    this.imageVectors,
-    this.currentPreviewIndex,
+    this.imageVector,
     this.isPreviousPreviewButtonEnabled,
     this.isNextPreviewButtonEnabled,
   );
@@ -19,8 +18,7 @@ class MainPageState {
         sourceSelectionTextFieldState = TextFieldState.initial,
         destinationSelectionTextFieldState = TextFieldState.initial,
         extensionReceiverTextFieldState = TextFieldState.initial,
-        imageVectors = [CustomIcons.faceIcon],
-        currentPreviewIndex = 0,
+        imageVector = CustomIcons.faceIcon,
         isPreviousPreviewButtonEnabled = false,
         isNextPreviewButtonEnabled = false;
 
@@ -29,8 +27,7 @@ class MainPageState {
   final TextFieldState sourceSelectionTextFieldState;
   final TextFieldState destinationSelectionTextFieldState;
   final TextFieldState extensionReceiverTextFieldState;
-  final List<ImageVector> imageVectors;
-  final int currentPreviewIndex;
+  final ImageVector imageVector;
   final bool isPreviousPreviewButtonEnabled, isNextPreviewButtonEnabled;
 
   MainPageState copyWith({
@@ -39,8 +36,7 @@ class MainPageState {
     TextFieldState? sourceSelectionTextFieldState,
     TextFieldState? destinationSelectionTextFieldState,
     TextFieldState? extensionReceiverTextFieldState,
-    List<ImageVector>? imageVectors,
-    int? currentPreviewIndex,
+    ImageVector? imageVector,
     bool? isPreviousPreviewButtonEnabled,
     bool? isNextPreviewButtonEnabled,
   }) {
@@ -51,8 +47,7 @@ class MainPageState {
       destinationSelectionTextFieldState ??
           this.destinationSelectionTextFieldState,
       extensionReceiverTextFieldState ?? this.extensionReceiverTextFieldState,
-      imageVectors ?? this.imageVectors,
-      currentPreviewIndex ?? this.currentPreviewIndex,
+      imageVector ?? this.imageVector,
       isPreviousPreviewButtonEnabled ?? this.isPreviousPreviewButtonEnabled,
       isNextPreviewButtonEnabled ?? this.isNextPreviewButtonEnabled,
     );

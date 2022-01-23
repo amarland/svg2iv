@@ -109,7 +109,7 @@ class _MainPageState extends State<MainPage>
     return /*CircularRevealAnimation(
       animation: _animation,
       child: */
-    fixed_cs.CallbackShortcuts(
+        fixed_cs.CallbackShortcuts(
       bindings: MainPageBloc.shortcutBindings
           .map((trigger, action) => MapEntry(trigger, () => action(bloc))),
       child: Focus(
@@ -228,15 +228,9 @@ class _MainPageState extends State<MainPage>
               child: AspectRatio(
                 aspectRatio: 1.0,
                 child: Checkerboard(
-                  /*child: ImageVectorPainter(
-                    imageVector: state.imageVectors[state.currentPreviewIndex],
-                  ),*/
-                  foregroundPictureBuilder: (Size size) {
-                    return imageVectorToPicture(
-                      state.imageVectors[state.currentPreviewIndex],
-                      size,
-                    );
-                  },
+                  // child: ImageVectorPainter(imageVector: state.imageVector),
+                  foregroundPictureBuilder: (Size size) =>
+                      imageVectorToPicture(state.imageVector, size),
                 ),
               ),
             ),

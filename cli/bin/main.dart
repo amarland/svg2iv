@@ -63,7 +63,9 @@ If not provided, the generated property will be declared as a top-level property
   final isHelpFlagSet = argResults[helpFlagName] as bool;
   if (isHelpFlagSet) {
     stdout
-      ..writeln('Usage: svg2iv [options] <source_files/directories>')
+      ..writeln(
+        'Usage: svg2iv [options] <comma-separated source files/directories>',
+      )
       ..writeln()
       ..writeln('Options:')
       ..writeln(argParser.usage);
