@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:svg2iv_gui/util/image_vector_to_picture.dart';
 
 import '../outerworld/file_selector.dart';
 import '../state/main_page_bloc.dart';
@@ -227,10 +226,13 @@ class _MainPageState extends State<MainPage>
               widthFactor: 0.65,
               child: AspectRatio(
                 aspectRatio: 1.0,
-                child: Checkerboard(
-                  // child: ImageVectorPainter(imageVector: state.imageVector),
-                  foregroundPictureBuilder: (Size size) =>
-                      imageVectorToPicture(state.imageVector, size),
+                child: LayoutBuilder(
+                  builder: (_, constraints) {
+                    return Checkerboard(
+                      foregroundImageVector: state.imageVector,
+                      size: constraints.biggest,
+                    );
+                  },
                 ),
               ),
             ),

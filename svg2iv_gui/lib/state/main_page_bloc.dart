@@ -59,6 +59,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           Tuple2<List<ImageVector?>, List<String>> parse(List<String> paths) =>
               parseFiles(paths.map(File.new).toList(growable: false));
           final parseResult = await compute(parse, p);
+          _imageVectors.clear();
+          _previewIndex = 0;
           for (final imageVector in parseResult.item1) {
             _imageVectors.add(imageVector ?? CustomIcons.errorCircle);
           }
@@ -85,8 +87,6 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         ),
       );
     } else if (event is SourceFilesParsed) {
-      _imageVectors.clear();
-      _previewIndex = 0;
       return state.copyWith(
           sourceSelectionTextFieldState: state.sourceSelectionTextFieldState
               .copyWith(isError: event.errorMessages.isNotEmpty),

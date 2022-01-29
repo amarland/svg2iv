@@ -7,6 +7,7 @@ class _Point {
 }
 
 void interpretPathCommands(List<PathNode> pathNodes, Path path) {
+  path.reset();
   final currentPoint = _Point();
   final controlPoint = _Point();
   final segmentPoint = _Point();
