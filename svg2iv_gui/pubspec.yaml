@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
-  shared_preferences: ^2.0.11
+  shared_preferences: ^2.0.12
   svg2iv_common:
     path: ../common
   window_size:
