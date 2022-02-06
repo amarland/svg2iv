@@ -166,7 +166,7 @@ class VectorGroupBuilder
           group.clipPathData.isNullOrEmpty) {
         // the child is useless, merge it with its parent (the current group)
         _nodes
-          ..removeAt(0)
+          ..remove(group)
           ..addAll(group.nodes);
         group.id?.let((id) => this.id(id));
       }
