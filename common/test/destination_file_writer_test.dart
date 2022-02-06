@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:svg2iv_common/destination_file_writer.dart';
@@ -63,15 +64,14 @@ path(
 
   group('writeGroup() writes a DSL-compliant group declaration', () {
     test('with both set and unset attributes', () {
+      final transformations = TransformationsBuilder()
+          .rotate(angleInDegrees: 30.0, pivotX: 5.0, pivotY: 5.0)
+          .scale(x: 1.2)
+          .translate(x: 9.0)
+          .build()!;
       final group = VectorGroupBuilder()
           .id('test_group')
-          .transformations(
-            TransformationsBuilder()
-                .rotate(angleInDegrees: 30.0, pivotX: 5.0, pivotY: 5.0)
-                .scale(x: 1.2)
-                .translate(x: 9.0)
-                .build()!,
-          )
+          .transformations(transformations)
           .clipPathData(
             const [
               PathNode(PathDataCommand.horizontalLineTo, [12.0])
@@ -86,6 +86,9 @@ path(
           )
           .addNode(
             VectorGroupBuilder()
+                .transformations(
+                  TransformationsBuilder().translate(x: 2.5).build()!,
+                )
                 .addNode(
                   VectorPathBuilder(
                     const [
@@ -96,15 +99,16 @@ path(
                 .build(),
           )
           .build();
+      // `pivotX` and `pivotY` are omitted because "absorbed" by
+      // the translation; refer to `transformations.dart`
       final expected = '''
 group(
-    name = "TestGroup",
-    rotate = 30F,
-    pivotX = 5F,
-    pivotY = 5F,
-    scaleX = 1.2F,
-    scaleY = 1.2F,
-    translationX = 9F,
+    name = "test_group",
+    rotate = ${numToKotlinFloatAsString(transformations.rotation!.angle)},
+    scaleX = ${numToKotlinFloatAsString(transformations.scale!.x)},
+    scaleY = ${numToKotlinFloatAsString(transformations.scale!.y!)},
+    translationX = ${numToKotlinFloatAsString(transformations.translation!.x)},
+    translationY = ${numToKotlinFloatAsString(transformations.translation!.y)},
     clipPathData = listOf(
         PathNode.HorizontalTo(12F),
     ),
@@ -112,7 +116,9 @@ group(
     path {
         horizontalLineTo(24F)
     }
-    group {
+    group(
+        translationX = 2.5F,
+    ) {
         path {
             verticalLineTo(6F)
         }
@@ -126,8 +132,74 @@ group(
     });
   });
 
-  group('writeImageVectorsToFile() generates code that can be compiled', () {
-    test('test', () {
+  group('writeImports() generates code with no missing or extra imports', () {
+    void actualTest(
+      String description,
+      ImageVector imageVector,
+      Set<String> intersection,
+    ) {
+      test(description, () {
+        final buffer = StringBuffer();
+        writeImports(buffer, [imageVector]);
+        final imports = LineSplitter().convert(buffer.toString()).toSet();
+        expect(
+          imports.intersection({
+            'import androidx.compose.ui.geometry.Offset',
+            'import androidx.compose.ui.graphics.*',
+          }),
+          unorderedEquals(intersection),
+        );
+      });
+    }
+
+    for (final pair in [
+      Tuple3(
+        'with no gradient',
+        VectorPathBuilder(_pathData).build(),
+        <String>{},
+      ),
+      //
+      Tuple3(
+        'with a gradient but without requiring `Offset`',
+        VectorPathBuilder(_pathData)
+            .fill(LinearGradient(const [0x11223344, 0x55667788]))
+            .build(),
+        {'import androidx.compose.ui.graphics.*'},
+      ),
+      //
+      Tuple3(
+        'with a gradient and requiring `Offset`',
+        VectorPathBuilder(_pathData)
+            .fill(LinearGradient(const [0x11223344, 0x55667788], endX: 20.0))
+            .build(),
+        {
+          'import androidx.compose.ui.geometry.Offset',
+          'import androidx.compose.ui.graphics.*',
+        },
+      ),
+    ]) {
+      final description = pair.item1;
+      final vectorPath = pair.item2;
+      final intersection = pair.item3;
+      actualTest(
+        description,
+        ImageVectorBuilder(24.0, 24.0)
+            .addNode(VectorGroupBuilder()
+                .transformations(
+                  TransformationsBuilder().scale(x: 0.5, y: 0.5).build()!,
+                )
+                .fillAlpha(0.3)
+                .addNode(vectorPath)
+                .build())
+            .addNode(VectorPathBuilder(_pathData).build())
+            .build(),
+        intersection,
+      );
+    }
+  });
+
+  group('writeFileContents() generates code that can be compiled', () {
+    test('the embedded Kotlin compiler reports no errors', () {
       final imageVector = ImageVectorBuilder(24.0, 24.0)
           .name('test_vector')
           .tintColor(0x11223344)
@@ -285,22 +357,26 @@ listOf(
 VectorPath _buildVectorPath({required bool trimPath}) =>
     VectorPathBuilder(_pathData)
         .id(trimPath ? 'trimmed_path' : 'non_trimmed_path')
-        .fill(LinearGradient(
-          const [0x11223344, 0x55667788],
-          startX: 1.0,
-          startY: 2.0,
-          endX: 3.0,
-          endY: 4.0,
-        ))
+        .fill(
+          LinearGradient(
+            const [0x11223344, 0x55667788],
+            startX: 1.0,
+            startY: 2.0,
+            endX: 3.0,
+            endY: 4.0,
+          ),
+        )
         .fillAlpha(0.5)
-        .stroke(RadialGradient(
-          const [0x11223344, 0x55667788, 0x99101112],
-          stops: [0.25, 0.5, 0.75],
-          centerX: 1.0,
-          centerY: 2.0,
-          radius: 3.0,
-          tileMode: TileMode.clamp,
-        ))
+        .stroke(
+          RadialGradient(
+            const [0x11223344, 0x55667788, 0x99101112],
+            stops: [0.25, 0.5, 0.75],
+            centerX: 1.0,
+            centerY: 2.0,
+            radius: 3.0,
+            tileMode: TileMode.clamp,
+          ),
+        )
         .strokeAlpha(1.0)
         .strokeLineWidth(2.0)
         .strokeLineCap(StrokeCap.round)
@@ -312,7 +388,7 @@ VectorPath _buildVectorPath({required bool trimPath}) =>
 
 const _pathAsDslString = '''
 path(
-    name = "NonTrimmedPath",
+    name = "non_trimmed_path",
     fill = Brush.linearGradient(
         listOf(
             Color(0x11223344),
@@ -341,7 +417,7 @@ $_pathDataAsString
 final _trimmedPathAsNonDslString = '''
 addPath(
     pathData = ${_pathDataAsNonDslString(indentationLevel: 1)},
-    name = "TrimmedPath",
+    name = "trimmed_path",
     fill = Brush.linearGradient(
         listOf(
             Color(0x11223344),

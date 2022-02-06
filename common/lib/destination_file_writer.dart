@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 
 import 'extensions.dart';
@@ -77,6 +78,7 @@ Future<void> writeImageVectorsToFile(
   await fileSink.close();
 }
 
+@visibleForTesting
 void writeFileContents(
   StringSink sink,
   List<Tuple2<String, ImageVector>> imageVectors, {
@@ -94,12 +96,7 @@ void writeFileContents(
       ..writeln('package $packageName')
       ..writeln();
   }
-  sink
-    ..writeln('import androidx.compose.ui.geometry.Offset')
-    ..writeln('import androidx.compose.ui.graphics.*')
-    ..writeln('import androidx.compose.ui.graphics.vector.*')
-    ..writeln('import androidx.compose.ui.unit.dp')
-    ..writeln();
+  writeImports(sink, imageVectors.map((pair) => pair.item2));
   for (final pair in imageVectors) {
     final sourceFileName = pair.item1;
     final imageVector = pair.item2;
@@ -112,6 +109,72 @@ void writeFileContents(
   }
 }
 
+@visibleForTesting
+void writeImports(
+  StringSink sink,
+  Iterable<ImageVector> imageVectors,
+) {
+  bool graphicsPackageNeeded = false;
+  bool offsetClassNeeded = false;
+  for (final imageVector in imageVectors) {
+    List<VectorPath> filterPaths(Iterable<VectorNode> nodes) {
+      final paths = <VectorPath>[];
+      return nodes.fold(paths, (paths, node) {
+        if (node is VectorGroup) {
+          paths.addAll(filterPaths(node.nodes));
+        } else {
+          paths.add(node as VectorPath);
+        }
+        return paths;
+      });
+    }
+
+    for (final vectorPath in filterPaths(imageVector.nodes)) {
+      bool doesGradientNeedOffsetClassToBeExpressed(Gradient gradient) {
+        if (gradient.colors.length < 2) {
+          return false;
+        }
+        if (gradient is LinearGradient) {
+          return gradient.startX != LinearGradient.defaultStartX ||
+              gradient.endX != LinearGradient.defaultEndX ||
+              gradient.startY != LinearGradient.defaultStartY ||
+              gradient.endY != LinearGradient.defaultEndY;
+        } else {
+          gradient as RadialGradient;
+          return gradient.centerX != RadialGradient.defaultCenterX ||
+              gradient.centerY != RadialGradient.defaultCenterY;
+        }
+      }
+
+      final bool? doesFillNeedOffsetClass =
+          vectorPath.fill?.let(doesGradientNeedOffsetClassToBeExpressed);
+      final bool? doesStrokeNeedOffsetClass =
+          vectorPath.stroke?.let(doesGradientNeedOffsetClassToBeExpressed);
+      if (!graphicsPackageNeeded) {
+        graphicsPackageNeeded = doesFillNeedOffsetClass != null ||
+            doesStrokeNeedOffsetClass != null;
+      }
+      if (graphicsPackageNeeded &&
+          (doesFillNeedOffsetClass == true ||
+              doesStrokeNeedOffsetClass == true)) {
+        offsetClassNeeded = true;
+        break;
+      }
+    }
+  }
+  if (offsetClassNeeded) {
+    sink.writeln('import androidx.compose.ui.geometry.Offset');
+  }
+  if (graphicsPackageNeeded) {
+    sink.writeln('import androidx.compose.ui.graphics.*');
+  }
+  sink
+    ..writeln('import androidx.compose.ui.graphics.vector.*')
+    ..writeln('import androidx.compose.ui.unit.dp')
+    ..writeln();
+}
+
+@visibleForTesting
 void writeImageVector(
   StringSink sink,
   ImageVector imageVector,
@@ -144,21 +207,21 @@ void writeImageVector(
   sink
     ..writelnIndent(
       indentationLevel,
-      'defaultWidth = ${_numToKotlinFloatAsString(imageVector.width)}.dp,',
+      'defaultWidth = ${numToKotlinFloatAsString(imageVector.width)}.dp,',
     )
     ..writelnIndent(
       indentationLevel,
-      'defaultHeight = ${_numToKotlinFloatAsString(imageVector.height)}.dp,',
+      'defaultHeight = ${numToKotlinFloatAsString(imageVector.height)}.dp,',
     )
     ..writelnIndent(
       indentationLevel,
       'viewportWidth = '
-      '${_numToKotlinFloatAsString(imageVector.viewportWidth)},',
+      '${numToKotlinFloatAsString(imageVector.viewportWidth)},',
     )
     ..writelnIndent(
       indentationLevel,
       'viewportHeight = '
-      '${_numToKotlinFloatAsString(imageVector.viewportHeight)},',
+      '${numToKotlinFloatAsString(imageVector.viewportHeight)},',
     )
     ..writeArgumentIfNotNull(
       indentationLevel,
@@ -211,6 +274,7 @@ int _writeNodes(
   return indentationLevel;
 }
 
+@visibleForTesting
 int writeGroup(
   StringSink sink,
   VectorGroup group,
@@ -221,6 +285,8 @@ int writeGroup(
     indentationLevel,
     shouldStatementBePrecededByPoint ? '.group' : 'group',
   );
+  // TODO: this should always return true based on the logic
+  //       in `VectorGroupBuilder.build`; sort this out?
   if (group.id != null || group.definesTransformations) {
     sink.writeln('(');
     sink
@@ -274,6 +340,7 @@ int writeGroup(
   return indentationLevel;
 }
 
+@visibleForTesting
 int writePath(
   StringSink sink,
   VectorPath path,
@@ -404,7 +471,7 @@ void _writePathNodes(
             ..writeAll(
               node.arguments.map(
                 (argument) => argument is double
-                    ? _numToKotlinFloatAsString(argument)
+                    ? numToKotlinFloatAsString(argument)
                     : argument,
               ),
               ', ',
@@ -421,7 +488,7 @@ void _writePathNodes(
 String _colorToString(int color) =>
     'Color(0x${color.toRadixString(16).toUpperCase()})';
 
-String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
+String _gradientToBrushAsString(Gradient gradient, int indentationLevel) {
   final buffer = StringBuffer();
   final colors = gradient.colors;
   if (colors.length == 1 || colors.every((c) => c == colors[0])) {
@@ -447,7 +514,7 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
         buffer
           ..writeIndent(
             indentationLevel,
-            _numToKotlinFloatAsString(gradient.stops[i]),
+            numToKotlinFloatAsString(gradient.stops[i]),
           )
           ..write(' to ')
           ..write(_colorToString(colors[i]))
@@ -492,11 +559,14 @@ String gradientToBrushAsString(Gradient gradient, int indentationLevel) {
 String _generateIndentation(int indentationLevel) =>
     String.fromCharCodes(List.filled(indentationLevel * 4, 0x20));
 
-String _numToKotlinFloatAsString(num number) =>
-    (number ~/ 1 == number
-        ? number.toStringAsFixed(0)
-        : number.toStringAsFixed(4).replaceFirst(RegExp(r'0*$'), '')) +
-    'F';
+// @internal
+String numToKotlinFloatAsString(num number) {
+  // erase trailing zeros and make sure the string doesn't end with '.'
+  return number.toStringAsFixed(4).replaceFirst(RegExp(r'0*$'), '').let((s) {
+    final lastIndex = s.length - 1;
+    return (s[lastIndex] == '.' ? s.substring(0, lastIndex) : s) + 'F';
+  });
+}
 
 extension _StringSinkWriting on StringSink {
   void writeIndent(int indentationLevel, Object obj) {
@@ -516,7 +586,7 @@ extension _StringSinkWriting on StringSink {
     writeIndent(indentationLevel, '$parameterName = ');
     final String argumentAsString;
     if (argument is double) {
-      argumentAsString = _numToKotlinFloatAsString(argument);
+      argumentAsString = numToKotlinFloatAsString(argument);
     } else if (argument is List<PathNode>) {
       final buffer = StringBuffer()..writeln('listOf(');
       _writePathNodes(
@@ -536,10 +606,10 @@ extension _StringSinkWriting on StringSink {
       argumentAsString =
           enumAsString.capitalizeCharAt(enumAsString.indexOf('.') + 1);
     } else if (argument is Gradient) {
-      argumentAsString = gradientToBrushAsString(argument, indentationLevel);
+      argumentAsString = _gradientToBrushAsString(argument, indentationLevel);
     } else if (argument is Tuple2<double, double>) {
-      final x = _numToKotlinFloatAsString(argument.item1);
-      final y = _numToKotlinFloatAsString(argument.item2);
+      final x = numToKotlinFloatAsString(argument.item1);
+      final y = numToKotlinFloatAsString(argument.item2);
       argumentAsString = 'Offset($x, $y)';
     } else if (argument is String) {
       if (argument.startsWith('Color(')) {

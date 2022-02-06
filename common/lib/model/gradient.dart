@@ -87,11 +87,16 @@ class LinearGradient extends Gradient {
     double? endX,
     double? endY,
     TileMode? tileMode,
-  })  : startX = startX ?? 0.0,
-        startY = startY ?? 0.0,
-        endX = endX ?? double.infinity,
-        endY = endY ?? double.infinity,
+  })  : startX = startX ?? defaultStartX,
+        startY = startY ?? defaultStartY,
+        endX = endX ?? defaultEndX,
+        endY = endY ?? defaultEndY,
         super(colors, stops, tileMode);
+
+  static final defaultStartX = 0.0;
+  static final defaultStartY = 0.0;
+  static final defaultEndX = double.infinity;
+  static final defaultEndY = 0.0;
 
   final double startX, startY, endX, endY;
 
@@ -123,10 +128,14 @@ class RadialGradient extends Gradient {
     double? centerY,
     double? radius,
     TileMode? tileMode,
-  })  : radius = radius ?? double.infinity,
-        centerX = centerX ?? 0.0,
-        centerY = centerY ?? 0.0,
+  })  : radius = radius ?? defaultRadius,
+        centerX = centerX ?? defaultCenterX,
+        centerY = centerY ?? defaultCenterY,
         super(colors, stops, tileMode);
+
+  static final defaultCenterX = 0.0;
+  static final defaultCenterY = 0.0;
+  static final defaultRadius = double.infinity;
 
   final double centerX, centerY;
   final double radius;
