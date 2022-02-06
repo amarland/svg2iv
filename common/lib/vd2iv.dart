@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
-import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
 
+import 'android_resources.dart';
 import 'extensions.dart';
 import 'file_parser.dart';
 import 'model/gradient.dart';
@@ -14,23 +12,14 @@ import 'model/vector_node.dart';
 import 'model/vector_path.dart';
 import 'path_data_parser.dart';
 
-const _aaptNamespaceUri = 'http://schemas.android.com/aapt';
-const _androidNamespaceUri = 'http://schemas.android.com/apk/res/android';
-
-ImageVector parseVectorDrawableFile(File source) {
-  final rootElement = parseXmlFile(source, expectedRootName: 'vector');
-  final requiredAttributeNames = [
-    'viewportWidth',
-    'viewportHeight',
-    'width',
-    'height',
-  ];
-  final parsedRequiredAttributes =
-      requiredAttributeNames.associate((name) => name, (name) {
-    final valueAsString =
-        rootElement.getAndroidNSAttribute(name)?.replaceFirst('dp', '', 1);
-    return valueAsString != null ? double.tryParse(valueAsString) : null;
-  });
+ImageVector parseVectorDrawableElement(XmlElement rootElement) {
+  final parsedRequiredAttributes = <String, dynamic>{
+    'viewportWidth': rootElement.getAndroidNSAttribute<double>('viewportWidth'),
+    'viewportHeight':
+        rootElement.getAndroidNSAttribute<double>('viewportHeight'),
+    'width': rootElement.getAndroidNSAttribute<Dimension>('width'),
+    'height': rootElement.getAndroidNSAttribute<Dimension>('height'),
+  };
   if (parsedRequiredAttributes.values.anyNull()) {
     throw FileParserException(
       'Missing required attribute(s): ' +
@@ -40,19 +29,19 @@ ImageVector parseVectorDrawableFile(File source) {
               .join(', '),
     );
   }
-  final builder = ImageVectorBuilder(
-    parsedRequiredAttributes['viewportWidth']!,
-    parsedRequiredAttributes['viewportHeight']!,
-  )
-      .width(parsedRequiredAttributes['width']!)
-      .height(parsedRequiredAttributes['height']!);
-  rootElement.getAndroidNSAttribute('name')?.let(builder.name);
+  final viewportWidth = parsedRequiredAttributes['viewportWidth']!;
+  final viewportHeight = parsedRequiredAttributes['viewportHeight']!;
+  final builder = ImageVectorBuilder(viewportWidth, viewportHeight)
+      .width((parsedRequiredAttributes['width']! as Dimension).value)
+      .height((parsedRequiredAttributes['height']! as Dimension).value);
+  rootElement.getAndroidNSAttribute<String>('name')?.let(builder.name);
   rootElement
-      .getAndroidNSAttribute('tintColor')
-      ?.let(Gradient.fromHexString)
+      .getAndroidNSAttribute<Gradient>('tintColor')
+      ?.colors
+      .singleOrNull
       ?.let(builder.tintColor);
   rootElement
-      .getAndroidNSAttribute('tintBlendMode')
+      .getAndroidNSAttribute<String>('tintBlendMode')
       ?.let(blendModeFromString)
       ?.let(builder.tintBlendMode);
   for (final element in rootElement.children.whereType<XmlElement>()) {
@@ -61,11 +50,10 @@ ImageVector parseVectorDrawableFile(File source) {
         builder.addNodes(_parseGroupElement(element));
         break;
       case 'path':
-        _parsePathElement(element)
-            ?.let((vectorPath) => builder.addNode(vectorPath));
+        _parsePathElement(element)?.let(builder.addNode);
         break;
       case 'clip-path':
-        _parseClipPathElement(element)?.let((group) => builder.addNode(group));
+        _parseClipPathElement(element)?.let(builder.addNode);
         break;
     }
   }
@@ -75,30 +63,37 @@ ImageVector parseVectorDrawableFile(File source) {
 // can be a single group or the list of its nodes if it's considered "redundant"
 Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
   final attributes = groupElement.androidNSAttributes
-      .associate((attr) => attr.name.local, (attr) => attr.value);
+      .associate((attr) => attr.name.local, (attr) => attr);
   final groupBuilder = VectorGroupBuilder();
-  attributes['name']?.let((name) => groupBuilder.id(name));
+  attributes['name']?.let(parseAndroidResourceValue).let(groupBuilder.id);
   final transformationsBuilder = TransformationsBuilder();
-  final rotationAngle = attributes['rotation']?.toDouble();
+  final rotationAngle =
+      attributes['rotation']?.let((v) => parseAndroidResourceValue<double>(v));
   if (rotationAngle != null) {
     transformationsBuilder.rotate(
       angleInDegrees: rotationAngle,
-      pivotX: attributes['pivotX']?.toDouble(),
-      pivotY: attributes['pivotY']?.toDouble(),
+      pivotX: attributes['pivotX']
+          ?.let((v) => parseAndroidResourceValue<double>(v)),
+      pivotY: attributes['pivotY']
+          ?.let((v) => parseAndroidResourceValue<double>(v)),
     );
   }
-  final scaleX = attributes['scaleX']?.toDouble();
+  final scaleX =
+      attributes['scaleX']?.let((v) => parseAndroidResourceValue<double>(v));
   if (scaleX != null) {
     transformationsBuilder.scale(
       x: scaleX,
-      y: attributes['scaleY']?.toDouble(),
+      y: attributes['scaleY']?.let((v) => parseAndroidResourceValue<double>(v)),
     );
   }
-  final translationX = attributes['translateX']?.toDouble();
-  if (translationX != null) {
+  final translationX = attributes['translateX']
+      ?.let((v) => parseAndroidResourceValue<double>(v));
+  final translationY = attributes['translateY']
+      ?.let((v) => parseAndroidResourceValue<double>(v));
+  if (translationX != null || translationY != null) {
     transformationsBuilder.translate(
-      x: translationX,
-      y: attributes['translateY']?.toDouble(),
+      x: translationX ?? 0.0,
+      y: translationY ?? 0.0,
     );
   }
   final transformations = transformationsBuilder.build();
@@ -112,76 +107,67 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
 }
 
 VectorPath? _parsePathElement(XmlElement pathElement) {
-  final pathData = parsePathData(pathElement.getAndroidNSAttribute('pathData'));
+  final pathData = parsePathData(
+    pathElement.getAndroidNSAttribute<String>('pathData'),
+  );
   if (pathData.isEmpty) return null;
   final builder = VectorPathBuilder(pathData);
   for (final attribute in pathElement.androidNSAttributes) {
     final attributeName = attribute.name.local;
-    final attributeValue = attribute.value;
     switch (attributeName) {
       case 'fillType':
-        pathFillTypeFromString(attributeValue)
-            ?.let((fillType) => builder.pathFillType(fillType));
+        parseAndroidResourceValue<String>(attribute)
+            ?.let(pathFillTypeFromString)
+            ?.let(builder.pathFillType);
         break;
       case 'name':
-        builder.id(attributeValue);
+        parseAndroidResourceValue<String>(attribute)?.let(builder.id);
         break;
       case 'fillColor':
-        Gradient.fromHexString(attributeValue)
-            ?.let((fill) => builder.fill(fill));
+        parseAndroidResourceValue<Gradient>(attribute)?.let(builder.fill);
         break;
       case 'fillAlpha':
-        attributeValue
-            .toDouble()
-            ?.let((fillAlpha) => builder.fillAlpha(fillAlpha));
+        parseAndroidResourceValue<double>(attribute)?.let(builder.fillAlpha);
         break;
       case 'strokeColor':
-        Gradient.fromHexString(attributeValue)
-            ?.let((stroke) => builder.stroke(stroke));
+        parseAndroidResourceValue<Gradient>(attribute)?.let(builder.stroke);
         break;
       case 'strokeAlpha':
-        attributeValue
-            .toDouble()
-            ?.let((strokeAlpha) => builder.strokeAlpha(strokeAlpha));
+        parseAndroidResourceValue<double>(attribute)?.let(builder.strokeAlpha);
         break;
       case 'strokeWidth':
-        attributeValue
-            .toDouble()
-            ?.let((strokeWidth) => builder.strokeLineWidth(strokeWidth));
+        parseAndroidResourceValue<double>(attribute)
+            ?.let(builder.strokeLineWidth);
         break;
       case 'strokeLineCap':
-        strokeCapFromString(attributeValue)
-            ?.let((strokeLineCap) => builder.strokeLineCap(strokeLineCap));
+        parseAndroidResourceValue<String>(attribute)
+            ?.let(strokeCapFromString)
+            ?.let(builder.strokeLineCap);
         break;
       case 'strokeLineJoin':
-        strokeJoinFromString(attributeValue)
-            ?.let((strokeLineJoin) => builder.strokeLineJoin(strokeLineJoin));
+        parseAndroidResourceValue<String>(attribute)
+            ?.let(strokeJoinFromString)
+            ?.let(builder.strokeLineJoin);
         break;
       case 'strokeLineMiter':
-        attributeValue.toDouble()?.let(
-            (strokeLineMiter) => builder.strokeLineMiter(strokeLineMiter));
+        parseAndroidResourceValue<double>(attribute)
+            ?.let(builder.strokeLineMiter);
         break;
       case 'trimPathStart':
-        attributeValue
-            .toDouble()
-            ?.let((trimPathStart) => builder.trimPathStart(trimPathStart));
+        parseAndroidResourceValue<double>(attribute)
+            ?.let(builder.trimPathStart);
         break;
       case 'trimPathEnd':
-        attributeValue
-            .toDouble()
-            ?.let((trimPathEnd) => builder.trimPathEnd(trimPathEnd));
+        parseAndroidResourceValue<double>(attribute)?.let(builder.trimPathEnd);
         break;
       case 'trimPathOffset':
-        attributeValue
-            .toDouble()
-            ?.let((trimPathOffset) => builder.trimPathOffset(trimPathOffset));
+        parseAndroidResourceValue<double>(attribute)
+            ?.let(builder.trimPathOffset);
         break;
     }
   }
-  final attrElements = pathElement.findElements(
-    'attr',
-    namespace: _aaptNamespaceUri,
-  );
+  final attrElements =
+      pathElement.findElements('attr', namespace: aaptNamespaceUri);
   for (final attrElement in attrElements) {
     final singleAttribute = attrElement.attributes.singleOrNull;
     if (singleAttribute == null || singleAttribute.name.local != 'name') {
@@ -193,7 +179,7 @@ VectorPath? _parsePathElement(XmlElement pathElement) {
         singleChildElement.name.local != 'gradient') {
       continue;
     }
-    final gradient = _parseGradient(singleChildElement);
+    final gradient = parseGradient(singleChildElement);
     if (gradient == null) continue;
     switch (singleAttribute.value) {
       case 'android:fillColor':
@@ -209,88 +195,8 @@ VectorPath? _parsePathElement(XmlElement pathElement) {
 
 VectorGroup? _parseClipPathElement(XmlElement clipPathElement) {
   final clipPathData =
-      parsePathData(clipPathElement.getAndroidNSAttribute('pathData'));
+      parsePathData(clipPathElement.getAndroidNSAttribute<String>('pathData'));
   return clipPathData.isNotEmpty
       ? VectorGroupBuilder().clipPathData(clipPathData).build()
       : null;
-}
-
-Gradient? _parseGradient(XmlElement gradientElement) {
-  final gradientType = gradientElement.getAndroidNSAttribute('type');
-  // TODO: support sweep gradients
-  if (gradientType == null || gradientType == 'sweep') return null;
-  final colorStops = _parseColorStops(gradientElement);
-  final colors = colorStops.map((colorStop) => colorStop.item2).toList();
-  final stops = colorStops.map((colorStop) => colorStop.item1).toList();
-  final tileMode = gradientElement
-      .getAndroidNSAttribute('tileMode')
-      ?.let(tileModeFromString);
-  if (gradientType == 'linear') {
-    return LinearGradient(
-      colors,
-      stops: stops,
-      startX: gradientElement.getAndroidNSAttribute('startX')?.toDouble(),
-      startY: gradientElement.getAndroidNSAttribute('startY')?.toDouble(),
-      endX: gradientElement.getAndroidNSAttribute('endX')?.toDouble(),
-      endY: gradientElement.getAndroidNSAttribute('endY')?.toDouble(),
-      tileMode: tileMode,
-    );
-  } else {
-    return RadialGradient(
-      colors,
-      stops: stops,
-      centerX: gradientElement.getAndroidNSAttribute('centerX')?.toDouble(),
-      centerY: gradientElement.getAndroidNSAttribute('centerY')?.toDouble(),
-      radius:
-          gradientElement.getAndroidNSAttribute('gradientRadius')?.toDouble(),
-      tileMode: tileMode,
-    );
-  }
-}
-
-Iterable<Tuple2<double, int>> _parseColorStops(XmlElement gradientElement) {
-  final childElements = gradientElement.findElements('item');
-  final lastIndex = childElements.length - 1;
-  if (lastIndex >= 0) {
-    return childElements.mapIndexed((index, item) {
-      final offset = item.getAndroidNSAttribute('offset')?.toDouble() ??
-          index / (lastIndex > 0 ? lastIndex : 1);
-      final colorAsString = item.getAndroidNSAttribute('color');
-      final colorInt = colorAsString != null
-          ? Gradient.fromHexString(colorAsString)?.colors.singleOrNull
-          : null;
-      return colorInt != null ? Tuple2(offset, colorInt) : null;
-    }).whereNotNull();
-  } else {
-    return gradientElement.androidNSAttributes
-        .where((attr) => attr.name.local.endsWith('Color'))
-        .map((attr) {
-      // the result is a Gradient with a single value
-      final colorInt = Gradient.fromHexString(attr.value)?.colors.singleOrNull;
-      if (colorInt == null) return null;
-      final double offset;
-      switch (attr.name.local) {
-        case 'startColor':
-          offset = 0.0;
-          break;
-        case 'centerColor':
-          offset = 0.5;
-          break;
-        case 'endColor':
-          offset = 1.0;
-          break;
-        default:
-          return null;
-      }
-      return Tuple2(offset, colorInt);
-    }).whereNotNull();
-  }
-}
-
-extension _AndroidNSAttributeParsing on XmlElement {
-  String? getAndroidNSAttribute(String name) =>
-      getAttribute(name, namespace: _androidNamespaceUri);
-
-  Iterable<XmlAttribute> get androidNSAttributes => attributes
-      .where((attr) => attr.name.namespaceUri == _androidNamespaceUri);
 }

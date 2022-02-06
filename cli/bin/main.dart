@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:svg2iv/protobuf/image_vector_adapter.dart';
 import 'package:svg2iv/protobuf/image_vector_transmitter.dart';
-import 'package:svg2iv_common/common_entry_point.dart';
+import 'package:svg2iv_common/file_parser.dart';
 import 'package:svg2iv_common/destination_file_writer.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/model/image_vector.dart';

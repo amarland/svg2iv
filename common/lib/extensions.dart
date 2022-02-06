@@ -87,4 +87,6 @@ extension StringIndexing on String {
 
 extension StringToNumberConversion on String {
   double? toDouble() => double.tryParse(this);
+
+  int? toInt() => int.tryParse(this);
 }

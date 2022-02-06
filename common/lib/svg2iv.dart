@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
+import 'package:svg2iv_common/path_building_helpers.dart';
 import 'package:xml/xml.dart';
 
 import 'extensions.dart';
@@ -18,8 +17,7 @@ final _definitionSeparatorPattern = RegExp(r'[,\s]\s*');
 
 final _definitions = <String, dynamic>{};
 
-ImageVector parseSvgFile(File source) {
-  final rootElement = parseXmlFile(source, expectedRootName: 'svg');
+ImageVector parseSvgElement(XmlElement rootElement) {
   preprocessSvg(rootElement);
   final viewBox = rootElement
       .getAttribute('viewBox')
@@ -324,57 +322,25 @@ VectorNode? _parseRectElement(XmlElement rectElement) {
   final mappedAttributes = _mapCoordinateAttributes(rectElement.attributes);
   final x = (mappedAttributes['x'] ?? 0.0) + offsetX;
   final y = (mappedAttributes['y'] ?? 0.0) + offsetY;
-  final width = mappedAttributes['width'] ?? double.nan;
-  final height = mappedAttributes['height'] ?? double.nan;
+  final width = mappedAttributes['width'];
+  final height = mappedAttributes['height'];
   var rx = mappedAttributes['rx'];
   var ry = mappedAttributes['ry'];
-  rx ??= ry;
+  rx ??= ry ?? 0.0;
   ry ??= rx;
-  if (width == double.nan || height == double.nan) return null;
-  final List<PathNode> pathData;
-  if (rx != null && ry != null) {
-    /*
-    pathData = _extractPathDataFromLinePoints(
-      // M x,y h x,width v y,height h x,-width v y,-height
-      [x, y, x, width, y, height, x, -width, y, -height],
-    );
-    */
-    pathData = [
-      PathNode(PathDataCommand.moveTo, [x, y]),
-      PathNode(PathDataCommand.relativeHorizontalLineTo, [width]),
-      PathNode(PathDataCommand.relativeVerticalLineTo, [height]),
-      PathNode(PathDataCommand.relativeHorizontalLineTo, [-width]),
-      PathNode(PathDataCommand.close, List.empty()),
-    ];
-  } else {
-    if (rx! > width / 2) rx = width / 2;
-    if (ry! > height / 2) ry = height / 2;
-    pathData = [
-      PathNode(PathDataCommand.moveTo, [x + rx, y]),
-      PathNode(PathDataCommand.lineTo, [x + width - rx, y]),
-      PathNode(
-        PathDataCommand.arcTo,
-        [rx, ry, 0.0, false, true, x + width, y + ry],
+  if (width == null || height == null) return null;
+  return _buildVectorNodeFromPathData(
+    rectElement,
+    obtainPathNodesForRectangle(
+      bounds: Rect(x, y, width, height),
+      radii: List.generate(
+        8,
+        ((index) => index.isEven ? rx! : ry!),
+        growable: false,
       ),
-      PathNode(PathDataCommand.lineTo, [x + width, y + height - ry]),
-      PathNode(
-        PathDataCommand.arcTo,
-        [rx, ry, 0.0, false, true, x + width - rx, y + height],
-      ),
-      PathNode(
-        PathDataCommand.lineTo,
-        [x + rx, y + height],
-      ),
-      PathNode(PathDataCommand.arcTo,
-          [rx, ry, 0.0, false, true, x, y + height - ry]),
-      PathNode(PathDataCommand.lineTo, [x, y + ry]),
-      PathNode(
-        PathDataCommand.arcTo,
-        [rx, ry, 0.0, false, true, x + rx, y],
-      ),
-    ];
-  }
-  return _buildVectorNodeFromPathData(rectElement, pathData, transformations);
+    ),
+    transformations,
+  );
 }
 
 // circle included
@@ -388,8 +354,7 @@ VectorNode? _parseEllipseElement(XmlElement ellipseElement) {
   final cx = (mappedAttributes['cx'] ?? 0.0) + offsetX;
   final cy = (mappedAttributes['cy'] ?? 0.0) + offsetY;
   final double rx, ry;
-  final isShapeACircle = mappedAttributes.containsKey('r');
-  if (isShapeACircle) {
+  if (mappedAttributes.containsKey('r')) {
     rx = mappedAttributes['r'] ?? double.nan;
     ry = rx;
   } else {
@@ -397,23 +362,9 @@ VectorNode? _parseEllipseElement(XmlElement ellipseElement) {
     ry = mappedAttributes['ry'] ?? double.nan;
   }
   if (rx == double.nan || ry == double.nan) return null;
-  final sweepFlag = isShapeACircle;
-  final diameter = 2 * rx;
-  final pathData = [
-    PathNode(PathDataCommand.moveTo, [cx - rx, cy]),
-    PathNode(
-      PathDataCommand.relativeArcTo,
-      [rx, ry, 0.0, true, sweepFlag, diameter, 0],
-    ),
-    PathNode(
-      PathDataCommand.relativeArcTo,
-      [rx, ry, 0.0, true, sweepFlag, -diameter, 0],
-    ),
-    if (isShapeACircle) PathNode(PathDataCommand.close, List.empty())
-  ];
   return _buildVectorNodeFromPathData(
     ellipseElement,
-    pathData,
+    obtainPathNodesForEllipse(cx: cx, cy: cy, rx: rx, ry: ry),
     transformations,
   );
 }

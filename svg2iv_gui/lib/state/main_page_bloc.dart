@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:svg2iv_common/common_entry_point.dart';
+import 'package:svg2iv_common/file_parser.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:tuple/tuple.dart';
