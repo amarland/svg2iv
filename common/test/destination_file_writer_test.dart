@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:svg2iv_common/destination_file_writer.dart';
 import 'package:svg2iv_common/extensions.dart';
@@ -11,6 +10,8 @@ import 'package:svg2iv_common/model/vector_node.dart';
 import 'package:svg2iv_common/model/vector_path.dart';
 import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
+
+import 'test_helpers.dart';
 
 void main() {
   group('writePath() writes a DSL-compliant path declaration', () {
@@ -230,68 +231,13 @@ group(
 @file:DependsOn("org.jetbrains.compose.ui:ui-unit-desktop:1.0.0-alpha3")
 
 ''';
-      final generatedSource = generatedSourceBuffer.toString();
-      final tempDirectoryPath = Directory.systemTemp.path;
-      final scriptSourceFile = File(tempDirectoryPath + '/test_script.main.kts')
-        ..createSync()
-        ..writeAsStringSync(dependencyAnnotations)
-        ..writeAsStringSync(
-          generatedSource,
-          mode: FileMode.append,
-        )
-        ..writeAsStringSync(
-          "\nprint(TestVector.name)",
-          mode: FileMode.append,
-          flush: true,
-        );
-      final workingDirectory = Directory('$tempDirectoryPath/kotlinc');
-      final workingDirectoryPath = workingDirectory.path.replaceAll('\\', '/');
-      if (!workingDirectory.existsSync() ||
-          workingDirectory
-              .listSync()
-              .where((e) => e is Directory || e is File)
-              .isEmpty) {
-        final compilerArchiveFile =
-            Directory('test_tool').listSync().singleWhere(
-          (e) {
-            // ignore: unnecessary_string_escapes
-            final fileNameRegExp = RegExp('''kotlin-compiler-.{3,6}\.zip''');
-            return fileNameRegExp.allMatches(e.path).length == 1;
-          },
-          orElse: () => fail(
-            'The archive file containing the Kotlin compiler'
-            ' could not be found!',
-          ),
-        ) as File;
-        Process.runSync(
-          'tar',
-          ['-xf', compilerArchiveFile.absolute.path],
-          workingDirectory: tempDirectoryPath,
-        );
-      }
-      final executable = '$workingDirectoryPath/bin/kotlinc';
-      // use PowerShell on Windows as it understands slashes as path separators
-      try {
-        final result = Process.runSync(
-          Platform.isWindows ? 'powershell' : executable,
-          [
-            '-cp',
-            '$workingDirectoryPath/lib/kotlin-main-kts.jar',
-            '-script',
-            scriptSourceFile.path,
-          ].also((args) {
-            // on Windows, the actual executable is 'powershell.exe',
-            // so the first argument has to be 'kotlinc.bat'
-            if (Platform.isWindows) args.insert(0, '$executable.bat');
-          }),
-        );
-        final errorString = result.stderr as String;
-        final resultString = result.stdout as String;
-        expect(errorString.isEmpty, true, reason: errorString);
-        expect(resultString, 'TestVector');
-      } finally {
-        scriptSourceFile.deleteSync();
-      }
+      final executionResult = executeKotlinScript(
+        dependencyAnnotations + generatedSourceBuffer.toString(),
+      );
+      final resultString = executionResult.item1;
+      final errorString = executionResult.item2;
+      expect(errorString.isEmpty, true, reason: errorString);
+      expect(resultString, 'TestVector');
     });
   });
 }

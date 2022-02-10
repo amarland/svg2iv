@@ -470,48 +470,41 @@ B _fillPresentationAttributes<T extends VectorNode,
     final attributeValue = attribute.value;
     switch (attributeName) {
       case 'fill-rule':
-        pathFillTypeFromString(attributeValue)
-            ?.let((fillType) => builder.pathFillType(fillType));
+        pathFillTypeFromString(attributeValue)?.let(builder.pathFillType);
         break;
       case 'id':
         builder.id(attributeValue);
         break;
       case 'opacity':
-        _parsePercentage(attributeValue)?.let((alpha) => builder.alpha(alpha));
+        _parsePercentage(attributeValue)?.let(builder.alpha);
         break;
       case 'fill':
         if (attributeValue == 'none') {
           builder.fillAlpha(0.0);
         } else {
-          _parseBrush(attributeValue)?.let((fill) => builder.fill(fill));
+          _parseBrush(attributeValue)?.let(builder.fill);
         }
         break;
       case 'fill-opacity':
-        _parsePercentage(attributeValue)
-            ?.let((fillAlpha) => builder.fillAlpha(fillAlpha));
+        _parsePercentage(attributeValue)?.let(builder.fillAlpha);
         break;
       case 'stroke':
-        _parseBrush(attributeValue)?.let((stroke) => builder.stroke(stroke));
+        _parseBrush(attributeValue)?.let(builder.stroke);
         break;
       case 'stroke-opacity':
-        _parsePercentage(attributeValue)
-            ?.let((strokeAlpha) => builder.strokeAlpha(strokeAlpha));
+        _parsePercentage(attributeValue)?.let(builder.strokeAlpha);
         break;
       case 'stroke-width':
-        _parseLength(attributeValue)
-            ?.let((strokeWidth) => builder.strokeLineWidth(strokeWidth));
+        _parseLength(attributeValue)?.let(builder.strokeLineWidth);
         break;
       case 'stroke-linecap':
-        strokeCapFromString(attributeValue)
-            ?.let((strokeLineCap) => builder.strokeLineCap(strokeLineCap));
+        strokeCapFromString(attributeValue)?.let(builder.strokeLineCap);
         break;
       case 'stroke-linejoin':
-        strokeJoinFromString(attributeValue)
-            ?.let((strokeLineJoin) => builder.strokeLineJoin(strokeLineJoin));
+        strokeJoinFromString(attributeValue)?.let(builder.strokeLineJoin);
         break;
       case 'stroke-miterlimit':
-        attributeValue.toDouble()?.let(
-            (strokeLineMiter) => builder.strokeLineMiter(strokeLineMiter));
+        attributeValue.toDouble()?.let(builder.strokeLineMiter);
         break;
     }
   }

@@ -20,7 +20,7 @@ class Dimension {
 extension AndroidNSAttributeParsing on XmlElement {
   T? getAndroidNSAttribute<T>(String name) =>
       getAttributeNode(name, namespace: androidNamespaceUri)
-          ?.let(parseAndroidResourceValue);
+          ?.let((value) => parseAndroidResourceValue<T>(value));
 
   Iterable<XmlAttribute> get androidNSAttributes =>
       attributes.where((attr) => attr.name.namespaceUri == androidNamespaceUri);

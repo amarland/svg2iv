@@ -69,15 +69,15 @@ abstract class VectorNodeBuilder<T extends VectorNode,
   @protected
   bool get hasAttributes_ {
     return [
-      fill,
-      fillAlpha,
-      stroke,
-      strokeAlpha,
-      strokeLineWidth,
-      strokeLineCap,
-      strokeLineJoin,
-      strokeLineMiter,
-      pathFillType,
+      _fill,
+      _fillAlpha,
+      _stroke,
+      _strokeAlpha,
+      _strokeLineWidth,
+      _strokeLineCap,
+      _strokeLineJoin,
+      _strokeLineMiter,
+      _pathFillType,
     ].anyNotNull();
   }
 

@@ -116,9 +116,10 @@ VectorPath? _parsePathElement(XmlElement pathElement) {
     final attributeName = attribute.name.local;
     switch (attributeName) {
       case 'fillType':
-        parseAndroidResourceValue<String>(attribute)
-            ?.let(pathFillTypeFromString)
-            ?.let(builder.pathFillType);
+        final PathFillType? pathFillType =
+            parseAndroidResourceValue<String>(attribute)
+                ?.let(pathFillTypeFromString);
+        pathFillType?.let(builder.pathFillType);
         break;
       case 'name':
         parseAndroidResourceValue<String>(attribute)?.let(builder.id);
