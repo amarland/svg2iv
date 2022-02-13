@@ -1,48 +1,36 @@
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:svg2iv/protobuf/image_vector.pb.dart';
-import 'package:svg2iv/protobuf/image_vector_transmitter.dart';
+import 'package:svg2iv/image_vector_adapter.dart';
+import 'package:svg2iv/image_vector_transmitter.dart';
+import 'package:svg2iv_common/model/gradient.dart';
+import 'package:svg2iv_common/model/image_vector.dart';
+import 'package:svg2iv_common/model/vector_path.dart';
 import 'package:test/test.dart';
 
 void main() {
   test(
-    'transmitImageVector successfully transmits a Protobuf ImageVector',
+    'transmitImageVector successfully transmits an ImageVector as JSON',
     () async {
-      final imageVectors = ImageVectorCollection(
-        nullableImageVectors: [
-          NullableImageVector(
-            value: ImageVector(
-              nodes: [
-                VectorNode(
-                  path: VectorPath(
-                    pathNodes: [
-                      PathNode(
-                        command: PathNode_Command.MOVE_TO,
-                        arguments: [
-                          PathNode_Argument(coordinate: 10.0),
-                          PathNode_Argument(coordinate: 20.0),
-                        ],
-                      )
-                    ],
-                    id: 'test_path',
-                    fill: Brush(
-                      linearGradient: Gradient(colors: [0xFFAABBCC]),
-                    ),
-                    fillAlpha: 0.75,
-                  ),
-                ),
-              ],
-              name: 'test',
-              viewportWidth: 20,
-              viewportHeight: 20,
-              width: 20,
-              height: 20,
-            ),
-          ),
-          NullableImageVector(nothing: Null.NOTHING),
-        ],
-      );
+      final imageVectors = <ImageVector?>[
+        ImageVectorBuilder(20.0, 20.0)
+            .width(20.0)
+            .height(20.0)
+            .name('test')
+            .addNode(
+              VectorPathBuilder([
+                PathNode(PathDataCommand.moveTo, [5.0, 5.0]),
+                PathNode(PathDataCommand.lineTo, [15.0, 15.0]),
+              ])
+                  .fill(Gradient.fromArgb(0xFFAABBCC))
+                  .fillAlpha(0.75)
+                  .stroke(Gradient.fromArgb(0xFFDDEEFF))
+                  .id('test_path')
+                  .build(),
+            )
+            .build(),
+        null,
+      ];
       final serverSocket =
           await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
       await transmitProtobufImageVector(
@@ -57,7 +45,7 @@ void main() {
       }
       await socket.cancel();
       await serverSocket.close();
-      expect(ImageVectorCollection.fromBuffer(buffer), imageVectors);
+      expect(buffer, imageVectors.toJson());
     },
   );
 }

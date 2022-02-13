@@ -43,6 +43,10 @@ extension NullableIterableNullChecking<E> on Iterable<E>? {
   bool get isNullOrEmpty => this == null || this!.isEmpty;
 }
 
+extension MapPurging<K, V> on Map<K, V?> {
+  void removeWhereValueIsNull() => removeWhere((_, value) => value == null);
+}
+
 extension Scoping<T, R> on T {
   R let(R Function(T) action) => action(this);
 

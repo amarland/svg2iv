@@ -1,13 +1,14 @@
 import 'dart:io';
 
-import 'package:svg2iv/protobuf/image_vector.pb.dart';
+import 'image_vector_adapter.dart';
+import 'package:svg2iv_common/model/image_vector.dart';
 
 Future transmitProtobufImageVector(
-  ImageVectorCollection imageVectors,
+  Iterable<ImageVector?> imageVectors,
   InternetAddress host,
   int portNumber,
 ) async {
   final socket = await Socket.connect(host, portNumber);
-  socket.add(imageVectors.writeToBuffer());
+  socket.add(imageVectors.toJson());
   return await socket.flush().then((_) => socket.destroy());
 }

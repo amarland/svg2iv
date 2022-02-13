@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:svg2iv/protobuf/image_vector_adapter.dart';
-import 'package:svg2iv/protobuf/image_vector_transmitter.dart';
+import 'package:svg2iv/image_vector_transmitter.dart';
 import 'package:svg2iv_common/file_parser.dart';
 import 'package:svg2iv_common/destination_file_writer.dart';
 import 'package:svg2iv_common/extensions.dart';
@@ -178,7 +177,7 @@ If not provided, the generated property will be declared as a top-level property
       exit(1);
     }
     await transmitProtobufImageVector(
-      imageVectorIterableAsProtobuf(parseResult.item1),
+      parseResult.item1,
       host,
       portNumber,
     ).catchError((_, stackTrace) => stderr.writeln(stackTrace));
