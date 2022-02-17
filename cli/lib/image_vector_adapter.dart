@@ -21,7 +21,7 @@ extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
 Map<String, dynamic>? _mapImageVector(ImageVector? imageVector) {
   if (imageVector == null) return null;
   return {
-    'name': imageVector.name,
+    'vectorName': imageVector.name,
     'viewportWidth': imageVector.viewportWidth,
     'viewportHeight': imageVector.viewportHeight,
     'width': imageVector.width,
@@ -39,7 +39,7 @@ Iterable<Map<String, dynamic>> _mapVectorNodes(Iterable<VectorNode> nodes) =>
 
 Map<String, dynamic> _mapVectorGroup(VectorGroup group) {
   return {
-    'id': group.id,
+    'groupName': group.id,
     'rotation': group.rotation?.angle,
     'pivotX': group.rotation?.pivotX,
     'pivotY': group.rotation?.pivotY,
@@ -57,7 +57,7 @@ Map<String, dynamic> _mapVectorPath(VectorPath path) {
   final strokeLineJoin = path.strokeLineJoin;
   final pathFillType = path.pathFillType;
   return {
-    'id': path.id,
+    'pathName': path.id,
     'fill': _mapGradient(path.fill),
     'fillAlpha': path.fillAlpha,
     'stroke': _mapGradient(path.stroke),
