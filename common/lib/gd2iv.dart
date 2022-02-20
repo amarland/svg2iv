@@ -155,4 +155,5 @@ Tuple2<Gradient, double>? _parseStroke(XmlElement rootElement) {
   if (color != null && width != null) {
     return Tuple2(color, width);
   }
+  return null;
 }

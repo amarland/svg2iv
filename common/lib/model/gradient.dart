@@ -166,4 +166,5 @@ TileMode? tileModeFromString(String valueAsString) {
     case 'reflect':
       return TileMode.mirror;
   }
+  return null;
 }

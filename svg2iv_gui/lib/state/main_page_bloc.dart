@@ -6,8 +6,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:svg2iv_common/file_parser.dart';
 import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common/file_parser.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:tuple/tuple.dart';
 
@@ -57,7 +57,11 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       event.paths?.let(
         (p) async {
           Tuple2<List<ImageVector?>, List<String>> parse(List<String> paths) =>
-              parseFiles(paths.map(File.new).toList(growable: false));
+              parseFiles(paths
+                  .map((path) =>
+                      Tuple2(File(path), SourceFileDefinitionType.explicit))
+                  .toList(growable: false));
+
           final parseResult = await compute(parse, p);
           _imageVectors.clear();
           _previewIndex = 0;

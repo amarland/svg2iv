@@ -427,6 +427,7 @@ VectorGroup? _handleClipPathAttribute(
           .build();
     }
   }
+  return null;
 }
 
 List<PathNode> _extractPathDataFromLinePoints(

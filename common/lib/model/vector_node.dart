@@ -154,6 +154,7 @@ PathFillType? pathFillTypeFromString(String valueAsString) {
     case 'evenodd':
       return PathFillType.evenOdd;
   }
+  return null;
 }
 
 enum StrokeCap { butt, round, square }
@@ -167,6 +168,7 @@ StrokeCap? strokeCapFromString(String valueAsString) {
     case 'square':
       return StrokeCap.square;
   }
+  return null;
 }
 
 enum StrokeJoin { miter, round, bevel }
@@ -180,6 +182,7 @@ StrokeJoin? strokeJoinFromString(String valueAsString) {
     case 'round':
       return StrokeJoin.round;
   }
+  return null;
 }
 
 @protected

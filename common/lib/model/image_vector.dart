@@ -158,4 +158,5 @@ BlendMode? blendModeFromString(String valueAsString) {
     case 'add':
       return BlendMode.plus;
   }
+  return null;
 }
