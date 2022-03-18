@@ -37,7 +37,7 @@ void main() {
       final sourceIterable = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
       const fillValue = 'fill';
       final actualIterable =
-          sourceIterable.chunked(6, fillValue: fillValue).toList();
+          sourceIterable.chunked(6, fillValue: fillValue).toNonGrowableList();
       expect(actualIterable.length, 2);
       expect(
         actualIterable.expand((pair) => pair), // flatten

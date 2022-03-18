@@ -6,13 +6,14 @@ import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:svg2iv_common/model/vector_group.dart';
 import 'package:svg2iv_common/model/vector_node.dart';
 import 'package:svg2iv_common/model/vector_path.dart';
+import 'package:svg2iv_common/color_utils.dart';
 
 extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
   List<int> toJson() {
     return JsonUtf8Encoder(
       null,
       (o) => o is Iterable
-          ? o.toList(growable: false)
+          ? o.toNonGrowableList()
           : throw JsonUnsupportedObjectError(o),
     ).convert(map(_mapImageVector));
   }
@@ -26,7 +27,7 @@ Map<String, dynamic>? _mapImageVector(ImageVector? imageVector) {
     'viewportHeight': imageVector.viewportHeight,
     'width': imageVector.width,
     'height': imageVector.height,
-    'tintColor': imageVector.tintColor?.let(_mapColor),
+    'tintColor': imageVector.tintColor?.let(colorIntToArgb),
     'tintBlendMode': imageVector.tintBlendMode?.name,
     'nodes': _mapVectorNodes(imageVector.nodes),
   }..removeWhereValueIsNull();
@@ -83,7 +84,7 @@ dynamic _mapGradient(Gradient? gradient) {
   if (gradient == null) return null;
 
   if (gradient.colors.length == 1) {
-    return _mapColor(gradient.colors[0]);
+    return colorIntToArgb(gradient.colors[0]);
   }
   final Map<String, double> typeSpecificAttributes;
   final isLinear = gradient is LinearGradient;
@@ -104,18 +105,9 @@ dynamic _mapGradient(Gradient? gradient) {
   }
   return {
     'type': isLinear ? 'linear' : 'radial',
-    'colors': gradient.colors.map(_mapColor),
+    'colors': gradient.colors.map(colorIntToArgb),
     'stops': gradient.stops,
     ...typeSpecificAttributes,
     'tileMode': gradient.tileMode?.name,
   }..removeWhereValueIsNull();
-}
-
-List<int> _mapColor(int value) {
-  return [
-    (0xFF000000 & value) >> 24,
-    (0x00FF0000 & value) >> 16,
-    (0x0000ff00 & value) >> 8,
-    0x000000FF & value,
-  ];
 }

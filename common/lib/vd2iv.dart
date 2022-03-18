@@ -12,7 +12,10 @@ import 'model/vector_node.dart';
 import 'model/vector_path.dart';
 import 'path_data_parser.dart';
 
-ImageVector parseVectorDrawableElement(XmlElement rootElement) {
+ImageVector parseVectorDrawableElement(
+  XmlElement rootElement, {
+  bool normalizePaths = false,
+}) {
   final parsedRequiredAttributes = <String, dynamic>{
     'viewportWidth': rootElement.getAndroidNSAttribute<double>('viewportWidth'),
     'viewportHeight':
@@ -50,10 +53,10 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
         builder.addNodes(_parseGroupElement(element));
         break;
       case 'path':
-        _parsePathElement(element)?.let(builder.addNode);
+        _parsePathElement(element, normalizePaths)?.let(builder.addNode);
         break;
       case 'clip-path':
-        _parseClipPathElement(element)?.let(builder.addNode);
+        _parseClipPathElement(element, normalizePaths)?.let(builder.addNode);
         break;
     }
   }
@@ -106,9 +109,13 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
       : group.nodes;
 }
 
-VectorPath? _parsePathElement(XmlElement pathElement) {
+VectorPath? _parsePathElement(
+  XmlElement pathElement, [
+  bool shouldNormalize = false,
+]) {
   final pathData = parsePathData(
     pathElement.getAndroidNSAttribute<String>('pathData'),
+    shouldNormalize: shouldNormalize,
   );
   if (pathData.isEmpty) return null;
   final builder = VectorPathBuilder(pathData);
@@ -194,9 +201,14 @@ VectorPath? _parsePathElement(XmlElement pathElement) {
   return builder.build();
 }
 
-VectorGroup? _parseClipPathElement(XmlElement clipPathElement) {
-  final clipPathData =
-      parsePathData(clipPathElement.getAndroidNSAttribute<String>('pathData'));
+VectorGroup? _parseClipPathElement(
+  XmlElement clipPathElement, [
+  bool shouldNormalize = false,
+]) {
+  final clipPathData = parsePathData(
+    clipPathElement.getAndroidNSAttribute<String>('pathData'),
+    shouldNormalize: shouldNormalize,
+  );
   return clipPathData.isNotEmpty
       ? VectorGroupBuilder().clipPathData(clipPathData).build()
       : null;

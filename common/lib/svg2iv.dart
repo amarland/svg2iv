@@ -14,16 +14,20 @@ import 'path_data_parser.dart';
 import 'svg_preprocessor.dart';
 
 final _definitionSeparatorPattern = RegExp(r'[,\s]\s*');
-
 final _definitions = <String, dynamic>{};
+var _normalizePaths = false;
 
-ImageVector parseSvgElement(XmlElement rootElement) {
+ImageVector parseSvgElement(
+  XmlElement rootElement, {
+  bool normalizePaths = false,
+}) {
+  _normalizePaths = normalizePaths;
   preprocessSvg(rootElement);
   final viewBox = rootElement
       .getAttribute('viewBox')
       ?.split(_definitionSeparatorPattern)
       .map(double.tryParse)
-      .toList()
+      .toNonGrowableList()
       .takeIf(
         (viewBox) => viewBox.length == 4 && viewBox.sublist(2).everyNotNull(),
       );
@@ -182,11 +186,15 @@ Transformations? _parseTransformations(XmlElement element) {
   final transformAttribute = element.getAttribute('transform');
   if (transformAttribute == null) return null;
   final builder = TransformationsBuilder();
-  final definitions = transformAttribute.split(RegExp(r'\)\s*')).toList()
+  final definitions = transformAttribute
+      .split(RegExp(r'\)\s*'))
+      .toList(growable: true)
     ..removeLast(); // the last element is an empty string
   for (final definition in definitions) {
-    final nameAndValues =
-        definition.split(RegExp(r'\s*\(\s*')).map((s) => s.trim()).toList();
+    final nameAndValues = definition
+        .split(RegExp(r'\s*\(\s*'))
+        .map((s) => s.trim())
+        .toNonGrowableList();
     final name = nameAndValues[0];
     final values = nameAndValues[1];
     if (nameAndValues.length < 2 || values.isEmpty) {
@@ -196,7 +204,7 @@ Transformations? _parseTransformations(XmlElement element) {
         .split(_definitionSeparatorPattern)
         .map(double.tryParse)
         .whereNotNull()
-        .toList();
+        .toNonGrowableList();
     switch (name) {
       case 'translate':
         final count = parsedValues.length;
@@ -265,6 +273,7 @@ VectorNode? _parsePathElement(XmlElement pathElement) {
   final pathData = parsePathData(
     pathElement.getAttribute('d'),
     translation: translation,
+    shouldNormalize: _normalizePaths,
   );
   return _buildVectorNodeFromPathData(pathElement, pathData, transformations);
 }
@@ -300,7 +309,7 @@ VectorNode? _parsePolyShapeElement(XmlElement polyShapeElement) {
       .getAttribute('points')
       ?.split(_definitionSeparatorPattern)
       .map(double.tryParse)
-      .toList();
+      .toNonGrowableList();
   final transformations = _parseTransformations(polyShapeElement);
   final pathData = _extractPathDataFromLinePoints(points, transformations);
   if (polyShapeElement.name.local == 'polygon') {
@@ -443,7 +452,7 @@ List<PathNode> _extractPathDataFromLinePoints(
   if (translation != null) {
     points = points
         .mapIndexed((i, p) => p! + (i.isEven ? translation.x : translation.y))
-        .toList();
+        .toNonGrowableList();
   }
   return [
     PathNode(PathDataCommand.moveTo, points.sublist(0, 2)),
@@ -529,7 +538,7 @@ Gradient? _parseGradient(XmlElement gradientElement) {
         }
       })
       .whereNotNull()
-      .toList();
+      .toNonGrowableList();
   if (colors.isEmpty) {
     return null;
   }
@@ -541,7 +550,7 @@ Gradient? _parseGradient(XmlElement gradientElement) {
         return offset;
       })
       .whereNotNull()
-      .toList();
+      .toNonGrowableList();
   if (stops.isNotEmpty && colors.length != stops.length) {
     return null;
   }
@@ -601,7 +610,7 @@ Gradient? _parseBrush(String brushAsString) {
       .substring(prefixLength + 1, value.length - 1)
       .split(_definitionSeparatorPattern)
       .map(num.tryParse)
-      .toList();
+      .toNonGrowableList();
 
   if (brushAsString.startsWith('#')) {
     gradient = Gradient.fromHexString(brushAsString);
@@ -609,14 +618,16 @@ Gradient? _parseBrush(String brushAsString) {
     final rgb = extractDefinitionValues(brushAsString, 4)
         .whereType<int>()
         .cast<int>()
-        .toList();
+        .toNonGrowableList();
     if (rgb.isNotEmpty && rgb.length == 3) {
       gradient = Gradient.fromArgbComponents(0xFF, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('rgba(')) {
-    final rgba =
-        extractDefinitionValues(brushAsString, 5).whereNotNull().toList();
-    final rgb = rgba.sublist(0, 4).whereType<int>().cast<int>().toList();
+    final rgba = extractDefinitionValues(brushAsString, 5)
+        .whereNotNull()
+        .toNonGrowableList();
+    final rgb =
+        rgba.sublist(0, 4).whereType<int>().cast<int>().toNonGrowableList();
     final alpha = rgba.length == 4 ? rgba[3] * 0xFF ~/ 1 : null;
     if (alpha != null && rgb.isNotEmpty && rgb.length == 3) {
       gradient = Gradient.fromArgbComponents(alpha, rgb[0], rgb[1], rgb[2]);

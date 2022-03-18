@@ -131,7 +131,7 @@ class VectorGroupBuilder
           );
         }
       },
-    ).toList();
+    ).toNonGrowableList();
   }
 
   @override
@@ -172,7 +172,7 @@ class VectorGroupBuilder
       }
     }
     return VectorGroup._init(
-      _nodes.toList(growable: false),
+      _nodes.toNonGrowableList(),
       id: id_,
       rotation: _rotation,
       scale: _scale,

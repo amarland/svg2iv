@@ -73,8 +73,10 @@ Gradient? parseGradient(XmlElement gradientElement, [Rect? bounds]) {
   // TODO: support sweep gradients
   if (gradientType == null || gradientType == 'sweep') return null;
   final colorStops = _parseGradientColorStops(gradientElement);
-  final colors = colorStops.map((colorStop) => colorStop.item2).toList();
-  final stops = colorStops.map((colorStop) => colorStop.item1).toList();
+  final colors =
+      colorStops.map((colorStop) => colorStop.item2).toNonGrowableList();
+  final stops =
+      colorStops.map((colorStop) => colorStop.item1).toNonGrowableList();
   final tileMode = gradientElement
       .getAndroidNSAttribute<String>('tileMode')
       ?.let(tileModeFromString);

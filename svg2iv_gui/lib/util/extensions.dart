@@ -72,7 +72,7 @@ extension GradientToPaintMapping on Gradient {
         paint.shader = ui.Gradient.linear(
           ui.Offset(gradient.startX, gradient.startY),
           ui.Offset(gradient.endX, gradient.endY),
-          gradient.colors.map(ui.Color.new).toList(),
+          gradient.colors.map(ui.Color.new).toNonGrowableList(),
           gradient.stops,
           gradient.tileMode.toFlutterTileMode(),
         );
@@ -82,7 +82,7 @@ extension GradientToPaintMapping on Gradient {
       paint.shader = ui.Gradient.radial(
         ui.Offset(gradient.centerX, gradient.centerY),
         gradient.radius,
-        gradient.colors.map(ui.Color.new).toList(),
+        gradient.colors.map(ui.Color.new).toNonGrowableList(),
         gradient.stops,
         gradient.tileMode.toFlutterTileMode(),
       );

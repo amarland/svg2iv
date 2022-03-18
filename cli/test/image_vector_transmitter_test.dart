@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:svg2iv/image_vector_adapter.dart';
+import 'package:svg2iv/image_vector_json_adapter.dart';
 import 'package:svg2iv/image_vector_transmitter.dart';
 import 'package:svg2iv_common/model/gradient.dart';
 import 'package:svg2iv_common/model/image_vector.dart';

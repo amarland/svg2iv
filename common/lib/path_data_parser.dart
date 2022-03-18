@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:path_parsing/path_parsing.dart';
 
+import 'extensions.dart';
 import 'model/transformations.dart';
 import 'model/vector_path.dart';
 
@@ -141,7 +142,7 @@ List<PathNode> parsePathData(
           }
         })
         .whereNotNull()
-        .toList();
+        .toNonGrowableList();
   }
 }
 

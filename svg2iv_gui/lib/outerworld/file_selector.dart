@@ -30,7 +30,7 @@ if ($dialog.ShowDialog() -eq [Windows.Forms.DialogResult]::OK) {
             .split(':')
             .skip(1) // "alias Macintosh HD"
             .join(r'\'))
-        .toList();
+        .toNonGrowableList();
   } else {
     return await _readShellCommandOutputLines(
       'zenity --file-selection --file-filter="*.svg *.xml"'

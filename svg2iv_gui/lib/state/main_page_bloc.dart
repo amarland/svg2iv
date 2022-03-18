@@ -60,7 +60,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
               parseFiles(paths
                   .map((path) =>
                       Tuple2(File(path), SourceFileDefinitionType.explicit))
-                  .toList(growable: false));
+                  .toNonGrowableList());
 
           final parseResult = await compute(parse, p);
           _imageVectors.clear();

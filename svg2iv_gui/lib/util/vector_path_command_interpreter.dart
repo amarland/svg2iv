@@ -1,17 +1,14 @@
 import 'dart:ui';
 
 import 'package:svg2iv_common/model/vector_path.dart';
-
-class _Point {
-  double x = 0.0, y = 0.0;
-}
+import 'package:vector_math/vector_math.dart';
 
 void interpretPathCommands(List<PathNode> pathNodes, Path path) {
   path.reset();
-  final currentPoint = _Point();
-  final controlPoint = _Point();
-  final segmentPoint = _Point();
-  final reflectiveControlPoint = _Point();
+  final currentPoint = Vector2.zero();
+  final controlPoint = Vector2.zero();
+  final segmentPoint = Vector2.zero();
+  final reflectiveControlPoint = Vector2.zero();
   var isPreviousNodeACurve = false;
 
   void _onMoveToCommandReceived(List<dynamic> arguments) {

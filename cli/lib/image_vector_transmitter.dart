@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'image_vector_adapter.dart';
+import 'image_vector_json_adapter.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
 
 Future transmitProtobufImageVector(

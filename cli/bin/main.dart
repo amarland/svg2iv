@@ -9,6 +9,7 @@ import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:tuple/tuple.dart';
 
 const destinationOptionName = 'destination';
+const forceLottieFlagName = 'force-lottie';
 const helpFlagName = 'help';
 const quietFlagName = 'quiet';
 const receiverOptionName = 'receiver';
@@ -50,6 +51,7 @@ If not set, the generated property will be declared as a top-level property.
       help: 'Show error messages only.',
       negatable: false,
     )
+    ..addFlag(forceLottieFlagName, negatable: false, hide: true)
     ..addFlag(
       helpFlagName,
       abbr: 'h',
@@ -93,7 +95,7 @@ If not set, the generated property will be declared as a top-level property.
           },
         ),
       )
-      .toList(growable: false);
+      .toNonGrowableList();
   if (sourceFiles.isEmpty) {
     _log(
       'No source file(s) specified;'
@@ -101,7 +103,7 @@ If not set, the generated property will be declared as a top-level property.
     );
     sourceFiles = _listSvgFilesRecursivelySync(Directory.current)
         .map((file) => Tuple2(file, SourceFileDefinitionType.implicit))
-        .toList(growable: false);
+        .toNonGrowableList();
     if (sourceFiles.isEmpty) {
       _logError(
         'No SVG/XML files were found in the current working directory.'
@@ -162,7 +164,11 @@ If not set, the generated property will be declared as a top-level property.
       }
     }
   }
-  final parseResult = parseFiles(sourceFiles);
+  final convertToLottie = argResults[forceLottieFlagName] as bool;
+  final parseResult = parseFiles(
+    sourceFiles,
+    normalizePaths: convertToLottie,
+  );
   final imageVectors = <Tuple2<String, ImageVector>>[];
   for (var index = 0; index < parseResult.item1.length; index++) {
     final imageVector = parseResult.item1[index];

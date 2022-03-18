@@ -11,10 +11,12 @@ import 'vd2iv.dart';
 enum SourceFileDefinitionType { explicit, implicit }
 
 Tuple2<List<ImageVector?>, List<String>> parseFiles(
-  List<Tuple2<File, SourceFileDefinitionType>> files,
-) {
-  if (files.isEmpty) return Tuple2(List.empty(), List.empty());
-
+  List<Tuple2<File, SourceFileDefinitionType>> files, {
+  bool normalizePaths = false,
+}) {
+  if (files.isEmpty) {
+    return Tuple2(List.empty(), List.empty());
+  }
   final imageVectors = <ImageVector?>[];
   final errorMessages = <String>[];
   for (final pair in files) {
@@ -26,10 +28,20 @@ Tuple2<List<ImageVector?>, List<String>> parseFiles(
       final rootElementName = rootElement.name.local;
       switch (rootElementName) {
         case 'svg':
-          imageVectors.add(parseSvgElement(rootElement));
+          imageVectors.add(
+            parseSvgElement(
+              rootElement,
+              normalizePaths: normalizePaths,
+            ),
+          );
           break;
         case 'vector':
-          imageVectors.add(parseVectorDrawableElement(rootElement));
+          imageVectors.add(
+            parseVectorDrawableElement(
+              rootElement,
+              normalizePaths: normalizePaths,
+            ),
+          );
           break;
         case 'shape':
           imageVectors.add(parseShapeDrawableElement(rootElement));
