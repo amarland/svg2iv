@@ -11,11 +11,13 @@ class Checkerboard extends StatefulWidget {
     Key? key,
     required this.size,
     required this.foregroundImageVector,
-    this.squareColor,
+    this.oddSquareColor,
+    this.evenSquareColor,
   }) : super(key: key);
 
   final Size size;
-  final Color? squareColor;
+  final Color? oddSquareColor;
+  final Color? evenSquareColor;
   final ImageVector foregroundImageVector;
 
   @override
@@ -39,10 +41,15 @@ class _CheckerboardState extends State<Checkerboard> {
 
   @override
   Widget build(BuildContext context) {
+    final themeData = Theme.of(context);
+    final isInLightMode = themeData.brightness == Brightness.light;
+    final onSurfaceColor = themeData.colorScheme.onSurface;
     return CustomPaint(
       painter: _CheckerboardPainter(
-        widget.squareColor ??
-            Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+        oddSquareColor: widget.oddSquareColor ??
+            onSurfaceColor.withOpacity(isInLightMode ? 0.38 : 0.54),
+        evenSquareColor: widget.oddSquareColor ??
+            onSurfaceColor.withOpacity(isInLightMode ? 0.08 : 0.16),
       ),
       foregroundPainter: _cachedImage?.let(_ImagePainter.new),
     );
@@ -75,9 +82,13 @@ class _CheckerboardState extends State<Checkerboard> {
 }
 
 class _CheckerboardPainter extends CustomPainter {
-  const _CheckerboardPainter(this.squareColor) : super();
+  const _CheckerboardPainter({
+    required this.oddSquareColor,
+    required this.evenSquareColor,
+  }) : super();
 
-  final Color squareColor;
+  final Color oddSquareColor;
+  final Color evenSquareColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -87,17 +98,18 @@ class _CheckerboardPainter extends CustomPainter {
     final offsetX = (size.width - actualWidth) / 2,
         offsetY = (size.height - actualHeight) / 2;
     double x = offsetX, y = offsetY;
+    var odd = true;
+    final paint = Paint()..isAntiAlias = false;
     while (y < actualHeight) {
       canvas.drawRect(
         Rect.fromLTWH(x, y, squareSize, squareSize),
-        Paint()..color = squareColor,
+        paint..color = odd ? oddSquareColor : evenSquareColor,
       );
-      if (x < actualWidth - squareSize * 2) {
-        x += squareSize * 2;
+      if (x < size.width - offsetX) {
+        x += squareSize;
+        odd = !odd;
       } else {
-        x = (y + squareSize) % (squareSize * 2);
-      }
-      if (x <= squareSize + offsetX) {
+        x = (y + squareSize) % (squareSize);
         y += squareSize;
       }
     }
@@ -105,7 +117,8 @@ class _CheckerboardPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CheckerboardPainter oldPainter) =>
-      squareColor != oldPainter.squareColor;
+      oddSquareColor != oldPainter.oddSquareColor ||
+      evenSquareColor != oldPainter.evenSquareColor;
 }
 
 class _ImagePainter extends CustomPainter {
