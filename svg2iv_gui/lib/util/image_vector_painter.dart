@@ -106,8 +106,10 @@ void _extractAndAddPath(
   double end,
   ui.Path destination,
 ) {
-  destination.addPath(
-    metric.extractPath(start, end, startWithMoveTo: true),
-    ui.Offset.zero,
-  );
+  destination
+    ..reset()
+    ..addPath(
+      metric.extractPath(start, end, startWithMoveTo: true),
+      ui.Offset.zero,
+    );
 }
