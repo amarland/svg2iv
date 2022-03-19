@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:svg2iv_common/model/vector_group.dart';
@@ -60,6 +61,24 @@ void _paintVectorPath(
   ui.Path reusablePath,
 ) {
   interpretPathCommands(vectorPath.pathData, reusablePath);
+  if (vectorPath.trimPathStart != null || vectorPath.trimPathEnd != null) {
+    final metric = reusablePath.computeMetrics().singleOrNull;
+    if (metric != null) {
+      final length = metric.length;
+      final offset =
+          vectorPath.trimPathOffset ?? VectorPath.defaultTrimPathOffset;
+      var start = vectorPath.trimPathStart ?? VectorPath.defaultTrimPathStart;
+      var end = vectorPath.trimPathEnd ?? VectorPath.defaultTrimPathEnd;
+      start = ((start + offset) % 1.0) * length;
+      end = ((end + offset) % 1.0) * length;
+      if (start > end) {
+        _extractAndAddPath(metric, start, length, reusablePath);
+        _extractAndAddPath(metric, 0.0, end, reusablePath);
+      } else {
+        _extractAndAddPath(metric, start, end, reusablePath);
+      }
+    }
+  }
   final pathFillType = vectorPath.pathFillType ?? PathFillType.nonZero;
   reusablePath.fillType = pathFillType.toFlutterPathFillType();
   canvas.drawPath(
@@ -79,4 +98,16 @@ void _paintVectorPath(
           vectorPath.strokeLineWidth ?? VectorPath.defaultStrokeLineWidth;
     canvas.drawPath(reusablePath, strokePaint);
   }
+}
+
+void _extractAndAddPath(
+  ui.PathMetric metric,
+  double start,
+  double end,
+  ui.Path destination,
+) {
+  destination.addPath(
+    metric.extractPath(start, end, startWithMoveTo: true),
+    ui.Offset.zero,
+  );
 }
