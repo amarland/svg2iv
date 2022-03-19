@@ -29,7 +29,7 @@ ImageVector parseSvgElement(
       .map(double.tryParse)
       .toNonGrowableList()
       .takeIf(
-        (viewBox) => viewBox.length == 4 && viewBox.sublist(2).everyNotNull(),
+        (viewBox) => viewBox.length == 4 && viewBox.slice(2).everyNotNull(),
       );
   final widthAsString = rootElement.getAttribute('width');
   final heightAsString = rootElement.getAttribute('height');
@@ -455,9 +455,9 @@ List<PathNode> _extractPathDataFromLinePoints(
         .toNonGrowableList();
   }
   return [
-    PathNode(PathDataCommand.moveTo, points.sublist(0, 2)),
+    PathNode(PathDataCommand.moveTo, points.slice(0, 2)),
     ...points
-        .sublist(2)
+        .slice(2)
         .chunked(2)
         .map((points) => PathNode(PathDataCommand.lineTo, points)),
   ];
@@ -616,20 +616,20 @@ Gradient? _parseBrush(String brushAsString) {
     gradient = Gradient.fromHexString(brushAsString);
   } else if (brushAsString.startsWith('rgb(')) {
     final rgb = extractDefinitionValues(brushAsString, 4)
-        .whereType<int>()
-        .cast<int>()
-        .toNonGrowableList();
-    if (rgb.isNotEmpty && rgb.length == 3) {
+            .takeIf((l) => l.every((e) => e is int))
+            ?.cast<int>() ??
+        List.empty();
+    if (rgb.length == 3) {
       gradient = Gradient.fromArgbComponents(0xFF, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('rgba(')) {
     final rgba = extractDefinitionValues(brushAsString, 5)
         .whereNotNull()
         .toNonGrowableList();
-    final rgb =
-        rgba.sublist(0, 4).whereType<int>().cast<int>().toNonGrowableList();
+    final rgb = rgba.slice(0, 4).takeIf((l) => l.every((e) => e is int)) ??
+        List.empty();
     final alpha = rgba.length == 4 ? rgba[3] * 0xFF ~/ 1 : null;
-    if (alpha != null && rgb.isNotEmpty && rgb.length == 3) {
+    if (alpha != null && rgb.length == 3) {
       gradient = Gradient.fromArgbComponents(alpha, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('url(#')) {

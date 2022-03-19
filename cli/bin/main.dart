@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:collection/collection.dart';
 import 'package:svg2iv/image_vector_transmitter.dart';
 import 'package:svg2iv_common/destination_file_writer.dart';
 import 'package:svg2iv_common/extensions.dart';
@@ -126,7 +127,7 @@ If not set, the generated property will be declared as a top-level property.
         final pathSegments = file.uri.pathSegments;
         return pathSegments.isNotEmpty
             ? pathSegments
-                .sublist(0, pathSegments.length - 1)
+                .slice(0, pathSegments.length - 1)
                 .join(Platform.pathSeparator)
             : '';
       });

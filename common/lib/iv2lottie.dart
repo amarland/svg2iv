@@ -41,22 +41,31 @@ dynamic _mapVectorNode(VectorNode node) => node is VectorGroup
     : _mapVectorPath(node as VectorPath);
 
 Map<String, dynamic> _mapVectorGroup(VectorGroup group) {
-  return { /* TODO */ };
+  return {
+    /* TODO */
+  };
 }
 
 Map<String, dynamic> _mapVectorPath(VectorPath path) {
   final pathId = path.id;
   final pathShapes = _mapPathShapes(path, pathId);
-  final fillShape = _mapPathFill(path);
   final strokeShape = _mapPathStroke(path);
   return {
     'nm': pathId,
     'ty': 'gr',
     'it': pathShapes
-      ..add(fillShape)
+      ..add(_mapPathFill(path))
       ..also((shapes) {
         if (strokeShape != null) {
           shapes.add(strokeShape);
+        }
+        if (path.trimPathStart != null || path.trimPathEnd != null) {
+          shapes.add({
+            'ty': 'tm',
+            's': path.trimPathStart,
+            'e': path.trimPathEnd,
+            'o': path.trimPathOffset
+          }..removeWhereValueIsNull());
         }
       }),
   };
