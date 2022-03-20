@@ -13,7 +13,7 @@ import 'extensions.dart';
 import 'model/image_vector.dart';
 
 extension ImageVectorToLottieJsonConversion on ImageVector? {
-  List<int> toJson() => JsonUtf8Encoder().convert(_mapImageVector);
+  List<int> toLottieJson() => JsonUtf8Encoder().convert(_mapImageVector);
 }
 
 Map<String, dynamic>? _mapImageVector(ImageVector? imageVector) {
@@ -32,7 +32,13 @@ Map<String, dynamic>? _mapImageVector(ImageVector? imageVector) {
     'fr': 1,
     'w': imageVector.viewportWidth,
     'h': imageVector.viewportHeight,
-    'layers': nodes.map(_mapVectorNode),
+    'layers': [
+      {
+        'ty': 4,
+        'ks': {'o': 100.0.toNonAnimatedProperty()},
+        'shapes': nodes.reversed.map(_mapVectorNode).toNonGrowableList(),
+      },
+    ],
   };
 }
 
@@ -42,8 +48,28 @@ dynamic _mapVectorNode(VectorNode node) => node is VectorGroup
 
 Map<String, dynamic> _mapVectorGroup(VectorGroup group) {
   return {
-    /* TODO */
-  };
+    'nm': group.id,
+    'ty': 'gr',
+    'a': group.rotation
+        ?.let(
+          (it) => [
+            it.pivotX ?? VectorGroup.defaultPivotX,
+            it.pivotY ?? VectorGroup.defaultPivotY,
+          ],
+        )
+        .toNonAnimatedProperty(),
+    'p': group.translation?.let((it) => [it.x, it.y]).toNonAnimatedProperty(),
+    's': group.scale
+        ?.let(
+          (it) => [
+            it.x * 100.0,
+            (it.y ?? VectorGroup.defaultScaleY) * 100.0,
+          ],
+        )
+        .toNonAnimatedProperty(),
+    'r': group.rotation?.angle.toNonAnimatedProperty(),
+    'it': group.nodes.reversed.map(_mapVectorNode),
+  }..removeWhereValueIsNull();
 }
 
 Map<String, dynamic> _mapVectorPath(VectorPath path) {
@@ -78,8 +104,11 @@ Map<String, dynamic> _mapPathFill(VectorPath path) {
     final color = pathFill?.colors.singleOrNull ?? 0xFFFFFFFF;
     fillShape = {
       'ty': 'fl',
-      'o': _getOpacityForColorInt(color, path.fillAlpha),
-      'c': colorIntToRgbFractions(color),
+      'o': _getOpacityForColorInt(
+        color,
+        path.fillAlpha,
+      ).toNonAnimatedProperty(),
+      'c': colorIntToRgbFractions(color).toNonAnimatedProperty(),
       'r': path.pathFillType == PathFillType.evenOdd ? 2 : 1,
     };
   } else {
@@ -102,8 +131,8 @@ Map<String, dynamic> _mapGradient(Gradient pathFill) {
   final colorCount = pathFill.colors.length;
   return {
     't': pathFill is LinearGradient ? 1 : 2,
-    's': startPoint.storage,
-    'e': endPoint.storage,
+    's': startPoint.storage.toNonAnimatedProperty(),
+    'e': endPoint.storage.toNonAnimatedProperty(),
     'g': {
       'k': Iterable.generate(
         colorCount * 4 + colorCount * 2,
@@ -111,13 +140,14 @@ Map<String, dynamic> _mapGradient(Gradient pathFill) {
           yield pathFill.stops[index];
           yield* colorIntToRgbFractions(pathFill.colors[index]);
         },
-      ).flattened.toNonGrowableList()
-        ..addAll(
-          Iterable.generate((colorCount * 2), (index) sync* {
-            yield pathFill.stops[index];
-            yield alphaForColorInt(pathFill.colors[index]) / 255.0;
-          }).flattened,
-        ),
+      )..flattened.toNonGrowableList().also((it) {
+          it.addAll(
+            Iterable.generate((colorCount * 2), (index) sync* {
+              yield pathFill.stops[index];
+              yield alphaForColorInt(pathFill.colors[index]) / 255.0;
+            }).flattened,
+          );
+        }).toNonAnimatedProperty(),
       'p': colorCount,
     },
   };
@@ -141,12 +171,15 @@ Map<String, dynamic>? _mapPathStroke(VectorPath path) {
     'lc': lineCapIndex > -1 ? lineCapIndex + 1 : null,
     'lj': lineJoinIndex > -1 ? lineJoinIndex + 1 : null,
     'ml': path.strokeLineMiter,
-    'w': path.strokeLineWidth,
+    'w': path.strokeLineWidth.toNonAnimatedProperty(),
   };
   if (pathStroke.colors.length == 1) {
     final color = pathStroke.colors[0];
-    strokeShape['o'] = _getOpacityForColorInt(color, path.strokeAlpha);
-    strokeShape['c'] = colorIntToRgbFractions(color);
+    strokeShape['o'] = _getOpacityForColorInt(
+      color,
+      path.strokeAlpha,
+    ).toNonAnimatedProperty();
+    strokeShape['c'] = colorIntToRgbFractions(color).toNonAnimatedProperty();
   } else {
     strokeShape
       ..addAll(_mapGradient(pathStroke))
@@ -229,4 +262,8 @@ dynamic _getIntermediateRepresentationForNode(PathNode node) {
             .toNonGrowableList(),
       );
   }
+}
+
+extension AnimatedPropertyCreation<T> on T {
+  Map<String, dynamic> toNonAnimatedProperty() => {'a': 0, 'k': this};
 }
