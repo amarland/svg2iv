@@ -4,14 +4,14 @@ extension NullableStringHandling on String? {
   String orEmpty() => this ?? '';
 }
 
-extension IterableItemSelection<E> on Iterable<E> {
+extension IterableUtilities<E> on Iterable<E> {
   Iterable<List<E>> chunked(int size, {E? fillValue}) {
     if (size <= 0) {
       throw ArgumentError('size must be greater than or equal to 1.');
     }
     if (isEmpty) return Iterable.empty();
     return Iterable.generate((length / size).ceil(), (i) {
-      final chunk = skip(i * size).take(size).toList();
+      final chunk = skip(i * size).take(size).toList(growable: true);
       if (fillValue != null) {
         while (chunk.length < size) {
           chunk.add(fillValue);
@@ -27,6 +27,8 @@ extension IterableItemSelection<E> on Iterable<E> {
   ) {
     return {for (final e in this) keySelector(e): valueSelector(e)};
   }
+
+  List<E> toNonGrowableList() => toList(growable: true);
 }
 
 extension NullableElementsIterableNullChecking<E> on Iterable<E?> {
