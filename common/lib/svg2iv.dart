@@ -481,7 +481,7 @@ B _fillPresentationAttributes<T extends VectorNode,
         break;
       case 'fill':
         if (attributeValue == 'none') {
-          builder.fillAlpha(0.0);
+          builder.fill(Gradient.fromArgb(0));
         } else {
           _parseBrush(attributeValue)?.let(builder.fill);
         }
