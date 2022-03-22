@@ -20,18 +20,16 @@ final _definitions = <String, dynamic>{};
 
 ImageVector parseSvgElement(XmlElement rootElement) {
   preprocessSvg(rootElement);
-  final viewBox = rootElement
-      .getAttribute('viewBox')
-      ?.let((vb) => _extractDefinitionValues<double>(vb))
-      .takeIf(
-        (viewBox) => viewBox.length == 4 && viewBox.sublist(2).everyNotNull(),
-      );
+  final viewBoxAsString = rootElement.getAttribute('viewBox');
+  final viewBox = viewBoxAsString != null
+      ? _extractDefinitionValues(viewBoxAsString)
+      : List.empty();
   final widthAsString = rootElement.getAttribute('width');
   final heightAsString = rootElement.getAttribute('height');
   double? viewportWidth, viewportHeight;
   double? width, height;
   double? minX, minY;
-  if (viewBox != null) {
+  if (viewBox.length == 4 && viewBox.sublist(2).everyNotNull()) {
     minX = viewBox[0];
     minY = viewBox[1];
     viewportWidth = viewBox[2]!;
@@ -179,22 +177,24 @@ VectorGroup _parseGroupElement(XmlElement groupElement) {
 
 Transformations? _parseTransformations(XmlElement element) {
   final transformAttributeValue = element.getAttribute('transform');
-  if (transformAttributeValue == null) return null;
+  if (transformAttributeValue == null) {
+    return null;
+  }
   const matrixDefinitionStart = 'matrix(';
   if (transformAttributeValue.startsWith(matrixDefinitionStart)) {
-    final values = _extractDefinitionValues<double>(
+    final values = _extractDefinitionValues(
       transformAttributeValue.substring(
         matrixDefinitionStart.length,
         transformAttributeValue.length - 1,
       ),
     );
-    if (values.length == 6) {
-      return Transformations.fromMatrix4(
-        Matrix4(values[0], values[1], 0.0, 0.0, values[2], values[3], 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0, values[4], values[5], 0.0, 1.0),
-      );
+    if (values.length != 6) {
+      return null;
     }
-    return null;
+    return Transformations.fromMatrix4(
+      Matrix4(values[0], values[1], 0.0, 0.0, values[2], values[3], 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0, values[4], values[5], 0.0, 1.0),
+    );
   }
   final builder = TransformationsBuilder();
   final definitions = transformAttributeValue.split(RegExp(r'\)\s*')).toList()
@@ -311,9 +311,8 @@ VectorNode? _parseLineElement(XmlElement lineElement) {
 
 // polyshape => polyline or polygon
 VectorNode? _parsePolyShapeElement(XmlElement polyShapeElement) {
-  final points = polyShapeElement
-      .getAttribute('points')
-      ?.let((p) => _extractDefinitionValues<double>(p));
+  final points =
+      polyShapeElement.getAttribute('points')?.let(_extractDefinitionValues);
   final transformations = _parseTransformations(polyShapeElement);
   final pathData = _extractPathDataFromLinePoints(points, transformations);
   if (polyShapeElement.name.local == 'polygon') {
@@ -610,24 +609,21 @@ double? _parsePercentage(String percentageAsString) {
 
 Gradient? _parseBrush(String brushAsString) {
   Gradient? gradient;
-  List<num> extractDefinitionValues(String value, int prefixLength) =>
+  List<int> extractDefinitionValues(String value, int prefixLength) =>
       _extractDefinitionValues(
-          value.substring(prefixLength + 1, value.length - 1));
+        value.substring(prefixLength + 1, value.length - 1),
+      ).map((d) => d.truncate()).toList();
 
   if (brushAsString.startsWith('#')) {
     gradient = Gradient.fromHexString(brushAsString);
   } else if (brushAsString.startsWith('rgb(')) {
-    final rgb = extractDefinitionValues(brushAsString, 4)
-        .whereType<int>()
-        .cast<int>()
-        .toList();
+    final rgb = extractDefinitionValues(brushAsString, 4);
     if (rgb.isNotEmpty && rgb.length == 3) {
       gradient = Gradient.fromArgbComponents(0xFF, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('rgba(')) {
-    final rgba =
-        extractDefinitionValues(brushAsString, 5).whereNotNull().toList();
-    final rgb = rgba.sublist(0, 4).whereType<int>().cast<int>().toList();
+    final rgba = extractDefinitionValues(brushAsString, 5);
+    final rgb = rgba.sublist(0, 4);
     final alpha = rgba.length == 4 ? rgba[3] * 0xFF ~/ 1 : null;
     if (alpha != null && rgb.isNotEmpty && rgb.length == 3) {
       gradient = Gradient.fromArgbComponents(alpha, rgb[0], rgb[1], rgb[2]);
@@ -652,12 +648,13 @@ Gradient? _parseBrush(String brushAsString) {
   return gradient;
 }
 
-List<N> _extractDefinitionValues<N extends num>(String definition) => definition
-    .split(_definitionSeparatorPattern)
-    .map(num.tryParse)
-    .whereNotNull()
-    .cast<N>()
-    .toList();
+List<double> _extractDefinitionValues(String definition) {
+  return definition
+      .split(_definitionSeparatorPattern)
+      .map(double.tryParse)
+      .whereNotNull()
+      .toList();
+}
 
 String extractIdFromUrlFunctionCall(String functionCallAsString) =>
     functionCallAsString
