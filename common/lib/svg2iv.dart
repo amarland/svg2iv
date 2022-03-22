@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:svg2iv_common/path_building_helpers.dart';
+import 'package:vector_math/vector_math.dart' show Matrix4;
 import 'package:xml/xml.dart';
 
 import 'extensions.dart';
@@ -21,9 +22,7 @@ ImageVector parseSvgElement(XmlElement rootElement) {
   preprocessSvg(rootElement);
   final viewBox = rootElement
       .getAttribute('viewBox')
-      ?.split(_definitionSeparatorPattern)
-      .map(double.tryParse)
-      .toList()
+      ?.let((vb) => _extractDefinitionValues<double>(vb))
       .takeIf(
         (viewBox) => viewBox.length == 4 && viewBox.sublist(2).everyNotNull(),
       );
@@ -179,10 +178,26 @@ VectorGroup _parseGroupElement(XmlElement groupElement) {
 }
 
 Transformations? _parseTransformations(XmlElement element) {
-  final transformAttribute = element.getAttribute('transform');
-  if (transformAttribute == null) return null;
+  final transformAttributeValue = element.getAttribute('transform');
+  if (transformAttributeValue == null) return null;
+  const matrixDefinitionStart = 'matrix(';
+  if (transformAttributeValue.startsWith(matrixDefinitionStart)) {
+    final values = _extractDefinitionValues<double>(
+      transformAttributeValue.substring(
+        matrixDefinitionStart.length,
+        transformAttributeValue.length - 1,
+      ),
+    );
+    if (values.length == 6) {
+      return Transformations.fromMatrix4(
+        Matrix4(values[0], values[1], 0.0, 0.0, values[2], values[3], 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0, values[4], values[5], 0.0, 1.0),
+      );
+    }
+    return null;
+  }
   final builder = TransformationsBuilder();
-  final definitions = transformAttribute.split(RegExp(r'\)\s*')).toList()
+  final definitions = transformAttributeValue.split(RegExp(r'\)\s*')).toList()
     ..removeLast(); // the last element is an empty string
   for (final definition in definitions) {
     final nameAndValues =
@@ -298,9 +313,7 @@ VectorNode? _parseLineElement(XmlElement lineElement) {
 VectorNode? _parsePolyShapeElement(XmlElement polyShapeElement) {
   final points = polyShapeElement
       .getAttribute('points')
-      ?.split(_definitionSeparatorPattern)
-      .map(double.tryParse)
-      .toList();
+      ?.let((p) => _extractDefinitionValues<double>(p));
   final transformations = _parseTransformations(polyShapeElement);
   final pathData = _extractPathDataFromLinePoints(points, transformations);
   if (polyShapeElement.name.local == 'polygon') {
@@ -597,11 +610,9 @@ double? _parsePercentage(String percentageAsString) {
 
 Gradient? _parseBrush(String brushAsString) {
   Gradient? gradient;
-  List<num?> extractDefinitionValues(String value, int prefixLength) => value
-      .substring(prefixLength + 1, value.length - 1)
-      .split(_definitionSeparatorPattern)
-      .map(num.tryParse)
-      .toList();
+  List<num> extractDefinitionValues(String value, int prefixLength) =>
+      _extractDefinitionValues(
+          value.substring(prefixLength + 1, value.length - 1));
 
   if (brushAsString.startsWith('#')) {
     gradient = Gradient.fromHexString(brushAsString);
@@ -640,6 +651,13 @@ Gradient? _parseBrush(String brushAsString) {
   }
   return gradient;
 }
+
+List<N> _extractDefinitionValues<N extends num>(String definition) => definition
+    .split(_definitionSeparatorPattern)
+    .map(num.tryParse)
+    .whereNotNull()
+    .cast<N>()
+    .toList();
 
 String extractIdFromUrlFunctionCall(String functionCallAsString) =>
     functionCallAsString

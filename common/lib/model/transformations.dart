@@ -32,6 +32,28 @@ class Translation implements Transformation {
 class Transformations {
   Transformations._init(this.rotation, this.scale, this.translation);
 
+  factory Transformations.fromMatrix4(Matrix4 matrix) {
+    Quaternion rotationQuaternion = Quaternion.identity();
+    Vector3 scaleVector = Vector3.zero();
+    Vector3 translationVector = Vector3.zero();
+    matrix.decompose(translationVector, rotationQuaternion, scaleVector);
+    final rotationAxis = rotationQuaternion.axis;
+    final rotation = _isQuaternionIdentity(rotationQuaternion)
+        ? null
+        : Rotation(
+            degrees(rotationQuaternion.radians),
+            pivotX: rotationAxis.x,
+            pivotY: rotationAxis.y,
+          );
+    final scale = scaleVector.x == 1.0 && scaleVector.y == 1.0
+        ? null
+        : Scale(scaleVector.x, scaleVector.y);
+    final translation = translationVector.x == 0.0 && translationVector.y == 0.0
+        ? null
+        : Translation(translationVector.x, translationVector.y);
+    return Transformations._init(rotation, scale, translation);
+  }
+
   final Rotation? rotation;
   final Scale? scale;
   Translation? translation;
@@ -92,36 +114,12 @@ class TransformationsBuilder {
     return this;
   }
 
-  Transformations? build() {
-    if (_matrix.isIdentity()) {
-      return null;
-    } else {
-      Quaternion rotationQuaternion = Quaternion.identity();
-      Vector3 scaleVector = Vector3.zero();
-      Vector3 translationVector = Vector3.zero();
-      _matrix.decompose(translationVector, rotationQuaternion, scaleVector);
-      final rotationAxis = rotationQuaternion.axis;
-      final rotation = _isQuaternionIdentity(rotationQuaternion)
-          ? null
-          : Rotation(
-              degrees(rotationQuaternion.radians),
-              pivotX: rotationAxis.x,
-              pivotY: rotationAxis.y,
-            );
-      final scale = scaleVector.x == 1.0 && scaleVector.y == 1.0
-          ? null
-          : Scale(scaleVector.x, scaleVector.y);
-      final translation =
-          translationVector.x == 0.0 && translationVector.y == 0.0
-              ? null
-              : Translation(translationVector.x, translationVector.y);
-      return Transformations._init(rotation, scale, translation);
-    }
-  }
-
-  static bool _isQuaternionIdentity(Quaternion quaternion) =>
-      quaternion.x == 0.0 &&
-      quaternion.y == 0.0 &&
-      quaternion.z == 0.0 &&
-      quaternion.w == 1.0;
+  Transformations? build() =>
+      _matrix.isIdentity() ? null : Transformations.fromMatrix4(_matrix);
 }
+
+bool _isQuaternionIdentity(Quaternion quaternion) =>
+    quaternion.x == 0.0 &&
+    quaternion.y == 0.0 &&
+    quaternion.z == 0.0 &&
+    quaternion.w == 1.0;
