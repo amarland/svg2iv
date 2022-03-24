@@ -71,7 +71,7 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
       attributes['rotation']?.let((v) => parseAndroidResourceValue<double>(v));
   if (rotationAngle != null) {
     transformationsBuilder.rotate(
-      angleInDegrees: rotationAngle,
+      rotationAngle,
       pivotX: attributes['pivotX']
           ?.let((v) => parseAndroidResourceValue<double>(v)),
       pivotY: attributes['pivotY']

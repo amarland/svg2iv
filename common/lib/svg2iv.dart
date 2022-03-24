@@ -79,10 +79,7 @@ ImageVector parseSvgElement(XmlElement rootElement) {
       final rootGroupBuilder = VectorGroupBuilder();
       nodes.forEach(rootGroupBuilder.addNode);
       final transformations = TransformationsBuilder()
-          .translate(
-            x: rootGroupTranslation.x,
-            y: rootGroupTranslation.y,
-          )
+          .translate(x: rootGroupTranslation.x, y: rootGroupTranslation.y)
           .build()!;
       rootGroupBuilder.transformations(transformations);
       builder.addNode(rootGroupBuilder.build());
@@ -235,7 +232,7 @@ Transformations? _parseTransformations(XmlElement element) {
         final count = parsedValues.length;
         if (parsedValues.isNotEmpty && count <= 3) {
           builder.rotate(
-            angleInDegrees: parsedValues[0],
+            parsedValues[0],
             pivotX: count >= 2 ? parsedValues[1] : null,
             pivotY: count == 3 ? parsedValues[2] : null,
           );

@@ -74,7 +74,7 @@ class VectorGroupBuilder
     extends VectorNodeBuilder<VectorGroup, VectorGroupBuilder> {
   VectorGroupBuilder();
 
-  final _nodes = <VectorNode>[];
+  List<VectorNode> _nodes = [];
   Rotation? _rotation;
   Scale? _scale;
   Translation? _translation;
@@ -107,7 +107,7 @@ class VectorGroupBuilder
       (node) {
         if (node is VectorPath) {
           final newFill = node.fill ?? fill_;
-          var newStroke = node.stroke ?? stroke_;
+          final newStroke = node.stroke ?? stroke_;
           return node.copyWith(
             fill: newFill,
             fillAlpha: multiplyAlphas(
@@ -137,10 +137,7 @@ class VectorGroupBuilder
   @override
   VectorGroup build() {
     if (hasAttributes_) {
-      final newNodes = _mergePresentationAttributes(_nodes);
-      _nodes
-        ..clear()
-        ..addAll(newNodes);
+      _nodes = _mergePresentationAttributes(_nodes);
     }
     if (_rotation == null &&
         _scale == null &&
@@ -149,9 +146,7 @@ class VectorGroupBuilder
       final onlyChild = _nodes.singleOrNull;
       if (onlyChild is VectorGroup) {
         // the current group is useless, merge it with its only child
-        _nodes
-          ..removeAt(0)
-          ..addAll(onlyChild.nodes);
+        _nodes = onlyChild.nodes;
         onlyChild.id?.let((id) => this.id(id));
         _rotation = onlyChild.rotation;
         _scale = onlyChild.scale;
@@ -159,18 +154,18 @@ class VectorGroupBuilder
         _clipPathData = onlyChild.clipPathData;
       }
     }
-    for (final group in _nodes.whereType<VectorGroup>()) {
+    _nodes.whereType<VectorGroup>().forEachIndexed((index, group) {
       if (group.rotation == null &&
           group.scale == null &&
           group.translation == null &&
           group.clipPathData.isNullOrEmpty) {
         // the child is useless, merge it with its parent (the current group)
         _nodes
-          ..remove(group)
-          ..addAll(group.nodes);
+          ..removeAt(index)
+          ..insertAll(index, group.nodes);
         group.id?.let((id) => this.id(id));
       }
-    }
+    });
     return VectorGroup._init(
       _nodes.toList(growable: false),
       id: id_,
