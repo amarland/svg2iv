@@ -80,23 +80,22 @@ extension TranslationExtensions on Translation? {
 }
 
 class TransformationsBuilder {
-  final matrices = <Matrix4>[];
+  final _matrices = <Matrix4>[];
 
   TransformationsBuilder translate({double? x, double? y}) {
     x ??= VectorGroup.defaultTranslationX;
     y ??= VectorGroup.defaultTranslationY;
     if (x != VectorGroup.defaultTranslationX ||
         y != VectorGroup.defaultTranslationY) {
-      matrices.add(Matrix4.translationValues(x, y, 0.0));
+      _matrices.add(Matrix4.translationValues(x, y, 0.0));
     }
     return this;
   }
 
   TransformationsBuilder scale({required double x, double? y}) {
-    if (x != VectorGroup.defaultScaleX ||
-        (y != null && y != VectorGroup.defaultScaleY)) {
-      matrices.add(
-        Matrix4.identity()..scale(x, y ?? VectorGroup.defaultScaleY),
+    if (x != VectorGroup.defaultScaleX) {
+      _matrices.add(
+        Matrix4.identity()..scale(x, y ?? x),
       );
     }
     return this;
@@ -114,7 +113,7 @@ class TransformationsBuilder {
       if (mustTranslate) {
         translate(x: pivotX, y: pivotY);
       }
-      matrices.add(
+      _matrices.add(
         Matrix4.identity()..rotateZ(radians(degrees)),
       );
       if (mustTranslate) {
@@ -126,28 +125,27 @@ class TransformationsBuilder {
 
   TransformationsBuilder skewX(double degrees) {
     if (degrees != 0.0) {
-      matrices.add(Matrix4.skewX(radians(degrees)));
+      _matrices.add(Matrix4.skewX(radians(degrees)));
     }
     return this;
   }
 
   TransformationsBuilder skewY(double degrees) {
     if (degrees != 0.0) {
-      matrices.add(Matrix4.skewY(radians(degrees)));
+      _matrices.add(Matrix4.skewY(radians(degrees)));
     }
     return this;
   }
 
   Transformations? build() {
-    if (matrices.isEmpty) {
+    if (_matrices.isEmpty) {
       return null;
     }
-    final result = matrices[0];
-    final count = matrices.length;
+    final result = _matrices[0];
+    final count = _matrices.length;
     for (var index = 1; index < count; index++) {
-      result.multiply(matrices[index]);
+      result.multiply(_matrices[index]);
     }
-    matrices.clear();
     return Transformations.fromMatrix4(result);
   }
 }

@@ -66,7 +66,7 @@ path(
   group('writeGroup() writes a DSL-compliant group declaration', () {
     test('with both set and unset attributes', () {
       final transformations = TransformationsBuilder()
-          .rotate(angleInDegrees: 30.0, pivotX: 5.0, pivotY: 5.0)
+          .rotate(30.0, pivotX: 5.0, pivotY: 5.0)
           .scale(x: 1.2)
           .translate(x: 9.0)
           .build()!;
@@ -210,7 +210,7 @@ group(
                 .id('test_group')
                 .transformations(
                   TransformationsBuilder()
-                      .rotate(angleInDegrees: 90.0)
+                      .rotate(90.0)
                       .build()!,
                 )
                 .addNode(_buildVectorPath(trimPath: false))

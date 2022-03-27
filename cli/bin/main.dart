@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:svg2iv/image_vector_transmitter.dart';
+import 'package:svg2iv/image_vector_adapter.dart';
 import 'package:svg2iv_common/destination_file_writer.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/file_parser.dart';
@@ -12,7 +12,7 @@ const destinationOptionName = 'destination';
 const helpFlagName = 'help';
 const quietFlagName = 'quiet';
 const receiverOptionName = 'receiver';
-const socketAddressOptionName = 'socket-address';
+const stdoutFlagName = 'stdout';
 
 var _isInQuietMode = false;
 
@@ -43,7 +43,7 @@ If not set, the generated property will be declared as a top-level property.
 ​""",
       valueHelp: 'type',
     )
-    ..addOption(socketAddressOptionName, abbr: 's', defaultsTo: '', hide: true)
+    ..addFlag(stdoutFlagName, negatable: false, hide: true)
     ..addFlag(
       quietFlagName,
       abbr: 'q',
@@ -63,7 +63,8 @@ If not set, the generated property will be declared as a top-level property.
     _logError(e.message);
     exit(2);
   }
-  _isInQuietMode = argResults[quietFlagName] as bool;
+  final shouldWriteToStdOut = (argResults[stdoutFlagName] as bool);
+  _isInQuietMode = shouldWriteToStdOut || argResults[quietFlagName] as bool;
   if (argResults[helpFlagName] as bool) {
     stdout
       ..writeln(
@@ -111,11 +112,7 @@ If not set, the generated property will be declared as a top-level property.
     }
   }
   FileSystemEntity? destination;
-  final socketAddress = (argResults[socketAddressOptionName] as String)
-      .split(':')
-      .takeIf((splits) =>
-          splits.length == 2 && splits.every((s) => !s.isNullOrEmpty));
-  if (socketAddress == null) {
+  if (!shouldWriteToStdOut) {
     final destinationPath = argResults[destinationOptionName] as String?;
     if (destinationPath.isNullOrEmpty) {
       final String location;
@@ -180,7 +177,8 @@ If not set, the generated property will be declared as a top-level property.
     exitCode = 1;
     errorMessages.forEach(_logError);
   }
-  // `destination` is null if generation is skipped in favor of transmission
+  // `destination` is null if the actual destination
+  // is the standard output stream
   if (destination != null) {
     if (imageVectors.isNotEmpty) {
       final extensionReceiver = argResults[receiverOptionName] as String?;
@@ -204,19 +202,8 @@ If not set, the generated property will be declared as a top-level property.
       // assume no eligible files were found
       _log('No eligible files were found.');
     }
-  }
-  if (socketAddress != null && socketAddress.every((it) => it.isNotEmpty)) {
-    final host = InternetAddress.tryParse(socketAddress[0]);
-    final portNumber = int.tryParse(socketAddress[1]);
-    if (host == null || portNumber == null) {
-      _logError('Socket address or port number could not be parsed.');
-      exit(1);
-    }
-    await transmitProtobufImageVector(
-      parseResult.item1,
-      host,
-      portNumber,
-    ).catchError((_, stackTrace) => _logError(stackTrace));
+  } else {
+    stdout.add(parseResult.item1.toJson());
   }
 }
 
