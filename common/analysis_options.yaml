@@ -5,5 +5,3 @@ analyzer:
     strict-casts: true
     strict-inference: true
     strict-raw-types: true
-  exclude:
-    - lib/ui/callback_shortcuts.dart # not my file
