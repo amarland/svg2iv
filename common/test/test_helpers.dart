@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:svg2iv_common/extensions.dart';
+import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
 
 Tuple2<String, String> executeKotlinScript(String source) {
-  final tempDirectoryPath = Directory.systemTemp.path;
+  final tempDirectoryPath = Directory.systemTemp.path.replaceAll('\\', '/');
   final scriptSourceFile = File(tempDirectoryPath + '/test_script.main.kts')
     ..createSync()
     ..writeAsStringSync(
@@ -20,20 +22,28 @@ Tuple2<String, String> executeKotlinScript(String source) {
     final compilerArchiveFile = Directory('test_tool').listSync().singleWhere(
       (e) {
         // ignore: unnecessary_string_escapes
-        final fileNameRegExp = RegExp('''kotlin-compiler-.{3,6}\.zip''');
+        final fileNameRegExp = RegExp('''kotlin-compiler-.{3,6}\.tar.gz''');
         return fileNameRegExp.allMatches(e.path).length == 1;
       },
       orElse: () => throw 'The archive file containing the Kotlin compiler'
           ' could not be found!',
     ) as File;
-    Process.runSync(
+    final extractionResult = Process.runSync(
       'tar',
       ['-xf', compilerArchiveFile.absolute.path],
       workingDirectory: tempDirectoryPath,
     );
+    if (extractionResult.exitCode != 0) {
+      fail(extractionResult.stderr as String);
+    }
+    final extractedDirectoryPath = '$tempDirectoryPath/' +
+        compilerArchiveFile.getNameWithoutExtension().replaceAll('.tar', '');
+    _runProcess('mv', [
+      '$extractedDirectoryPath/kotlinc',
+      tempDirectoryPath,
+    ]);
+    _runProcess('rm', ['-r', extractedDirectoryPath]);
   }
-  final executable = '$workingDirectoryPath/bin/kotlinc';
-  // use PowerShell on Windows as it understands slashes as path separators
   try {
     final arguments = [
       '-cp',
@@ -41,17 +51,31 @@ Tuple2<String, String> executeKotlinScript(String source) {
       '-script',
       scriptSourceFile.path,
     ];
-    // on Windows, the actual executable is 'powershell.exe',
-    // so the first argument has to be 'kotlinc.bat'
-    if (Platform.isWindows) {
-      arguments.insert(0, '$executable.bat');
+    final executable = '$workingDirectoryPath/bin/kotlinc';
+    final isPlatformWindows = Platform.isWindows;
+    if (!isPlatformWindows) {
+      Process.runSync('chmod', ['+x', executable]);
     }
-    final result = Process.runSync(
-      Platform.isWindows ? 'powershell' : executable,
+    final result = _runProcess(
+      isPlatformWindows ? executable + '.bat' : executable,
       arguments,
     );
     return Tuple2(result.stdout as String, result.stderr as String);
   } finally {
     scriptSourceFile.deleteSync();
+    _runProcess('rm', ['-r', workingDirectoryPath]);
   }
+}
+
+ProcessResult _runProcess(String executable, List<String> arguments) {
+  final isPlatformWindows = Platform.isWindows;
+  // on Windows, the actual executable is 'powershell.exe',
+  // so the first argument has to be `executable`
+  if (isPlatformWindows) {
+    arguments.insert(0, executable);
+  }
+  return Process.runSync(
+    isPlatformWindows ? 'powershell' : executable,
+    arguments,
+  );
 }

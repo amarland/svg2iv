@@ -41,6 +41,10 @@ jobs:
       - uses: dart-lang/setup-dart@v1.3
         with:
           sdk: ${{ matrix.sdk }}
+      - uses: actions/setup-java@v3 # needed for one test
+        with:
+          distribution: 'temurin'
+          java-version: '11'
       - id: install
         name: Install dependencies
         run: dart pub get -C ./common/

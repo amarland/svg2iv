@@ -175,7 +175,9 @@ If not set, the generated property will be declared as a top-level property.
     final parseResult = parseXmlString(sourceString);
     imageVectors.add(
       Tuple2(
-        destination is File ? destination.getName() : 'your_name_here',
+        destination is File
+            ? destination.getNameWithoutExtension()
+            : 'your_name_here',
         parseResult.item1,
       ),
     );
@@ -185,7 +187,7 @@ If not set, the generated property will be declared as a top-level property.
       final parseResult = parseXmlFile(file);
       imageVectors.add(
         Tuple2(
-          file.item1.getName(),
+          file.item1.getNameWithoutExtension(),
           parseResult.item1,
         ),
       );

@@ -214,11 +214,6 @@ group(
           )
           .addNode(_buildVectorPath(trimPath: true))
           .build();
-      final generatedSourceBuffer = StringBuffer();
-      writeFileContents(
-        generatedSourceBuffer,
-        [Tuple2('test_vector.svg', imageVector)],
-      );
       final dependencyAnnotations = '''
 @file:Repository("https://maven.pkg.jetbrains.space/public/p/compose/dev/")
 @file:DependsOn("org.jetbrains.compose.ui:ui-desktop:1.0.0-alpha3")
@@ -227,8 +222,14 @@ group(
 @file:DependsOn("org.jetbrains.compose.ui:ui-unit-desktop:1.0.0-alpha3")
 
 ''';
+      final generatedSourceBuffer = StringBuffer(dependencyAnnotations);
+      writeFileContents(
+        generatedSourceBuffer,
+        [Tuple2('test_vector.svg', imageVector)],
+      );
+      generatedSourceBuffer.writeln('\nprint(TestVector.name)');
       final executionResult = executeKotlinScript(
-        dependencyAnnotations + generatedSourceBuffer.toString(),
+        generatedSourceBuffer.toString(),
       );
       final resultString = executionResult.item1;
       final errorString = executionResult.item2;

@@ -101,7 +101,7 @@ extension StringToNumberConversion on String {
 }
 
 extension FileNameExtraction on File {
-  String getName() {
+  String getNameWithoutExtension() {
     final path = this.path;
     return path.substring(
       path.lastIndexOf(Platform.pathSeparator) + 1,
