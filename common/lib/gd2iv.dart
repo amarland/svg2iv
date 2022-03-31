@@ -18,7 +18,7 @@ ImageVector parseShapeDrawableElement(XmlElement rootElement) {
   final width = sizeElement?.getAndroidNSAttribute<Dimension>('width')?.value;
   final height = sizeElement?.getAndroidNSAttribute<Dimension>('height')?.value;
   if (width == null || height == null) {
-    throw FileParserException(
+    throw ParserException(
       'This tool does not support converting gradient drawables'
       ' without an explicit size (both width and height).',
     );
@@ -139,7 +139,7 @@ Gradient? _parseFill(XmlElement rootElement, Rect bounds) {
   final gradientElement = rootElement.getElement('gradient');
   if (singleColor != null) {
     if (gradientElement != null) {
-      throw FileParserException(
+      throw ParserException(
         'This gradient drawable defines both a solid color and a gradient.',
       );
     }

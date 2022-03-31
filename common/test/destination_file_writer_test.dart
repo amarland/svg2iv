@@ -208,11 +208,7 @@ group(
           .addNode(
             VectorGroupBuilder()
                 .id('test_group')
-                .transformations(
-                  TransformationsBuilder()
-                      .rotate(90.0)
-                      .build()!,
-                )
+                .transformations(TransformationsBuilder().rotate(90.0).build()!)
                 .addNode(_buildVectorPath(trimPath: false))
                 .build(),
           )

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 extension NullableStringHandling on String? {
   bool get isNullOrEmpty => this == null || this!.isEmpty;
 
@@ -28,7 +30,7 @@ extension IterableUtilities<E> on Iterable<E> {
     return {for (final e in this) keySelector(e): valueSelector(e)};
   }
 
-  List<E> toNonGrowableList() => toList(growable: true);
+  List<E> toNonGrowableList() => toList(growable: false);
 }
 
 extension NullableElementsIterableNullChecking<E> on Iterable<E?> {
@@ -50,9 +52,10 @@ extension MapPurging<K, V> on Map<K, V?> {
 }
 
 extension Scoping<T, R> on T {
-  R let(R Function(T) action) => action(this);
+  // ignore: avoid_shadowing_type_parameters
+  R let<R>(R Function(T) action) => action(this);
 
-  T also(Function(T) action) {
+  T also(void Function(T) action) {
     action(this);
     return this;
   }
@@ -95,4 +98,14 @@ extension StringToNumberConversion on String {
   double? toDouble() => double.tryParse(this);
 
   int? toInt() => int.tryParse(this);
+}
+
+extension FileNameExtraction on File {
+  String getName() {
+    final path = this.path;
+    return path.substring(
+      path.lastIndexOf(Platform.pathSeparator) + 1,
+      path.lastIndexOfOrNull('.'),
+    );
+  }
 }

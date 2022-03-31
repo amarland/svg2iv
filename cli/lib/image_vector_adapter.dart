@@ -12,7 +12,7 @@ extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
     return JsonUtf8Encoder(
       null,
       (o) => o is Iterable
-          ? o.toList(growable: false)
+          ? o.toNonGrowableList()
           : throw JsonUnsupportedObjectError(o),
     ).convert(map(_mapImageVector));
   }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -8,19 +9,19 @@ import 'package:svg2iv_common/file_parser.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:tuple/tuple.dart';
 
-const destinationOptionName = 'destination';
+const outputOptionName = 'output';
 const helpFlagName = 'help';
 const quietFlagName = 'quiet';
 const receiverOptionName = 'receiver';
-const stdoutFlagName = 'stdout';
+const jsonFlagName = 'json'; // overrides '--output'
 
 var _isInQuietMode = false;
 
 void main(List<String> args) async {
   final argParser = ArgParser()
     ..addOption(
-      destinationOptionName,
-      abbr: 'd',
+      outputOptionName,
+      abbr: 'o',
       help: """
 Either the path to the directory where you want the file(s) to be generated,
 or the path to the file in which all the ImageVectors will be generated
@@ -43,7 +44,7 @@ If not set, the generated property will be declared as a top-level property.
 ​""",
       valueHelp: 'type',
     )
-    ..addFlag(stdoutFlagName, negatable: false, hide: true)
+    ..addFlag(jsonFlagName, negatable: false, hide: true)
     ..addFlag(
       quietFlagName,
       abbr: 'q',
@@ -63,7 +64,8 @@ If not set, the generated property will be declared as a top-level property.
     _logError(e.message);
     exit(2);
   }
-  final shouldWriteToStdOut = (argResults[stdoutFlagName] as bool);
+  final outputOptionValue = argResults[outputOptionName] as String?;
+  final shouldWriteToStdOut = outputOptionValue == '-';
   _isInQuietMode = shouldWriteToStdOut || argResults[quietFlagName] as bool;
   if (argResults[helpFlagName] as bool) {
     stdout
@@ -75,16 +77,16 @@ If not set, the generated property will be declared as a top-level property.
       ..writeln(argParser.usage);
     return;
   }
-  List<Tuple2<File, SourceFileDefinitionType>> sourceFiles = argResults.rest
+  List<Tuple2<File, SourceDefinitionType>> sourceFiles = argResults.rest
       .expand(
         (rest) => rest.split(RegExp(',+')).where((s) => s.isNotEmpty).expand(
           (path) sync* {
             if (FileSystemEntity.isDirectorySync(path)) {
               yield* _listSvgFilesRecursivelySync(Directory(path)).map(
-                (file) => Tuple2(file, SourceFileDefinitionType.implicit),
+                (file) => Tuple2(file, SourceDefinitionType.implicit),
               );
             } else if (FileSystemEntity.isFileSync(path)) {
-              yield Tuple2(File(path), SourceFileDefinitionType.explicit);
+              yield Tuple2(File(path), SourceDefinitionType.explicit);
             } else {
               _logError("'$path' does not exist!");
               if (argResults.rest.length == 1) {
@@ -94,27 +96,35 @@ If not set, the generated property will be declared as a top-level property.
           },
         ),
       )
-      .toList(growable: false);
+      .toNonGrowableList();
+  String? sourceString;
   if (sourceFiles.isEmpty) {
-    _log(
-      'No source file(s) specified;'
-      ' defaulting to files in the current working directory.',
-    );
-    sourceFiles = _listSvgFilesRecursivelySync(Directory.current)
-        .map((file) => Tuple2(file, SourceFileDefinitionType.implicit))
-        .toList(growable: false);
-    if (sourceFiles.isEmpty) {
-      _logError(
-        'No SVG/XML files were found in the current working directory.'
-        ' Exiting.',
+    final inBytes = BytesBuilder();
+    await for (final bytes in stdin) {
+      inBytes.add(bytes);
+    }
+    if (inBytes.isNotEmpty) {
+      sourceString = utf8.decode(inBytes.toBytes());
+    } else {
+      _log(
+        'No source file(s) specified;'
+        ' defaulting to files in the current working directory.',
       );
-      exit(2);
+      sourceFiles = _listSvgFilesRecursivelySync(Directory.current)
+          .map((file) => Tuple2(file, SourceDefinitionType.implicit))
+          .toNonGrowableList();
+      if (sourceFiles.isEmpty) {
+        _logError(
+          'No SVG/XML files were found in the current working directory.'
+          ' Exiting.',
+        );
+        exit(2);
+      }
     }
   }
   FileSystemEntity? destination;
   if (!shouldWriteToStdOut) {
-    final destinationPath = argResults[destinationOptionName] as String?;
-    if (destinationPath.isNullOrEmpty) {
+    if (outputOptionValue.isNullOrEmpty) {
       final String location;
       final directoryPaths = sourceFiles.map((pair) {
         final file = pair.item1;
@@ -139,12 +149,12 @@ If not set, the generated property will be declared as a top-level property.
       );
     } else {
       Directory destinationDirectory;
-      if (destinationPath!.endsWith('.kt')) {
-        destination = File(destinationPath);
+      if (outputOptionValue!.endsWith('.kt')) {
+        destination = File(outputOptionValue);
         destinationDirectory = destination.parent;
         _log('Destination is assumed to be a file.');
       } else {
-        destinationDirectory = destination = Directory(destinationPath);
+        destinationDirectory = destination = Directory(outputOptionValue);
       }
       if (!destinationDirectory.existsSync()) {
         _log('Destination directory does not exist. Creating it…');
@@ -159,51 +169,68 @@ If not set, the generated property will be declared as a top-level property.
       }
     }
   }
-  final parseResult = parseFiles(sourceFiles);
-  final imageVectors = <Tuple2<String, ImageVector>>[];
-  for (var index = 0; index < parseResult.item1.length; index++) {
-    final imageVector = parseResult.item1[index];
-    if (imageVector != null) {
-      final filePath = sourceFiles[index].item1.path;
-      final fileName = filePath.substring(
-        filePath.lastIndexOf(Platform.pathSeparator) + 1,
-        filePath.lastIndexOfOrNull('.'),
+  final imageVectors = List<Tuple2<String, ImageVector?>>.empty(growable: true);
+  final errorMessages = List<String>.empty(growable: true);
+  if (sourceString != null) {
+    final parseResult = parseXmlString(sourceString);
+    imageVectors.add(
+      Tuple2(
+        destination is File ? destination.getName() : 'your_name_here',
+        parseResult.item1,
+      ),
+    );
+    errorMessages.addAll(parseResult.item2);
+  } else {
+    for (final file in sourceFiles) {
+      final parseResult = parseXmlFile(file);
+      imageVectors.add(
+        Tuple2(
+          file.item1.getName(),
+          parseResult.item1,
+        ),
       );
-      imageVectors.add(Tuple2(fileName, imageVector));
+      errorMessages.addAll(parseResult.item2);
     }
   }
-  final errorMessages = parseResult.item2;
   if (errorMessages.isNotEmpty) {
     exitCode = 1;
     errorMessages.forEach(_logError);
   }
   // `destination` is null if the actual destination
   // is the standard output stream
-  if (destination != null) {
+  if (!(argResults[jsonFlagName] as bool)) {
     if (imageVectors.isNotEmpty) {
       final extensionReceiver = argResults[receiverOptionName] as String?;
-      if (destination is File) {
-        await writeImageVectorsToFile(
-          destination.path,
+      if (destination != null) {
+        if (destination is File) {
+          await writeImageVectorsToFile(
+            destination.path,
+            imageVectors,
+            extensionReceiver: extensionReceiver,
+          );
+        } else {
+          for (final pair in imageVectors) {
+            await writeImageVectorsToFile(
+              destination.path + Platform.pathSeparator + pair.item1,
+              [pair],
+              extensionReceiver: extensionReceiver,
+            );
+          }
+        }
+        _log("File(s) generated in '${destination.path}'.");
+      } else {
+        writeFileContents(
+          stdout,
           imageVectors,
           extensionReceiver: extensionReceiver,
         );
-      } else {
-        for (final pair in imageVectors) {
-          await writeImageVectorsToFile(
-            destination.path + Platform.pathSeparator + pair.item1,
-            [pair],
-            extensionReceiver: extensionReceiver,
-          );
-        }
       }
-      _log("File(s) generated in '${destination.path}'.");
     } else if (errorMessages.isEmpty) {
       // assume no eligible files were found
       _log('No eligible files were found.');
     }
   } else {
-    stdout.add(parseResult.item1.toJson());
+    stdout.add(imageVectors.map((pair) => pair.item2).toJson());
   }
 }
 

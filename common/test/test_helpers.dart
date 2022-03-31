@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:svg2iv_common/extensions.dart';
 import 'package:tuple/tuple.dart';
 
 Tuple2<String, String> executeKotlinScript(String source) {
@@ -36,18 +35,20 @@ Tuple2<String, String> executeKotlinScript(String source) {
   final executable = '$workingDirectoryPath/bin/kotlinc';
   // use PowerShell on Windows as it understands slashes as path separators
   try {
+    final arguments = [
+      '-cp',
+      '$workingDirectoryPath/lib/kotlin-main-kts.jar',
+      '-script',
+      scriptSourceFile.path,
+    ];
+    // on Windows, the actual executable is 'powershell.exe',
+    // so the first argument has to be 'kotlinc.bat'
+    if (Platform.isWindows) {
+      arguments.insert(0, '$executable.bat');
+    }
     final result = Process.runSync(
       Platform.isWindows ? 'powershell' : executable,
-      [
-        '-cp',
-        '$workingDirectoryPath/lib/kotlin-main-kts.jar',
-        '-script',
-        scriptSourceFile.path,
-      ].also((args) {
-        // on Windows, the actual executable is 'powershell.exe',
-        // so the first argument has to be 'kotlinc.bat'
-        if (Platform.isWindows) args.insert(0, '$executable.bat');
-      }),
+      arguments,
     );
     return Tuple2(result.stdout as String, result.stderr as String);
   } finally {

@@ -23,7 +23,7 @@ ImageVector parseSvgElement(XmlElement rootElement) {
   final viewBoxAsString = rootElement.getAttribute('viewBox');
   final viewBox = viewBoxAsString != null
       ? _extractDefinitionValues(viewBoxAsString)
-      : List.empty();
+      : List<double>.empty();
   final widthAsString = rootElement.getAttribute('width');
   final heightAsString = rootElement.getAttribute('height');
   double? viewportWidth, viewportHeight;
@@ -32,8 +32,8 @@ ImageVector parseSvgElement(XmlElement rootElement) {
   if (viewBox.length == 4 && viewBox.sublist(2).everyNotNull()) {
     minX = viewBox[0];
     minY = viewBox[1];
-    viewportWidth = viewBox[2]!;
-    viewportHeight = viewBox[3]!;
+    viewportWidth = viewBox[2];
+    viewportHeight = viewBox[3];
   }
   minX ??= 0.0;
   minY ??= 0.0;
@@ -47,7 +47,7 @@ ImageVector parseSvgElement(XmlElement rootElement) {
   viewportWidth ??= width;
   viewportHeight ??= height;
   if (viewportWidth == null || viewportHeight == null) {
-    throw FileParserException(
+    throw ParserException(
       'The size of the viewport could not be determined.',
     );
   }
@@ -543,12 +543,10 @@ Gradient? _parseGradient(XmlElement gradientElement) {
     return null;
   }
   final stops = stopElements
-      .mapIndexed((index, stopElement) {
-        var offset = stopElement.getAttribute('offset')?.let(_parsePercentage)
-            as double?;
-        if (offset == null && index == 0) offset = 0.0;
-        return offset;
-      })
+      .mapIndexed((index, stopElement) => stopElement
+          .getAttribute('offset')
+          ?.let(_parsePercentage)
+          .takeIf((offset) => offset == null && index == 0))
       .whereNotNull()
       .toList();
   if (stops.isNotEmpty && colors.length != stops.length) {

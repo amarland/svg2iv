@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/file_parser.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:tuple/tuple.dart';
@@ -53,24 +52,26 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
             break;
           }
         }
-      }
-      event.paths?.let(
-        (p) async {
-          Tuple2<List<ImageVector?>, List<String>> parse(List<String> paths) =>
-              parseFiles(paths
-                  .map((path) =>
-                      Tuple2(File(path), SourceFileDefinitionType.explicit))
-                  .toList(growable: false));
+        Iterable<Tuple2<ImageVector?, List<String>>> parse(List<String> paths) {
+          return paths.map(
+            (path) {
+              return parseXmlFile(
+                Tuple2(File(path), SourceDefinitionType.explicit),
+              );
+            },
+          );
+        }
 
-          final parseResult = await compute(parse, p);
-          _imageVectors.clear();
-          _previewIndex = 0;
-          for (final imageVector in parseResult.item1) {
-            _imageVectors.add(imageVector ?? CustomIcons.errorCircle);
-          }
-          add(SourceFilesParsed(errorMessages: parseResult.item2));
-        },
-      );
+        final parseResult = await compute(parse, paths);
+        _imageVectors.clear();
+        _previewIndex = 0;
+        final errorMessages = List<String>.empty(growable: true);
+        for (final pair in parseResult) {
+          _imageVectors.add(pair.item1 ?? CustomIcons.errorCircle);
+          errorMessages.addAll(pair.item2);
+        }
+        add(SourceFilesParsed(errorMessages: errorMessages));
+      }
       return state.copyWith(
         visibleDialog: VisibleDialog.none,
         sourceSelectionTextFieldState:
