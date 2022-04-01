@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: [stable, 2.16.0]
+        sdk: [ 2.16.0, stable ]
     steps:
       - uses: actions/checkout@v3
       - uses: dart-lang/setup-dart@v1.3
@@ -34,14 +34,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        sdk: [stable, 2.16.0]
+        os: [ ubuntu-latest, windows-latest ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: nschloe/action-cached-lfs-checkout@v1.1.2
       - uses: dart-lang/setup-dart@v1.3
-        with:
-          sdk: ${{ matrix.sdk }}
-      - uses: actions/setup-java@v3 # needed for one test
+      - uses: actions/setup-java@v3 # needed for tests which rely on the Kotlin compiler
         with:
           distribution: 'temurin'
           java-version: '11'
