@@ -66,7 +66,7 @@ path(
   group('writeGroup() writes a DSL-compliant group declaration', () {
     test('with both set and unset attributes', () {
       final transformations = TransformationsBuilder()
-          .rotate(angleInDegrees: 30.0, pivotX: 5.0, pivotY: 5.0)
+          .rotate(30.0, pivotX: 5.0, pivotY: 5.0)
           .scale(x: 1.2)
           .translate(x: 9.0)
           .build()!;
@@ -208,21 +208,12 @@ group(
           .addNode(
             VectorGroupBuilder()
                 .id('test_group')
-                .transformations(
-                  TransformationsBuilder()
-                      .rotate(angleInDegrees: 90.0)
-                      .build()!,
-                )
+                .transformations(TransformationsBuilder().rotate(90.0).build()!)
                 .addNode(_buildVectorPath(trimPath: false))
                 .build(),
           )
           .addNode(_buildVectorPath(trimPath: true))
           .build();
-      final generatedSourceBuffer = StringBuffer();
-      writeFileContents(
-        generatedSourceBuffer,
-        [Tuple2('test_vector.svg', imageVector)],
-      );
       final dependencyAnnotations = '''
 @file:Repository("https://maven.pkg.jetbrains.space/public/p/compose/dev/")
 @file:DependsOn("org.jetbrains.compose.ui:ui-desktop:1.0.0-alpha3")
@@ -231,8 +222,14 @@ group(
 @file:DependsOn("org.jetbrains.compose.ui:ui-unit-desktop:1.0.0-alpha3")
 
 ''';
+      final generatedSourceBuffer = StringBuffer(dependencyAnnotations);
+      writeFileContents(
+        generatedSourceBuffer,
+        [Tuple2('test_vector.svg', imageVector)],
+      );
+      generatedSourceBuffer.writeln('\nprint(TestVector.name)');
       final executionResult = executeKotlinScript(
-        dependencyAnnotations + generatedSourceBuffer.toString(),
+        generatedSourceBuffer.toString(),
       );
       final resultString = executionResult.item1;
       final errorString = executionResult.item2;

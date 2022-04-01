@@ -5,7 +5,6 @@ import '../outerworld/file_selector.dart';
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
-import 'callback_shortcuts.dart' as fixed_cs;
 import 'checkerboard.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
@@ -108,7 +107,7 @@ class _MainPageState extends State<MainPage>
     return /*CircularRevealAnimation(
       animation: _animation,
       child: */
-        fixed_cs.CallbackShortcuts(
+        CallbackShortcuts(
       bindings: MainPageBloc.shortcutBindings
           .map((trigger, action) => MapEntry(trigger, () => action(bloc))),
       child: Focus(

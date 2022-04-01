@@ -1,0 +1,50 @@
+name: Dart CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [ 2.16.0, stable ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dart-lang/setup-dart@v1.3
+        with:
+          sdk: ${{ matrix.sdk }}
+      - id: install
+        name: Install dependencies
+        run: dart pub get -C ./cli/ && dart pub get -C ./common/
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed ./cli/bin/ ./cli/lib/ ./common/lib/ ./common/test/ ./svg2iv_gui/lib/
+        if: matrix.sdk == 'stable' && steps.install.outcome == 'success'
+      - name: Analyze code
+        run: dart analyze ./cli/ && dart analyze ./common/
+        if: steps.install.outcome == 'success'
+
+  test:
+    needs: analyze
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+    steps:
+      - uses: nschloe/action-cached-lfs-checkout@v1.1.2
+      - uses: dart-lang/setup-dart@v1.3
+      - uses: actions/setup-java@v3 # needed for tests which rely on the Kotlin compiler
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - id: install
+        name: Install dependencies
+        run: dart pub get -C ./common/
+      - name: Run tests
+        run: cd ./common/ && dart test
+        if: steps.install.outcome == 'success'

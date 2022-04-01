@@ -11,7 +11,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
   final reflectiveControlPoint = Vector2.zero();
   var isPreviousNodeACurve = false;
 
-  void _onMoveToCommandReceived(List<dynamic> arguments) {
+  void _onMoveToCommandReceived(List<double> arguments) {
     path.moveTo(arguments[0], arguments[1]);
     currentPoint.x = arguments[0];
     currentPoint.y = arguments[1];
@@ -20,7 +20,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = false;
   }
 
-  void _onRelativeMoveToCommandReceived(List<dynamic> arguments) {
+  void _onRelativeMoveToCommandReceived(List<double> arguments) {
     path.relativeMoveTo(arguments[0], arguments[1]);
     currentPoint.x += arguments[0];
     currentPoint.y += arguments[1];
@@ -29,45 +29,45 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = false;
   }
 
-  void _onLineToCommandReceived(List<dynamic> arguments) {
+  void _onLineToCommandReceived(List<double> arguments) {
     path.lineTo(arguments[0], arguments[1]);
     currentPoint.x = arguments[0];
     currentPoint.y = arguments[1];
     isPreviousNodeACurve = false;
   }
 
-  void _onRelativeLineToCommandReceived(List<dynamic> arguments) {
+  void _onRelativeLineToCommandReceived(List<double> arguments) {
     path.relativeLineTo(arguments[0], arguments[1]);
     currentPoint.x += arguments[0];
     currentPoint.y += arguments[1];
     isPreviousNodeACurve = false;
   }
 
-  void _onHorizontalLineToCommandReceived(List<dynamic> arguments) {
+  void _onHorizontalLineToCommandReceived(List<double> arguments) {
     path.lineTo(arguments[0], currentPoint.y);
     currentPoint.x = arguments[0];
     isPreviousNodeACurve = false;
   }
 
-  void _onRelativeHorizontalLineToCommandReceived(List<dynamic> arguments) {
+  void _onRelativeHorizontalLineToCommandReceived(List<double> arguments) {
     path.relativeLineTo(arguments[0], 0);
     currentPoint.x += arguments[0];
     isPreviousNodeACurve = false;
   }
 
-  void _onVerticalLineToCommandReceived(List<dynamic> arguments) {
+  void _onVerticalLineToCommandReceived(List<double> arguments) {
     path.lineTo(currentPoint.x, arguments[0]);
     currentPoint.y = arguments[0];
     isPreviousNodeACurve = false;
   }
 
-  void _onRelativeVerticalLineToCommandReceived(List<dynamic> arguments) {
+  void _onRelativeVerticalLineToCommandReceived(List<double> arguments) {
     path.relativeLineTo(0, arguments[0]);
     currentPoint.y += arguments[0];
     isPreviousNodeACurve = false;
   }
 
-  void _onCurveToCommandReceived(List<dynamic> arguments) {
+  void _onCurveToCommandReceived(List<double> arguments) {
     path.cubicTo(
       arguments[0],
       arguments[1],
@@ -83,7 +83,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = true;
   }
 
-  void _onRelativeCurveToCommandReceived(List<dynamic> arguments) {
+  void _onRelativeCurveToCommandReceived(List<double> arguments) {
     path.relativeCubicTo(
       arguments[0],
       arguments[1],
@@ -99,7 +99,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = true;
   }
 
-  void _onSmoothCurveToCommandReceived(List<dynamic> arguments) {
+  void _onSmoothCurveToCommandReceived(List<double> arguments) {
     if (isPreviousNodeACurve) {
       reflectiveControlPoint.x = 2 * currentPoint.x - controlPoint.x;
       reflectiveControlPoint.y = 2 * currentPoint.y - controlPoint.y;
@@ -122,7 +122,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = true;
   }
 
-  void _onRelativeSmoothCurveToCommandReceived(List<dynamic> arguments) {
+  void _onRelativeSmoothCurveToCommandReceived(List<double> arguments) {
     if (isPreviousNodeACurve) {
       reflectiveControlPoint.x = currentPoint.x - controlPoint.x;
       reflectiveControlPoint.y = currentPoint.y - controlPoint.y;
@@ -145,7 +145,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = true;
   }
 
-  void _onQuadToCommandReceived(List<dynamic> arguments) {
+  void _onQuadToCommandReceived(List<double> arguments) {
     path.quadraticBezierTo(
       arguments[0],
       arguments[1],
@@ -159,7 +159,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = true;
   }
 
-  void _onRelativeQuadToCommandReceived(List<dynamic> arguments) {
+  void _onRelativeQuadToCommandReceived(List<double> arguments) {
     path.relativeQuadraticBezierTo(
       arguments[0],
       arguments[1],
@@ -173,7 +173,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = true;
   }
 
-  void _onSmoothQuadToCommandReceived(List<dynamic> arguments) {
+  void _onSmoothQuadToCommandReceived(List<double> arguments) {
     if (isPreviousNodeACurve) {
       reflectiveControlPoint.x = 2 * currentPoint.x - controlPoint.x;
       reflectiveControlPoint.y = 2 * currentPoint.y - controlPoint.y;
@@ -194,7 +194,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = true;
   }
 
-  void _onRelativeSmoothQuadToCommandReceived(List<dynamic> arguments) {
+  void _onRelativeSmoothQuadToCommandReceived(List<double> arguments) {
     if (isPreviousNodeACurve) {
       reflectiveControlPoint.x = currentPoint.x - controlPoint.x;
       reflectiveControlPoint.y = currentPoint.y - controlPoint.y;
@@ -215,29 +215,43 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     isPreviousNodeACurve = true;
   }
 
-  void _onArcToCommandReceived(List<dynamic> arguments) {
+  void _onArcToCommandReceived(
+    List<double> argumentsWithoutFlags,
+    bool largeArc,
+    bool clockwise,
+  ) {
     path.arcToPoint(
-      Offset(arguments[5], arguments[6]),
-      radius: Radius.elliptical(arguments[0], arguments[1]),
-      rotation: arguments[2],
-      largeArc: arguments[3],
-      clockwise: arguments[4],
+      Offset(argumentsWithoutFlags[3], argumentsWithoutFlags[4]),
+      radius: Radius.elliptical(
+        argumentsWithoutFlags[0],
+        argumentsWithoutFlags[1],
+      ),
+      rotation: argumentsWithoutFlags[2],
+      largeArc: largeArc,
+      clockwise: clockwise,
     );
-    controlPoint.x = currentPoint.x = arguments[5];
-    controlPoint.y = currentPoint.y = arguments[6];
+    controlPoint.x = currentPoint.x = argumentsWithoutFlags[3];
+    controlPoint.y = currentPoint.y = argumentsWithoutFlags[4];
     isPreviousNodeACurve = false;
   }
 
-  void _onRelativeArcToCommandReceived(List<dynamic> arguments) {
+  void _onRelativeArcToCommandReceived(
+    List<double> argumentsWithoutFlags,
+    bool largeArc,
+    bool clockwise,
+  ) {
     path.relativeArcToPoint(
-      Offset(arguments[5], arguments[6]),
-      radius: Radius.elliptical(arguments[0], arguments[1]),
-      rotation: arguments[2],
-      largeArc: arguments[3],
-      clockwise: arguments[4],
+      Offset(argumentsWithoutFlags[3], argumentsWithoutFlags[4]),
+      radius: Radius.elliptical(
+        argumentsWithoutFlags[0],
+        argumentsWithoutFlags[1],
+      ),
+      rotation: argumentsWithoutFlags[2],
+      largeArc: largeArc,
+      clockwise: clockwise,
     );
-    controlPoint.x = currentPoint.x = arguments[5];
-    controlPoint.y = currentPoint.y = arguments[6];
+    controlPoint.x = currentPoint.x = argumentsWithoutFlags[3];
+    controlPoint.y = currentPoint.y = argumentsWithoutFlags[4];
     isPreviousNodeACurve = false;
   }
 
@@ -254,58 +268,70 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
     final arguments = pathNode.arguments;
     switch (pathNode.command) {
       case PathDataCommand.moveTo:
-        _onMoveToCommandReceived(arguments);
+        _onMoveToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.relativeMoveTo:
-        _onRelativeMoveToCommandReceived(arguments);
+        _onRelativeMoveToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.lineTo:
-        _onLineToCommandReceived(arguments);
+        _onLineToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.relativeLineTo:
-        _onRelativeLineToCommandReceived(arguments);
+        _onRelativeLineToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.horizontalLineTo:
-        _onHorizontalLineToCommandReceived(arguments);
+        _onHorizontalLineToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.relativeHorizontalLineTo:
-        _onRelativeHorizontalLineToCommandReceived(arguments);
+        _onRelativeHorizontalLineToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.verticalLineTo:
-        _onVerticalLineToCommandReceived(arguments);
+        _onVerticalLineToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.relativeVerticalLineTo:
-        _onRelativeVerticalLineToCommandReceived(arguments);
+        _onRelativeVerticalLineToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.curveTo:
-        _onCurveToCommandReceived(arguments);
+        _onCurveToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.relativeCurveTo:
-        _onRelativeCurveToCommandReceived(arguments);
+        _onRelativeCurveToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.smoothCurveTo:
-        _onSmoothCurveToCommandReceived(arguments);
+        _onSmoothCurveToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.relativeSmoothCurveTo:
-        _onRelativeSmoothCurveToCommandReceived(arguments);
+        _onRelativeSmoothCurveToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.quadraticBezierCurveTo:
-        _onQuadToCommandReceived(arguments);
+        _onQuadToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.relativeQuadraticBezierCurveTo:
-        _onRelativeQuadToCommandReceived(arguments);
+        _onRelativeQuadToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.smoothQuadraticBezierCurveTo:
-        _onSmoothQuadToCommandReceived(arguments);
+        _onSmoothQuadToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.relativeSmoothQuadraticBezierCurveTo:
-        _onRelativeSmoothQuadToCommandReceived(arguments);
+        _onRelativeSmoothQuadToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.arcTo:
-        _onArcToCommandReceived(arguments);
+        final largeArc = arguments.removeAt(3) as bool;
+        final clockwise = arguments.removeAt(4) as bool;
+        _onArcToCommandReceived(
+          arguments.cast<double>(),
+          largeArc,
+          clockwise,
+        );
         break;
       case PathDataCommand.relativeArcTo:
-        _onRelativeArcToCommandReceived(arguments);
+        final largeArc = arguments.removeAt(3) as bool;
+        final clockwise = arguments.removeAt(4) as bool;
+        _onRelativeArcToCommandReceived(
+          arguments.cast<double>(),
+          largeArc,
+          clockwise,
+        );
         break;
       case PathDataCommand.close:
         _onCloseCommandReceived();

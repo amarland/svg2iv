@@ -24,7 +24,7 @@ ImageVector parseVectorDrawableElement(
     'height': rootElement.getAndroidNSAttribute<Dimension>('height'),
   };
   if (parsedRequiredAttributes.values.anyNull()) {
-    throw FileParserException(
+    throw ParserException(
       'Missing required attribute(s): ' +
           parsedRequiredAttributes.entries
               .where((entry) => entry.value == null)
@@ -32,11 +32,11 @@ ImageVector parseVectorDrawableElement(
               .join(', '),
     );
   }
-  final viewportWidth = parsedRequiredAttributes['viewportWidth']!;
-  final viewportHeight = parsedRequiredAttributes['viewportHeight']!;
+  final viewportWidth = parsedRequiredAttributes['viewportWidth'] as double;
+  final viewportHeight = parsedRequiredAttributes['viewportHeight'] as double;
   final builder = ImageVectorBuilder(viewportWidth, viewportHeight)
-      .width((parsedRequiredAttributes['width']! as Dimension).value)
-      .height((parsedRequiredAttributes['height']! as Dimension).value);
+      .width((parsedRequiredAttributes['width'] as Dimension).value)
+      .height((parsedRequiredAttributes['height'] as Dimension).value);
   rootElement.getAndroidNSAttribute<String>('name')?.let(builder.name);
   rootElement
       .getAndroidNSAttribute<Gradient>('tintColor')
@@ -68,13 +68,15 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
   final attributes = groupElement.androidNSAttributes
       .associate((attr) => attr.name.local, (attr) => attr);
   final groupBuilder = VectorGroupBuilder();
-  attributes['name']?.let(parseAndroidResourceValue).let(groupBuilder.id);
+  attributes['name']
+      ?.let((n) => parseAndroidResourceValue<String>(n))
+      ?.let((n) => groupBuilder.id(n));
   final transformationsBuilder = TransformationsBuilder();
   final rotationAngle =
       attributes['rotation']?.let((v) => parseAndroidResourceValue<double>(v));
   if (rotationAngle != null) {
     transformationsBuilder.rotate(
-      angleInDegrees: rotationAngle,
+      rotationAngle,
       pivotX: attributes['pivotX']
           ?.let((v) => parseAndroidResourceValue<double>(v)),
       pivotY: attributes['pivotY']

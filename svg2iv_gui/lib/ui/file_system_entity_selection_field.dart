@@ -67,10 +67,10 @@ class _State extends State<FileSystemEntitySelectionField> {
           ),
         ),
         const SizedBox(width: 8.0),
-        SizedBox.fromSize(
-          size: const Size.square(50.0),
-          child: OutlinedButton(
-            onPressed: widget.onButtonPressed,
+        OutlinedButton(
+          onPressed: widget.onButtonPressed,
+          child: SizedBox.fromSize(
+            size: const Size(24.0, 52.0),
             child: const Icon(Icons.folder_outlined),
           ),
         ),

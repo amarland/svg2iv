@@ -30,7 +30,7 @@ T? parseAndroidResourceValue<T>(XmlAttribute attribute) {
   final attributeValue = attribute.value;
   if (attributeValue[0] == '?' ||
       attributeValue.startsWith(RegExp(r'(?:android\.)?R\.|\?'))) {
-    throw FileParserException(
+    throw ParserException(
       '''
 Reference found for XML attribute '${attribute.name}': '$attributeValue'
 References to theme attributes and/or to Android resources'''
@@ -46,7 +46,7 @@ References to theme attributes and/or to Android resources'''
           .takeIf((it) => it != attributeValue)
           ?.toDouble();
       if (numericalValue == null) {
-        throw FileParserException(
+        throw ParserException(
           "Expected a dimension for XML attribute '${attribute.name}';"
           """ found '$attributeValue'
 Dimensions expressed in units other than density-independent pixels (dp)"""
@@ -63,7 +63,7 @@ Dimensions expressed in units other than density-independent pixels (dp)"""
     case Gradient:
       return Gradient.fromHexString(attributeValue) as T?;
   }
-  throw FileParserException(
+  throw ParserException(
     "Unexpected value for XML attribute '${attribute.name}': '$attributeValue'",
   );
 }
@@ -92,7 +92,7 @@ Gradient? parseGradient(XmlElement gradientElement, [Rect? bounds]) {
       // 270 = top to bottom, the default
       final angle = gradientElement.getAndroidNSAttribute<int>('angle') ?? 270;
       if (angle % 45 != 0) {
-        throw FileParserException(
+        throw ParserException(
           'The angle for the gradient must be a multiple of 45.',
         );
       }

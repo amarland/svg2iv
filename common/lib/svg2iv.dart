@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:svg2iv_common/path_building_helpers.dart';
+import 'package:vector_math/vector_math.dart' show Matrix4;
 import 'package:xml/xml.dart';
 
 import 'extensions.dart';
@@ -23,24 +24,20 @@ ImageVector parseSvgElement(
 }) {
   _normalizePaths = normalizePaths;
   preprocessSvg(rootElement);
-  final viewBox = rootElement
-      .getAttribute('viewBox')
-      ?.split(_definitionSeparatorPattern)
-      .map(double.tryParse)
-      .toNonGrowableList()
-      .takeIf(
-        (viewBox) => viewBox.length == 4 && viewBox.slice(2).everyNotNull(),
-      );
+  final viewBoxAsString = rootElement.getAttribute('viewBox');
+  final viewBox = viewBoxAsString != null
+      ? _extractDefinitionValues(viewBoxAsString)
+      : List<double>.empty();
   final widthAsString = rootElement.getAttribute('width');
   final heightAsString = rootElement.getAttribute('height');
   double? viewportWidth, viewportHeight;
   double? width, height;
   double? minX, minY;
-  if (viewBox != null) {
+  if (viewBox.length == 4 && viewBox.slice(2).everyNotNull()) {
     minX = viewBox[0];
     minY = viewBox[1];
-    viewportWidth = viewBox[2]!;
-    viewportHeight = viewBox[3]!;
+    viewportWidth = viewBox[2];
+    viewportHeight = viewBox[3];
   }
   minX ??= 0.0;
   minY ??= 0.0;
@@ -54,7 +51,7 @@ ImageVector parseSvgElement(
   viewportWidth ??= width;
   viewportHeight ??= height;
   if (viewportWidth == null || viewportHeight == null) {
-    throw FileParserException(
+    throw ParserException(
       'The size of the viewport could not be determined.',
     );
   }
@@ -86,10 +83,7 @@ ImageVector parseSvgElement(
       final rootGroupBuilder = VectorGroupBuilder();
       nodes.forEach(rootGroupBuilder.addNode);
       final transformations = TransformationsBuilder()
-          .translate(
-            x: rootGroupTranslation.x,
-            y: rootGroupTranslation.y,
-          )
+          .translate(x: rootGroupTranslation.x, y: rootGroupTranslation.y)
           .build()!;
       rootGroupBuilder.transformations(transformations);
       builder.addNode(rootGroupBuilder.build());
@@ -183,13 +177,30 @@ VectorGroup _parseGroupElement(XmlElement groupElement) {
 }
 
 Transformations? _parseTransformations(XmlElement element) {
-  final transformAttribute = element.getAttribute('transform');
-  if (transformAttribute == null) return null;
+  final transformAttributeValue = element.getAttribute('transform');
+  if (transformAttributeValue == null) {
+    return null;
+  }
+  const matrixDefinitionStart = 'matrix(';
+  if (transformAttributeValue.startsWith(matrixDefinitionStart)) {
+    final values = _extractDefinitionValues(
+      transformAttributeValue.substring(
+        matrixDefinitionStart.length,
+        transformAttributeValue.length - 1,
+      ),
+    );
+    if (values.length != 6) {
+      return null;
+    }
+    return Transformations.fromMatrix4(
+      Matrix4(values[0], values[1], 0.0, 0.0, values[2], values[3], 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0, values[4], values[5], 0.0, 1.0),
+    );
+  }
   final builder = TransformationsBuilder();
-  final definitions = transformAttribute
+  final definitions = transformAttributeValue
       .split(RegExp(r'\)\s*'))
-      .toList(growable: true)
-    ..removeLast(); // the last element is an empty string
+      .let((d) => d.take(d.length - 1)); // the last element is an empty string
   for (final definition in definitions) {
     final nameAndValues = definition
         .split(RegExp(r'\s*\(\s*'))
@@ -228,7 +239,7 @@ Transformations? _parseTransformations(XmlElement element) {
         final count = parsedValues.length;
         if (parsedValues.isNotEmpty && count <= 3) {
           builder.rotate(
-            angleInDegrees: parsedValues[0],
+            parsedValues[0],
             pivotX: count >= 2 ? parsedValues[1] : null,
             pivotY: count == 3 ? parsedValues[2] : null,
           );
@@ -305,11 +316,8 @@ VectorNode? _parseLineElement(XmlElement lineElement) {
 
 // polyshape => polyline or polygon
 VectorNode? _parsePolyShapeElement(XmlElement polyShapeElement) {
-  final points = polyShapeElement
-      .getAttribute('points')
-      ?.split(_definitionSeparatorPattern)
-      .map(double.tryParse)
-      .toNonGrowableList();
+  final points =
+      polyShapeElement.getAttribute('points')?.let(_extractDefinitionValues);
   final transformations = _parseTransformations(polyShapeElement);
   final pathData = _extractPathDataFromLinePoints(points, transformations);
   if (polyShapeElement.name.local == 'polygon') {
@@ -490,7 +498,7 @@ B _fillPresentationAttributes<T extends VectorNode,
         break;
       case 'fill':
         if (attributeValue == 'none') {
-          builder.fillAlpha(0.0);
+          builder.fill(Gradient.fromArgb(0));
         } else {
           _parseBrush(attributeValue)?.let(builder.fill);
         }
@@ -543,12 +551,10 @@ Gradient? _parseGradient(XmlElement gradientElement) {
     return null;
   }
   final stops = stopElements
-      .mapIndexed((index, stopElement) {
-        var offset = stopElement.getAttribute('offset')?.let(_parsePercentage)
-            as double?;
-        if (offset == null && index == 0) offset = 0.0;
-        return offset;
-      })
+      .mapIndexed((index, stopElement) => stopElement
+          .getAttribute('offset')
+          ?.let(_parsePercentage)
+          .takeIf((offset) => offset == null && index == 0))
       .whereNotNull()
       .toNonGrowableList();
   if (stops.isNotEmpty && colors.length != stops.length) {
@@ -606,30 +612,24 @@ double? _parsePercentage(String percentageAsString) {
 
 Gradient? _parseBrush(String brushAsString) {
   Gradient? gradient;
-  List<num?> extractDefinitionValues(String value, int prefixLength) => value
-      .substring(prefixLength + 1, value.length - 1)
-      .split(_definitionSeparatorPattern)
-      .map(num.tryParse)
-      .toNonGrowableList();
+
+  List<int> extractDefinitionValues(String value, int prefixLength) =>
+      _extractDefinitionValues(
+        value.substring(prefixLength + 1, value.length - 1),
+      ).map((d) => d.truncate()).toNonGrowableList();
 
   if (brushAsString.startsWith('#')) {
     gradient = Gradient.fromHexString(brushAsString);
   } else if (brushAsString.startsWith('rgb(')) {
-    final rgb = extractDefinitionValues(brushAsString, 4)
-            .takeIf((l) => l.every((e) => e is int))
-            ?.cast<int>() ??
-        List.empty();
-    if (rgb.length == 3) {
+    final rgb = extractDefinitionValues(brushAsString, 4);
+    if (rgb.isNotEmpty && rgb.length == 3) {
       gradient = Gradient.fromArgbComponents(0xFF, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('rgba(')) {
-    final rgba = extractDefinitionValues(brushAsString, 5)
-        .whereNotNull()
-        .toNonGrowableList();
-    final rgb = rgba.slice(0, 4).takeIf((l) => l.every((e) => e is int)) ??
-        List.empty();
+    final rgba = extractDefinitionValues(brushAsString, 5);
+    final rgb = rgba.slice(0, 4);
     final alpha = rgba.length == 4 ? rgba[3] * 0xFF ~/ 1 : null;
-    if (alpha != null && rgb.length == 3) {
+    if (alpha != null && rgb.isNotEmpty && rgb.length == 3) {
       gradient = Gradient.fromArgbComponents(alpha, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('url(#')) {
@@ -650,6 +650,14 @@ Gradient? _parseBrush(String brushAsString) {
     }
   }
   return gradient;
+}
+
+List<double> _extractDefinitionValues(String definition) {
+  return definition
+      .split(_definitionSeparatorPattern)
+      .map(double.tryParse)
+      .whereNotNull()
+      .toNonGrowableList();
 }
 
 String extractIdFromUrlFunctionCall(String functionCallAsString) =>

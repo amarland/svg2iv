@@ -42,7 +42,7 @@ const _commandsToFunctionAndClassNames = {
 
 Future<void> writeImageVectorsToFile(
   String destinationPath,
-  List<Tuple2<String, ImageVector>> imageVectors, {
+  List<Tuple2<String, ImageVector?>> imageVectors, {
   String? extensionReceiver,
   String? heading,
 }) async {
@@ -78,10 +78,9 @@ Future<void> writeImageVectorsToFile(
   await fileSink.close();
 }
 
-@visibleForTesting
 void writeFileContents(
   StringSink sink,
-  List<Tuple2<String, ImageVector>> imageVectors, {
+  List<Tuple2<String, ImageVector?>> imageVectors, {
   String? packageName,
   String? extensionReceiver,
   String? heading,
@@ -96,16 +95,18 @@ void writeFileContents(
       ..writeln('package $packageName')
       ..writeln();
   }
-  writeImports(sink, imageVectors.map((pair) => pair.item2));
+  writeImports(sink, imageVectors.map((pair) => pair.item2).whereNotNull());
   for (final pair in imageVectors) {
-    final sourceFileName = pair.item1;
     final imageVector = pair.item2;
-    writeImageVector(
-      sink,
-      imageVector,
-      sourceFileName.toPascalCase(),
-      extensionReceiver,
-    );
+    if (imageVector != null) {
+      final sourceFileName = pair.item1;
+      writeImageVector(
+        sink,
+        imageVector,
+        sourceFileName.toPascalCase(),
+        extensionReceiver,
+      );
+    }
   }
 }
 

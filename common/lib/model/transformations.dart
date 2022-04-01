@@ -1,5 +1,6 @@
-import 'package:vector_math/vector_math.dart'
-    show degrees, radians, Vector3, Quaternion, Matrix4;
+import 'package:vector_math/vector_math.dart';
+
+import 'vector_group.dart';
 
 abstract class Transformation {}
 
@@ -32,6 +33,28 @@ class Translation implements Transformation {
 class Transformations {
   Transformations._init(this.rotation, this.scale, this.translation);
 
+  factory Transformations.fromMatrix4(Matrix4 matrix) {
+    Quaternion rotationQuaternion = Quaternion.identity();
+    Vector3 scaleVector = Vector3.zero();
+    Vector3 translationVector = Vector3.zero();
+    matrix.decompose(translationVector, rotationQuaternion, scaleVector);
+    final rotationAxis = rotationQuaternion.axis;
+    final rotation = _isQuaternionIdentity(rotationQuaternion)
+        ? null
+        : Rotation(
+            degrees(rotationQuaternion.radians),
+            pivotX: rotationAxis.x,
+            pivotY: rotationAxis.y,
+          );
+    final scale = scaleVector.x == 1.0 && scaleVector.y == 1.0
+        ? null
+        : Scale(scaleVector.x, scaleVector.y);
+    final translation = translationVector.x == 0.0 && translationVector.y == 0.0
+        ? null
+        : Translation(translationVector.x, translationVector.y);
+    return Transformations._init(rotation, scale, translation);
+  }
+
   final Rotation? rotation;
   final Scale? scale;
   Translation? translation;
@@ -44,6 +67,12 @@ class Transformations {
     translation = null;
     return result;
   }
+
+  static bool _isQuaternionIdentity(Quaternion quaternion) =>
+      quaternion.x == 0.0 &&
+      quaternion.y == 0.0 &&
+      quaternion.z == 0.0 &&
+      quaternion.w == 1.0;
 }
 
 extension TranslationExtensions on Translation? {
@@ -51,77 +80,72 @@ extension TranslationExtensions on Translation? {
 }
 
 class TransformationsBuilder {
-  Matrix4 _matrix = Matrix4.identity();
+  final _matrices = <Matrix4>[];
 
-  TransformationsBuilder rotate({
-    required double angleInDegrees,
-    double? pivotX,
-    double? pivotY,
-  }) {
-    final angleInRadians = radians(angleInDegrees);
-    if (pivotX != null || pivotY != null) {
-      pivotX ??= 0.0;
-      pivotY ??= 0.0;
-      _matrix
-        ..translate(pivotX, pivotY)
-        ..multiply(Matrix4.rotationZ(angleInRadians))
-        ..translate(-pivotX, -pivotY);
-    } else {
-      _matrix.rotateZ(angleInRadians);
+  TransformationsBuilder translate({double? x, double? y}) {
+    x ??= VectorGroup.defaultTranslationX;
+    y ??= VectorGroup.defaultTranslationY;
+    if (x != VectorGroup.defaultTranslationX ||
+        y != VectorGroup.defaultTranslationY) {
+      _matrices.add(Matrix4.translationValues(x, y, 0.0));
     }
     return this;
   }
 
   TransformationsBuilder scale({required double x, double? y}) {
-    _matrix.scale(x, y ?? x);
+    if (x != VectorGroup.defaultScaleX) {
+      _matrices.add(
+        Matrix4.identity()..scale(x, y ?? x),
+      );
+    }
     return this;
   }
 
-  TransformationsBuilder translate({required double x, double? y}) {
-    _matrix.translate(x, y ?? 0.0);
+  TransformationsBuilder rotate(
+    double degrees, {
+    double? pivotX,
+    double? pivotY,
+  }) {
+    if (degrees != 0.0) {
+      final mustTranslate = pivotX != null || pivotY != null;
+      pivotX ??= VectorGroup.defaultPivotX;
+      pivotY ??= VectorGroup.defaultPivotY;
+      if (mustTranslate) {
+        translate(x: pivotX, y: pivotY);
+      }
+      _matrices.add(
+        Matrix4.identity()..rotateZ(radians(degrees)),
+      );
+      if (mustTranslate) {
+        translate(x: -pivotX, y: -pivotY);
+      }
+    }
     return this;
   }
 
-  TransformationsBuilder skewX(double x) {
-    _matrix = Matrix4.skewX(x).multiplied(_matrix);
+  TransformationsBuilder skewX(double degrees) {
+    if (degrees != 0.0) {
+      _matrices.add(Matrix4.skewX(radians(degrees)));
+    }
     return this;
   }
 
-  TransformationsBuilder skewY(double y) {
-    _matrix = Matrix4.skewY(y).multiplied(_matrix);
+  TransformationsBuilder skewY(double degrees) {
+    if (degrees != 0.0) {
+      _matrices.add(Matrix4.skewY(radians(degrees)));
+    }
     return this;
   }
 
   Transformations? build() {
-    if (_matrix.isIdentity()) {
+    if (_matrices.isEmpty) {
       return null;
-    } else {
-      Quaternion rotationQuaternion = Quaternion.identity();
-      Vector3 scaleVector = Vector3.zero();
-      Vector3 translationVector = Vector3.zero();
-      _matrix.decompose(translationVector, rotationQuaternion, scaleVector);
-      final rotationAxis = rotationQuaternion.axis;
-      final rotation = _isQuaternionIdentity(rotationQuaternion)
-          ? null
-          : Rotation(
-              degrees(rotationQuaternion.radians),
-              pivotX: rotationAxis.x,
-              pivotY: rotationAxis.y,
-            );
-      final scale = scaleVector.x == 1.0 && scaleVector.y == 1.0
-          ? null
-          : Scale(scaleVector.x, scaleVector.y);
-      final translation =
-          translationVector.x == 0.0 && translationVector.y == 0.0
-              ? null
-              : Translation(translationVector.x, translationVector.y);
-      return Transformations._init(rotation, scale, translation);
     }
+    final result = _matrices[0];
+    final count = _matrices.length;
+    for (var index = 1; index < count; index++) {
+      result.multiply(_matrices[index]);
+    }
+    return Transformations.fromMatrix4(result);
   }
-
-  static bool _isQuaternionIdentity(Quaternion quaternion) =>
-      quaternion.x == 0.0 &&
-      quaternion.y == 0.0 &&
-      quaternion.z == 0.0 &&
-      quaternion.w == 1.0;
 }

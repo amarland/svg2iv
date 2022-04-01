@@ -1,21 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:svg2iv_common/extensions.dart';
 
 Future<List<String>?> openFileSelectionDialog() async {
   if (Platform.isWindows) {
     return await _readPowerShellCommandOutputLines(r'''
-Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Windows.Forms;
+$filter = "SVG files (*.svg)|*.svg|XML files (*.xml)|*.xml|All files (*.*)|*.*";
 $dialog = New-Object System.Windows.Forms.OpenFileDialog -Property @{
-    Filter = 'SVG files (*.svg)|*.svg|XML files (*.xml)|*.xml|All files (*.*)|*.*'
-    Multiselect = $true
-}
+    Filter = $filter;
+    Multiselect = $true;
+};
 if ($dialog.ShowDialog() -eq [Windows.Forms.DialogResult]::OK) {
-    Write-Output $dialog.FileNames
-}
-''');
+    Write-Output $dialog.FileNames;
+};''');
   } else if (Platform.isMacOS) {
     final files = await _readShellCommandOutputLines(
       'osascript -e "choose file of type'
@@ -42,12 +41,11 @@ if ($dialog.ShowDialog() -eq [Windows.Forms.DialogResult]::OK) {
 Future<String?> openDirectorySelectionDialog() async {
   if (Platform.isWindows) {
     final lines = await _readPowerShellCommandOutputLines(r'''
-Add-Type -AssemblyName System.Windows.Forms
-$dialog = New-Object System.Windows.Forms.FolderBrowserDialog
+Add-Type -AssemblyName System.Windows.Forms;
+$dialog = New-Object System.Windows.Forms.FolderBrowserDialog;
 if ($dialog.ShowDialog() -eq [Windows.Forms.DialogResult]::OK) {
-    Write-Output $dialog.SelectedPath
-}
-''');
+    Write-Output $dialog.SelectedPath;
+};''');
     if (lines == null || lines.length != 1 || lines[0].isEmpty) return null;
     return lines[0];
   } else if (Platform.isMacOS) {
@@ -70,16 +68,11 @@ if ($dialog.ShowDialog() -eq [Windows.Forms.DialogResult]::OK) {
 }
 
 Future<List<String>?> _readPowerShellCommandOutputLines(String script) async {
-  final scriptCodeUnits = script.codeUnits;
-  final byteData = ByteData(scriptCodeUnits.length * 2);
-  for (var i = 0; i < scriptCodeUnits.length; i++) {
-    byteData.setUint16(i * 2, scriptCodeUnits[i], Endian.little);
-  }
-  final encodedScript = base64.encode(byteData.buffer.asUint8List());
+  final command = script.replaceAll('\n', ' ').replaceAll(RegExp(' {2,}'), ' ');
   return _readOutputLines(
     await Process.run(
       'powershell',
-      ['-ExecutionPolicy', 'unrestricted', '-EncodedCommand', encodedScript],
+      ['Invoke-Expression', '-Command', "'$command'"],
     ),
   );
 }

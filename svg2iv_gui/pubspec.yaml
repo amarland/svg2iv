@@ -5,7 +5,7 @@ description: A simple GUI for svg2iv.
 publish_to: 'none'
 
 environment:
-  sdk: '>=2.15.0 <3.0.0'
+  sdk: '>=2.16.0 <3.0.0'
 
 dependencies:
   flutter:

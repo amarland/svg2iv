@@ -208,14 +208,15 @@ List<Map<String, Object?>> _mapPathShapes(VectorPath path, String? pathId) {
           final ir = irList[index];
           return Tuple3(
             zero,
-            irList[index + 1].item1,
+            irList[index + 1].item1 as Vector2,
             ir is Vector2 ? ir : zero,
           );
         } else {
-          final point = irList[index].item3;
+          final castIrList = irList.cast<Tuple3<Vector2, Vector2, Vector2>>();
+          final point = castIrList[index].item3;
           return Tuple3(
-            irList[index - 1].item2 - point,
-            (index < pointCount ? irList[index + 1].item1 : zero) - point,
+            castIrList[index - 1].item2 - point,
+            (index < pointCount ? castIrList[index + 1].item1 : zero) - point,
             point,
           );
         }
@@ -255,7 +256,7 @@ dynamic _getIntermediateRepresentationForNode(PathNode node) {
         Vector2(arguments[0], arguments[1]),
       );
     default:
-      return Tuple3.fromList(
+      return Tuple3<Vector2, Vector2, Vector2>.fromList(
         arguments
             .chunked(2)
             .map((c) => Vector2(c[0], c[1]))

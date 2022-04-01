@@ -1,8 +1,7 @@
 include: package:lints/recommended.yaml
 
 analyzer:
-  exclude:
-    - lib/protobuf/image_vector.pb.dart
-    - lib/protobuf/image_vector.pbenum.dart
-    - lib/protobuf/image_vector.pbjson.dart
-    - lib/protobuf/image_vector.pbserver.dart
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
