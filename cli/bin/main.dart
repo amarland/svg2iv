@@ -11,7 +11,6 @@ import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:tuple/tuple.dart';
 
 const outputOptionName = 'output';
-const destinationOptionName = 'destination';
 const forceLottieFlagName = 'force-lottie';
 const helpFlagName = 'help';
 const quietFlagName = 'quiet';

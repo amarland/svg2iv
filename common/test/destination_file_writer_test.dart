@@ -14,7 +14,7 @@ import 'package:tuple/tuple.dart';
 import 'test_helpers.dart';
 
 void main() {
-  group('writePath() writes a DSL-compliant path declaration', () {
+  group('writePath() writes a DSL-compliant path declaration;', () {
     test('without attributes', () {
       final path = VectorPathBuilder(_pathData).build();
       final expected = (StringBuffer()
@@ -63,7 +63,7 @@ path(
     });
   });
 
-  group('writeGroup() writes a DSL-compliant group declaration', () {
+  group('writeGroup() writes a DSL-compliant group declaration;', () {
     test('with both set and unset attributes', () {
       final transformations = TransformationsBuilder()
           .rotate(30.0, pivotX: 5.0, pivotY: 5.0)
@@ -133,7 +133,7 @@ group(
     });
   });
 
-  group('writeImports() generates code with no missing or extra imports', () {
+  group('writeImports() generates code with no missing or extra imports;', () {
     void actualTest(
       String description,
       ImageVector imageVector,
@@ -199,7 +199,7 @@ group(
     }
   });
 
-  group('writeFileContents() generates code that can be compiled', () {
+  group('writeFileContents() generates code that can be compiled;', () {
     test('the embedded Kotlin compiler reports no errors', () {
       final imageVector = ImageVectorBuilder(24.0, 24.0)
           .name('test_vector')

@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
 
 void main() {
-  group('Iterable item selection', () {
+  group('Iterable item selection;', () {
     test('chunked(`size`) throws when `size` is less than 1', () {
       expect(
         () {
@@ -13,7 +13,7 @@ void main() {
       );
     });
     test('chunked returns an empty Iterable when the receiver is empty', () {
-      expect(true, Iterable.empty().chunked(2).isEmpty);
+      expect(true, Iterable<String>.empty().chunked(2).isEmpty);
     });
     const secondTestDescription = 'chunked(`size`) returns an Iterable<List>'
         " whose Lists are of length `size`, with all the receiver's elements"
@@ -63,7 +63,7 @@ void main() {
       expect(actualIterable, {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'});
     });
   });
-  group('String formatting', () {
+  group('String formatting;', () {
     test(
       'capitalizeCharAt(`index`) returns a String'
       ' with the character at `index` capitalized',

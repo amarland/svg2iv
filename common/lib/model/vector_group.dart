@@ -55,19 +55,19 @@ class VectorGroup extends VectorNode {
       identical(this, other) ||
       other is VectorGroup &&
           runtimeType == other.runtimeType &&
-          const ListEquality().equals(nodes, other.nodes) &&
+          const ListEquality<VectorNode>().equals(nodes, other.nodes) &&
           rotation == other.rotation &&
           scale == other.scale &&
           translation == other.translation &&
-          const ListEquality().equals(clipPathData, other.clipPathData);
+          const ListEquality<PathNode>().equals(clipPathData, other.clipPathData);
 
   @override
   int get hashCode =>
-      const ListEquality().hash(nodes) ^
+      const ListEquality<VectorNode>().hash(nodes) ^
       rotation.hashCode ^
       scale.hashCode ^
       translation.hashCode ^
-      const ListEquality().hash(clipPathData);
+      const ListEquality<PathNode>().hash(clipPathData);
 }
 
 class VectorGroupBuilder

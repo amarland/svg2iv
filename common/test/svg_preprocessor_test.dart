@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 
 void main() {
-  group('<defs> elements are moved if needed', () {
+  group('<defs> elements are moved if needed;', () {
     void actualTest(String description, String svgAsString) {
       test(description, () {
         final svgElement = XmlDocument.parse(svgAsString).rootElement;

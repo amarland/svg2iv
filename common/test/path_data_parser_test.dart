@@ -3,11 +3,11 @@ import 'package:svg2iv_common/path_data_parser.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('parsePathData() returns the expected pathNodes', () {
+  group('parsePathData() returns the expected pathNodes;', () {
     test('null', () {
-      expect(parsePathData(null), List.empty());
+      expect(parsePathData(null), List<dynamic>.empty());
     });
-    group('moveTo + [h|v]lineTo', () {
+    group('moveTo + [h|v]lineTo;', () {
       test('relative', () {
         final pathData = 'm5,5 h90 v90 h-90 l0,-90';
         final expectedPathNodes = const [
@@ -44,7 +44,7 @@ void main() {
       final actualPathNodes = parsePathData(pathData);
       expect(actualPathNodes, orderedEquals(expectedPathNodes));
     });
-    group('curveTo + smoothCurveTo', () {
+    group('curveTo + smoothCurveTo;', () {
       test('relative', () {
         final pathData = 'M10,80 c30,-70,55,-70,85,0 s55,70,85,0';
         final expectedPathNodes = const [
@@ -78,7 +78,7 @@ void main() {
         expect(actualPathNodes, orderedEquals(expectedPathNodes));
       });
     });
-    group('quadTo + smoothQuadTo', () {
+    group('quadTo + smoothQuadTo;', () {
       test('relative', () {
         final pathData = 'M10,80 q42.5,-70,85,0 t85,0';
         final expectedPathNodes = const [
@@ -112,7 +112,7 @@ void main() {
         expect(actualPathNodes, orderedEquals(expectedPathNodes));
       });
     });
-    group('with arcTo', () {
+    group('with arcTo;', () {
       test('relative', () {
         final pathData = 'M10,315 l100,-100 a30,50,0,0,1,52.55,-52.55'
             'l10,-10 a30,50,-45,0,1,42.55,-42.55 l99.9,-99.9';
