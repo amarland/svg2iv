@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:svg2iv_common/extensions.dart';
 import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
@@ -86,4 +88,17 @@ void main() {
       expect(testString.toCamelCase(), expectedString);
     });
   });
+  test(
+    "getNameWithoutExtension() returns a File's name without its extension",
+    () {
+      final fileNameWithoutExtension = 'test_file';
+      final file = File(
+        Directory.systemTemp.absolute.path +
+            Platform.pathSeparator +
+            fileNameWithoutExtension +
+            '.test',
+      );
+      expect(file.getNameWithoutExtension(), fileNameWithoutExtension);
+    },
+  );
 }
