@@ -65,7 +65,8 @@ If not set, the generated property will be declared as a top-level property.
     exit(2);
   }
   final outputOptionValue = argResults[outputOptionName] as String?;
-  final shouldWriteToStdOut = outputOptionValue == '-';
+  final isOutputJson = argResults[jsonFlagName] as bool;
+  final shouldWriteToStdOut = outputOptionValue == '-' || isOutputJson;
   _isInQuietMode = shouldWriteToStdOut || argResults[quietFlagName] as bool;
   if (argResults[helpFlagName] as bool) {
     stdout
@@ -200,7 +201,9 @@ If not set, the generated property will be declared as a top-level property.
   }
   // `destination` is null if the actual destination
   // is the standard output stream
-  if (!(argResults[jsonFlagName] as bool)) {
+  if (isOutputJson) {
+    stdout.add(imageVectors.map((pair) => pair.item2).toJson());
+  } else {
     if (imageVectors.isNotEmpty) {
       final extensionReceiver = argResults[receiverOptionName] as String?;
       if (destination != null) {
@@ -231,8 +234,6 @@ If not set, the generated property will be declared as a top-level property.
       // assume no eligible files were found
       _log('No eligible files were found.');
     }
-  } else {
-    stdout.add(imageVectors.map((pair) => pair.item2).toJson());
   }
 }
 
