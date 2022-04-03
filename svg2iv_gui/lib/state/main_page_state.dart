@@ -1,48 +1,53 @@
+import 'package:flutter/material.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:svg2iv_gui/ui/custom_icons.dart';
 
 class MainPageState {
   const MainPageState._(
     this.isThemeDark,
-    this.visibleDialog,
+    this.visibleSelectionDialog,
     this.sourceSelectionTextFieldState,
     this.destinationSelectionTextFieldState,
     this.extensionReceiverTextFieldState,
     this.imageVector,
     this.isPreviousPreviewButtonEnabled,
     this.isNextPreviewButtonEnabled,
+    this.snackBar,
   );
 
   MainPageState.initial({required this.isThemeDark})
-      : visibleDialog = VisibleDialog.none,
+      : visibleSelectionDialog = VisibleSelectionDialog.none,
         sourceSelectionTextFieldState = TextFieldState.initial,
         destinationSelectionTextFieldState = TextFieldState.initial,
         extensionReceiverTextFieldState = TextFieldState.initial,
         imageVector = CustomIcons.faceIcon,
         isPreviousPreviewButtonEnabled = false,
-        isNextPreviewButtonEnabled = false;
+        isNextPreviewButtonEnabled = false,
+        snackBar = null;
 
   final bool isThemeDark;
-  final VisibleDialog visibleDialog;
+  final VisibleSelectionDialog visibleSelectionDialog;
   final TextFieldState sourceSelectionTextFieldState;
   final TextFieldState destinationSelectionTextFieldState;
   final TextFieldState extensionReceiverTextFieldState;
   final ImageVector imageVector;
   final bool isPreviousPreviewButtonEnabled, isNextPreviewButtonEnabled;
+  final SnackBar? snackBar; // TODO: create a separate class
 
   MainPageState copyWith({
     bool? isThemeDark,
-    VisibleDialog? visibleDialog,
+    VisibleSelectionDialog? visibleSelectionDialog,
     TextFieldState? sourceSelectionTextFieldState,
     TextFieldState? destinationSelectionTextFieldState,
     TextFieldState? extensionReceiverTextFieldState,
     ImageVector? imageVector,
     bool? isPreviousPreviewButtonEnabled,
     bool? isNextPreviewButtonEnabled,
+    SnackBar? snackBar,
   }) {
     return MainPageState._(
       isThemeDark ?? this.isThemeDark,
-      visibleDialog ?? this.visibleDialog,
+      visibleSelectionDialog ?? this.visibleSelectionDialog,
       sourceSelectionTextFieldState ?? this.sourceSelectionTextFieldState,
       destinationSelectionTextFieldState ??
           this.destinationSelectionTextFieldState,
@@ -50,11 +55,12 @@ class MainPageState {
       imageVector ?? this.imageVector,
       isPreviousPreviewButtonEnabled ?? this.isPreviousPreviewButtonEnabled,
       isNextPreviewButtonEnabled ?? this.isNextPreviewButtonEnabled,
+      snackBar ?? this.snackBar,
     );
   }
 }
 
-enum VisibleDialog {
+enum VisibleSelectionDialog {
   sourceSelection,
   destinationSelection,
   none,

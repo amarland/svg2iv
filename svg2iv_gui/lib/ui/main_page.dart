@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../outerworld/file_selector.dart';
+import '../outer_world/file_selector.dart';
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
@@ -21,54 +21,29 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme =
+        Typography.material2018().englishLike.apply(fontFamily: 'WorkSans');
     return BlocProvider(
       create: (context) => bloc,
-      child: BlocConsumer<MainPageBloc, MainPageState>(
-        bloc: bloc,
-        listenWhen: (previousState, _) =>
-            previousState.visibleDialog == VisibleDialog.none,
-        listener: (context, state) {
-          switch (state.visibleDialog) {
-            case VisibleDialog.sourceSelection:
-              openFileSelectionDialog().then((selectedPaths) {
-                bloc.add(SourceSelectionDialogClosed(selectedPaths));
-              });
-              break;
-            case VisibleDialog.destinationSelection:
-              openDirectorySelectionDialog().then((selectedPath) {
-                bloc.add(DestinationSelectionDialogClosed(selectedPath));
-              });
-              break;
-            case VisibleDialog.none:
-              // no reaction
-              break;
-          }
-        },
-        builder: (context, state) {
-          final textTheme = Typography.material2018()
-              .englishLike
-              .apply(fontFamily: 'WorkSans');
-          return MaterialApp(
-            home: const MainPage(),
-            title: 'svg2iv',
-            theme: ThemeData.from(
-              colorScheme: const ColorScheme.light(
-                primary: _androidBlue,
-                secondary: _androidGreen,
-              ),
-              textTheme: textTheme,
-            ),
-            darkTheme: ThemeData.from(
-              colorScheme: const ColorScheme.dark(
-                primary: _androidGreen,
-                secondary: _androidBlue,
-              ),
-              textTheme: textTheme,
-            ),
-            themeMode: state.isThemeDark ? ThemeMode.dark : ThemeMode.light,
-            debugShowCheckedModeBanner: false,
-          );
-        },
+      child: MaterialApp(
+        home: const MainPage(),
+        title: 'svg2iv',
+        theme: ThemeData.from(
+          colorScheme: const ColorScheme.light(
+            primary: _androidBlue,
+            secondary: _androidGreen,
+          ),
+          textTheme: textTheme,
+        ),
+        darkTheme: ThemeData.from(
+          colorScheme: const ColorScheme.dark(
+            primary: _androidGreen,
+            secondary: _androidBlue,
+          ),
+          textTheme: textTheme,
+        ),
+        themeMode: bloc.state.isThemeDark ? ThemeMode.dark : ThemeMode.light,
+        debugShowCheckedModeBanner: false,
       ),
     );
   }
@@ -138,11 +113,36 @@ class _MainPageState extends State<MainPage>
           ),
         ],
       ),
-      body: Row(
-        children: [
-          _buildLeftPanel(context),
-          _buildRightPanel(context),
-        ],
+      body: BlocListener<MainPageBloc, MainPageState>(
+        listenWhen: (previousState, currentState) {
+          return previousState.visibleSelectionDialog !=
+                  currentState.visibleSelectionDialog ||
+              previousState.snackBar != currentState.snackBar;
+        },
+        listener: (context, state) {
+          final dialog = state.visibleSelectionDialog;
+          if (dialog != VisibleSelectionDialog.none) {
+            if (dialog == VisibleSelectionDialog.sourceSelection) {
+              openFileSelectionDialog().then((selectedPaths) {
+                bloc.add(SourceSelectionDialogClosed(selectedPaths));
+              });
+            } else if (dialog == VisibleSelectionDialog.destinationSelection) {
+              openDirectorySelectionDialog().then((selectedPath) {
+                bloc.add(DestinationSelectionDialogClosed(selectedPath));
+              });
+            }
+          }
+          final snackBar = state.snackBar;
+          if (snackBar != null) {
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+        },
+        child: Row(
+          children: [
+            _buildLeftPanel(context),
+            _buildRightPanel(context),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -162,7 +162,7 @@ class _MainPageState extends State<MainPage>
     final bloc = BlocProvider.of<MainPageBloc>(context);
     final state = bloc.state;
     final areSelectionFieldButtonsEnabled =
-        state.visibleDialog == VisibleDialog.none;
+        state.visibleSelectionDialog == VisibleSelectionDialog.none;
     return Expanded(
       flex: 2,
       child: Padding(
