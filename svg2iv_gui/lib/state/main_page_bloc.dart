@@ -11,9 +11,12 @@ import 'package:svg2iv_common/model/image_vector.dart';
 import 'package:tuple/tuple.dart';
 
 import '../ui/custom_icons.dart';
+import '../ui/snack_bar_info.dart';
 import 'main_page_event.dart';
 import 'main_page_state.dart';
 import 'preferences.dart';
+
+const _previewErrorsSnackBarId = 0x3B9ACA00;
 
 class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
   static final shortcutBindings = {
@@ -21,6 +24,13 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         (MainPageBloc bloc) => bloc.add(SelectSourceButtonPressed()),
     const SingleActivator(LogicalKeyboardKey.keyD, alt: true):
         (MainPageBloc bloc) => bloc.add(SelectDestinationButtonPressed()),
+    /*
+    const SingleActivator(LogicalKeyboardKey.escape): (MainPageBloc bloc) {
+      if (bloc.state.areErrorMessagesShown) {
+        bloc.add(ErrorMessagesDialogCloseRequested());
+      }
+    },
+    */
   };
 
   MainPageBloc({required bool isThemeDark})
@@ -56,6 +66,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
             break;
           }
         }
+
         Iterable<Tuple2<ImageVector?, List<String>>> parse(List<String> paths) {
           return paths.map(
             (path) {
@@ -74,7 +85,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           _imageVectors.add(pair.item1 ?? CustomIcons.errorCircle);
           errorMessages.addAll(pair.item2);
         }
-        add(SourceFilesParsed(errorMessages: errorMessages));
+        add(SourceFilesParsed(errorMessages: List.filled(10, 'Test')));
       }
       return state.copyWith(
         visibleSelectionDialog: VisibleSelectionDialog.none,
@@ -108,19 +119,16 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
             : state.imageVector,
         isPreviousPreviewButtonEnabled: false,
         isNextPreviewButtonEnabled: _imageVectors.length > 1,
-        snackBar: event.errorMessages.isEmpty
-            ? SnackBar(
-                content: const Text(
-                  'Error(s) occurred while trying to'
-                  ' display a preview of the source(s)',
-                ),
-                action: SnackBarAction(
-                  label: 'View errors',
-                  onPressed: () {},
-                ),
-                duration: const Duration(minutes: 1),
+        snackBarInfo: event.errorMessages.isNotEmpty
+            ? const SnackBarInfo(
+                id: _previewErrorsSnackBarId,
+                message: 'Error(s) occurred while trying to'
+                    ' display a preview of the source(s)',
+                actionLabel: 'View errors',
+                duration: Duration(minutes: 1),
               )
             : null,
+        errorMessages: event.errorMessages,
       );
     } else if (event is PreviousPreviewButtonClicked) {
       return state.copyWith(
@@ -134,6 +142,24 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         isPreviousPreviewButtonEnabled: true,
         isNextPreviewButtonEnabled: _previewIndex < _imageVectors.length - 1,
       );
+    } else if (event is SnackBarActionButtonClicked) {
+      switch (event.snackBarId) {
+        case _previewErrorsSnackBarId:
+          return state.copyWith(
+            snackBarInfo: null,
+            areErrorMessagesShown: true,
+          );
+        default:
+          throw ArgumentError.value(
+            event.snackBarId.toRadixString(16),
+            'event.snackBarId',
+          );
+      }
+    } else if (event is ErrorMessagesDialogCloseRequested) {
+      return state.copyWith(areErrorMessagesShown: false);
+    } else if (event is ReadMoreErrorMessagesActionClicked) {
+      // TODO
+      return state.copyWith(areErrorMessagesShown: false);
     } else {
       throw UnimplementedError();
     }

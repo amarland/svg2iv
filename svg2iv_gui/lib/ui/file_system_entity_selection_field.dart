@@ -39,29 +39,43 @@ class _State extends State<FileSystemEntitySelectionField> {
   @override
   Widget build(BuildContext context) {
     final IconData icon;
-    final TextSpan labelSpan;
+    final TextSpan defaultLabelSpan;
     switch (widget.selectionMode) {
       case FileSystemEntitySelectionMode.sourceFiles:
         icon = Icons.upload_file_outlined;
-        labelSpan = 'Source files'.asMnemonic();
+        defaultLabelSpan = 'Source files'.asMnemonic();
         break;
       case FileSystemEntitySelectionMode.destinationDirectory:
         icon = Icons.snippet_folder_outlined;
-        labelSpan = 'Destination directory'.asMnemonic();
+        defaultLabelSpan = 'Destination directory'.asMnemonic();
         break;
     }
+    final theme = Theme.of(context);
+    final defaultInputBorder = theme.inputDecorationTheme.border;
+    final inputBorder = defaultInputBorder?.copyWith(
+      borderSide: defaultInputBorder.borderSide.copyWith(
+        color: widget.isError
+            ? theme.colorScheme.error
+            // from 'input_decorator.dart',
+            // `_InputDecoratorState._getDefaultBorderColor`
+            : theme.colorScheme.onSurface.withOpacity(0.38),
+      ),
+    );
+    final labelSpan = widget.isError
+        ? TextSpan(
+            children: [defaultLabelSpan],
+            style: TextStyle(color: theme.colorScheme.error),
+          )
+        : defaultLabelSpan;
     return Row(
       children: [
         Flexible(
           child: TextField(
             controller: _textEditingController,
             decoration: InputDecoration(
-              label: widget.isError
-                  ? null
-                  : Text.rich(labelSpan, overflow: TextOverflow.ellipsis),
+              label: Text.rich(labelSpan, overflow: TextOverflow.ellipsis),
               prefixIcon: Icon(icon),
-              border: const OutlineInputBorder(),
-              errorText: widget.isError ? labelSpan.text : null,
+              enabledBorder: inputBorder,
             ),
             readOnly: true,
           ),

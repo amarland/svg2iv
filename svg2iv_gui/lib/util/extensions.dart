@@ -119,22 +119,14 @@ extension PathNodesToSvgPathDataStringMapping on List<PathNode> {
       PathDataCommand.arcTo: 'A',
       PathDataCommand.relativeArcTo: 'a',
     };
-    return map((segment) =>
-        commandLetterMap[segment.command]! +
-        (segment.command != PathDataCommand.close ? ' ' : '') +
-        segment.arguments.map((value) {
-          if (value is bool) {
-            return (value ? '1' : '0');
-          } else {
-            return (value as num).toStringAsFixed(5).let(
-                  (str) => str
-                      .replaceRange(
-                          str.indexOf('0', str.indexOf('.')), str.length, '')
-                      .let((zeroTrimmed) => zeroTrimmed.endsWith('.')
-                          ? zeroTrimmed.substring(0, zeroTrimmed.length - 1)
-                          : zeroTrimmed),
-                );
-          }
-        }).join(' ')).join(' ');
+    return map((segment) {
+      return commandLetterMap[segment.command]! +
+          (segment.command != PathDataCommand.close ? ' ' : '') +
+          segment.arguments
+              .map((value) => value is bool
+                  ? (value ? '1' : '0')
+                  : (value as double).toStringWithMaxDecimals(5))
+              .join(' ');
+    }).join(' ');
   }
 }

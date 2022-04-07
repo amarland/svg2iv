@@ -100,6 +100,17 @@ extension StringToNumberConversion on String {
   int? toInt() => int.tryParse(this);
 }
 
+extension DoubleToStringFormatting on num {
+  String toStringWithMaxDecimals(int max) {
+    // erase trailing zeros and make sure the string doesn't end with '.'
+    final trimmed = toStringAsFixed(max).replaceFirst(RegExp(r'0*$'), '');
+    final lastIndex = trimmed.length - 1;
+    return (trimmed[lastIndex] == '.'
+        ? trimmed.substring(0, lastIndex)
+        : trimmed);
+  }
+}
+
 extension FileNameExtraction on File {
   String getNameWithoutExtension() {
     final path = this.path;

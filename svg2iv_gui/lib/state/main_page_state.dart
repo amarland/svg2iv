@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
-import 'package:svg2iv_gui/ui/custom_icons.dart';
+
+import '../ui/custom_icons.dart';
+import '../ui/snack_bar_info.dart';
 
 class MainPageState {
   const MainPageState._(
@@ -12,7 +13,9 @@ class MainPageState {
     this.imageVector,
     this.isPreviousPreviewButtonEnabled,
     this.isNextPreviewButtonEnabled,
-    this.snackBar,
+    this.snackBarInfo,
+    this.areErrorMessagesShown,
+    this.errorMessages,
   );
 
   MainPageState.initial({required this.isThemeDark})
@@ -23,7 +26,9 @@ class MainPageState {
         imageVector = CustomIcons.faceIcon,
         isPreviousPreviewButtonEnabled = false,
         isNextPreviewButtonEnabled = false,
-        snackBar = null;
+        snackBarInfo = null,
+        areErrorMessagesShown = false,
+        errorMessages = List.empty();
 
   final bool isThemeDark;
   final VisibleSelectionDialog visibleSelectionDialog;
@@ -32,7 +37,9 @@ class MainPageState {
   final TextFieldState extensionReceiverTextFieldState;
   final ImageVector imageVector;
   final bool isPreviousPreviewButtonEnabled, isNextPreviewButtonEnabled;
-  final SnackBar? snackBar; // TODO: create a separate class
+  final SnackBarInfo? snackBarInfo;
+  final bool areErrorMessagesShown;
+  final List<String> errorMessages;
 
   MainPageState copyWith({
     bool? isThemeDark,
@@ -43,7 +50,9 @@ class MainPageState {
     ImageVector? imageVector,
     bool? isPreviousPreviewButtonEnabled,
     bool? isNextPreviewButtonEnabled,
-    SnackBar? snackBar,
+    SnackBarInfo? snackBarInfo,
+    bool? areErrorMessagesShown,
+    List<String>? errorMessages,
   }) {
     return MainPageState._(
       isThemeDark ?? this.isThemeDark,
@@ -55,7 +64,9 @@ class MainPageState {
       imageVector ?? this.imageVector,
       isPreviousPreviewButtonEnabled ?? this.isPreviousPreviewButtonEnabled,
       isNextPreviewButtonEnabled ?? this.isNextPreviewButtonEnabled,
-      snackBar ?? this.snackBar,
+      snackBarInfo ?? this.snackBarInfo,
+      areErrorMessagesShown ?? this.areErrorMessagesShown,
+      errorMessages ?? this.errorMessages,
     );
   }
 }

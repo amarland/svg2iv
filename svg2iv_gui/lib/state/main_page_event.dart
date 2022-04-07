@@ -29,3 +29,13 @@ class SourceFilesParsed extends MainPageEvent {
 class PreviousPreviewButtonClicked extends MainPageEvent {}
 
 class NextPreviewButtonClicked extends MainPageEvent {}
+
+class SnackBarActionButtonClicked extends MainPageEvent {
+  const SnackBarActionButtonClicked(this.snackBarId);
+
+  final int snackBarId;
+}
+
+class ErrorMessagesDialogCloseRequested extends MainPageEvent {}
+
+class ReadMoreErrorMessagesActionClicked extends MainPageEvent {}
