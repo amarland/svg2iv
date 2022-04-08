@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
 
-import '../outer_world/file_selector.dart';
+import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
@@ -144,11 +144,11 @@ class _MainPageState extends State<MainPage>
         final dialog = state.visibleSelectionDialog;
         final bloc = BlocProvider.of<MainPageBloc>(context);
         if (dialog == VisibleSelectionDialog.sourceSelection) {
-          openFileSelectionDialog().then((selectedPaths) {
+          file_pickers.openFileSelectionDialog().then((selectedPaths) {
             bloc.add(SourceSelectionDialogClosed(selectedPaths));
           });
         } else {
-          openDirectorySelectionDialog().then((selectedPath) {
+          file_pickers.openDirectorySelectionDialog().then((selectedPath) {
             bloc.add(DestinationSelectionDialogClosed(selectedPath));
           });
         }
