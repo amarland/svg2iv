@@ -159,7 +159,7 @@ class CustomIcons {
             ),
             const PathNode(
               PathDataCommand.arcTo,
-              [8.0, 8.0, 0.0, false, true, 12.0, 20.0],
+              [8.0, 8.0, 0.0, true, true, 12.0, 20.0],
             ),
             const PathNode(PathDataCommand.close, []),
           ],

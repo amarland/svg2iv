@@ -3,27 +3,26 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:svg2iv_common/file_parser.dart';
+import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/model/image_vector.dart';
-import 'package:tuple/tuple.dart';
+import 'package:svg2iv_gui/outer_world/log_file.dart';
 
-import '../ui/custom_icons.dart';
+import '../outer_world/preferences.dart';
 import '../ui/snack_bar_info.dart';
+import '../util/file_parser.dart';
 import 'main_page_event.dart';
 import 'main_page_state.dart';
-import 'preferences.dart';
 
 const _previewErrorsSnackBarId = 0x3B9ACA00;
 
 class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
   static final shortcutBindings = {
     const SingleActivator(LogicalKeyboardKey.keyS, alt: true):
-        (MainPageBloc bloc) => bloc.add(SelectSourceButtonPressed()),
+        (MainPageBloc bloc) => bloc.add(const SelectSourceButtonPressed()),
     const SingleActivator(LogicalKeyboardKey.keyD, alt: true):
-        (MainPageBloc bloc) => bloc.add(SelectDestinationButtonPressed()),
+        (MainPageBloc bloc) => bloc.add(const SelectDestinationButtonPressed()),
     /*
     const SingleActivator(LogicalKeyboardKey.escape): (MainPageBloc bloc) {
       if (bloc.state.areErrorMessagesShown) {
@@ -40,8 +39,10 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
     );
   }
 
-  final _imageVectors = <ImageVector>[];
+  final _imageVectors = <ImageVector?>[];
   int _previewIndex = 0;
+
+  bool get _didErrorsOccur => _imageVectors.anyNull();
 
   FutureOr<MainPageState> mapEventToState(MainPageEvent event) async {
     if (event is ToggleThemeButtonPressed) {
@@ -66,26 +67,12 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
             break;
           }
         }
-
-        Iterable<Tuple2<ImageVector?, List<String>>> parse(List<String> paths) {
-          return paths.map(
-            (path) {
-              return parseXmlFile(
-                Tuple2(File(path), SourceDefinitionType.explicit),
-              );
-            },
-          );
-        }
-
-        final parseResult = await compute(parse, paths);
         _imageVectors.clear();
-        _previewIndex = 0;
-        final errorMessages = List<String>.empty(growable: true);
-        for (final pair in parseResult) {
-          _imageVectors.add(pair.item1 ?? CustomIcons.errorCircle);
-          errorMessages.addAll(pair.item2);
+        await for (final imageVector in parseFiles(paths)) {
+          _imageVectors.add(imageVector);
         }
-        add(SourceFilesParsed(errorMessages: List.filled(10, 'Test')));
+        _previewIndex = 0;
+        add(const SourceFilesParsed());
       }
       return state.copyWith(
         visibleSelectionDialog: VisibleSelectionDialog.none,
@@ -109,7 +96,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
     } else if (event is SourceFilesParsed) {
       return state.copyWith(
         sourceSelectionTextFieldState: state.sourceSelectionTextFieldState
-            .copyWith(isError: event.errorMessages.isNotEmpty),
+            .copyWith(isError: _didErrorsOccur),
         extensionReceiverTextFieldState:
             state.extensionReceiverTextFieldState.copyWith(
           placeholder: _imageVectors.singleOrNull?.name,
@@ -119,7 +106,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
             : state.imageVector,
         isPreviousPreviewButtonEnabled: false,
         isNextPreviewButtonEnabled: _imageVectors.length > 1,
-        snackBarInfo: event.errorMessages.isNotEmpty
+        snackBarInfo: _didErrorsOccur
             ? const SnackBarInfo(
                 id: _previewErrorsSnackBarId,
                 message: 'Error(s) occurred while trying to'
@@ -128,7 +115,6 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
                 duration: Duration(minutes: 1),
               )
             : null,
-        errorMessages: event.errorMessages,
       );
     } else if (event is PreviousPreviewButtonClicked) {
       return state.copyWith(
@@ -145,9 +131,14 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
     } else if (event is SnackBarActionButtonClicked) {
       switch (event.snackBarId) {
         case _previewErrorsSnackBarId:
+          const maxErrorMessageCount = 8;
+          final errorMessages = await readErrorMessages(maxErrorMessageCount);
           return state.copyWith(
             snackBarInfo: null,
-            areErrorMessagesShown: true,
+            errorMessagesDialogState: ErrorMessagesDialogShown(
+              errorMessages.item1,
+              errorMessages.item2,
+            ),
           );
         default:
           throw ArgumentError.value(
@@ -156,10 +147,14 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           );
       }
     } else if (event is ErrorMessagesDialogCloseRequested) {
-      return state.copyWith(areErrorMessagesShown: false);
+      return state.copyWith(
+        errorMessagesDialogState: const ErrorMessagesDialogNotShown(),
+      );
     } else if (event is ReadMoreErrorMessagesActionClicked) {
-      // TODO
-      return state.copyWith(areErrorMessagesShown: false);
+      await openLogFileInPreferredApplication();
+      return state.copyWith(
+        errorMessagesDialogState: const ErrorMessagesDialogNotShown(),
+      );
     } else {
       throw UnimplementedError();
     }

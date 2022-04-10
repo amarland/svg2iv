@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_gui/ui/custom_icons.dart';
 
 import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
@@ -113,7 +114,7 @@ class _MainPageState extends State<MainPage>
         title: const Text('SVG to ImageVector conversion tool'),
         actions: [
           IconButton(
-            onPressed: () => bloc.add(ToggleThemeButtonPressed()),
+            onPressed: () => bloc.add(const ToggleThemeButtonPressed()),
             icon: const Icon(Icons.dark_mode_outlined),
           ),
           IconButton(
@@ -198,38 +199,37 @@ class _MainPageState extends State<MainPage>
   static Widget _areErrorMessagesShownChangeListener({required Widget child}) {
     return BlocListener<MainPageBloc, MainPageState>(
       listenWhen: (previousState, currentState) =>
-          previousState.areErrorMessagesShown !=
-          currentState.areErrorMessagesShown,
+          previousState.errorMessagesDialogState !=
+          currentState.errorMessagesDialogState,
       listener: (context, state) async {
-        if (state.areErrorMessagesShown) {
+        final dialogState = state.errorMessagesDialogState;
+        if (dialogState is ErrorMessagesDialogShown) {
           await showDialog<void>(
             context: context,
             builder: (context) {
               final bloc = BlocProvider.of<MainPageBloc>(context);
-              const maxErrorMessageCount = 8;
               return AlertDialog(
                 content: DefaultTextStyle(
                   style: const TextStyle(fontFamily: 'JetBrainsMono'),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: bloc.state.errorMessages
-                        .take(maxErrorMessageCount)
+                    children: dialogState.messages
                         .map((message) => Text(message))
                         .toNonGrowableList(),
                   ),
                 ),
                 actions: [
-                  if (bloc.state.errorMessages.length > maxErrorMessageCount)
+                  if (dialogState.isReadMoreButtonVisible)
                     TextButton(
                       onPressed: () {
-                        bloc.add(ErrorMessagesDialogCloseRequested());
+                        bloc.add(const ReadMoreErrorMessagesActionClicked());
                       },
                       child: const Text('Read more'),
                     ),
                   TextButton(
                     onPressed: () {
-                      bloc.add(ReadMoreErrorMessagesActionClicked());
+                      bloc.add(const ErrorMessagesDialogCloseRequested());
                     },
                     child: const Text('Close'),
                   ),
@@ -263,7 +263,7 @@ class _MainPageState extends State<MainPage>
             children: [
               FileSystemEntitySelectionField(
                 onButtonPressed: areSelectionFieldButtonsEnabled
-                    ? () => bloc.add(SelectSourceButtonPressed())
+                    ? () => bloc.add(const SelectSourceButtonPressed())
                     : null,
                 selectionMode: FileSystemEntitySelectionMode.sourceFiles,
                 value: state.sourceSelectionTextFieldState.value,
@@ -283,7 +283,7 @@ class _MainPageState extends State<MainPage>
               ),
               FileSystemEntitySelectionField(
                 onButtonPressed: areSelectionFieldButtonsEnabled
-                    ? () => bloc.add(SelectDestinationButtonPressed())
+                    ? () => bloc.add(const SelectDestinationButtonPressed())
                     : null,
                 selectionMode:
                     FileSystemEntitySelectionMode.destinationDirectory,
@@ -326,7 +326,8 @@ class _MainPageState extends State<MainPage>
                   child: LayoutBuilder(
                     builder: (_, constraints) {
                       return Checkerboard(
-                        foregroundImageVector: state.imageVector,
+                        foregroundImageVector:
+                            state.imageVector ?? CustomIcons.errorCircle,
                         size: constraints.biggest,
                       );
                     },
@@ -337,7 +338,7 @@ class _MainPageState extends State<MainPage>
                 alignment: Alignment.centerLeft,
                 child: PreviewSelectionButton(
                   onPressed: state.isPreviousPreviewButtonEnabled
-                      ? () => bloc.add(PreviousPreviewButtonClicked())
+                      ? () => bloc.add(const PreviousPreviewButtonClicked())
                       : null,
                   iconData: Icons.keyboard_arrow_left_outlined,
                 ),
@@ -346,7 +347,7 @@ class _MainPageState extends State<MainPage>
                 alignment: Alignment.centerRight,
                 child: PreviewSelectionButton(
                   onPressed: state.isNextPreviewButtonEnabled
-                      ? () => bloc.add(NextPreviewButtonClicked())
+                      ? () => bloc.add(const NextPreviewButtonClicked())
                       : null,
                   iconData: Icons.keyboard_arrow_right_outlined,
                 ),

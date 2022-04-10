@@ -14,8 +14,7 @@ class MainPageState {
     this.isPreviousPreviewButtonEnabled,
     this.isNextPreviewButtonEnabled,
     this.snackBarInfo,
-    this.areErrorMessagesShown,
-    this.errorMessages,
+    this.errorMessagesDialogState,
   );
 
   MainPageState.initial({required this.isThemeDark})
@@ -27,19 +26,17 @@ class MainPageState {
         isPreviousPreviewButtonEnabled = false,
         isNextPreviewButtonEnabled = false,
         snackBarInfo = null,
-        areErrorMessagesShown = false,
-        errorMessages = List.empty();
+        errorMessagesDialogState = const ErrorMessagesDialogNotShown();
 
   final bool isThemeDark;
   final VisibleSelectionDialog visibleSelectionDialog;
   final TextFieldState sourceSelectionTextFieldState;
   final TextFieldState destinationSelectionTextFieldState;
   final TextFieldState extensionReceiverTextFieldState;
-  final ImageVector imageVector;
+  final ImageVector? imageVector;
   final bool isPreviousPreviewButtonEnabled, isNextPreviewButtonEnabled;
   final SnackBarInfo? snackBarInfo;
-  final bool areErrorMessagesShown;
-  final List<String> errorMessages;
+  final ErrorMessagesDialogState errorMessagesDialogState;
 
   MainPageState copyWith({
     bool? isThemeDark,
@@ -51,8 +48,7 @@ class MainPageState {
     bool? isPreviousPreviewButtonEnabled,
     bool? isNextPreviewButtonEnabled,
     SnackBarInfo? snackBarInfo,
-    bool? areErrorMessagesShown,
-    List<String>? errorMessages,
+    ErrorMessagesDialogState? errorMessagesDialogState,
   }) {
     return MainPageState._(
       isThemeDark ?? this.isThemeDark,
@@ -65,8 +61,7 @@ class MainPageState {
       isPreviousPreviewButtonEnabled ?? this.isPreviousPreviewButtonEnabled,
       isNextPreviewButtonEnabled ?? this.isNextPreviewButtonEnabled,
       snackBarInfo ?? this.snackBarInfo,
-      areErrorMessagesShown ?? this.areErrorMessagesShown,
-      errorMessages ?? this.errorMessages,
+      errorMessagesDialogState ?? this.errorMessagesDialogState,
     );
   }
 }
@@ -93,4 +88,22 @@ class TextFieldState {
       placeholder ?? this.placeholder,
     );
   }
+}
+
+abstract class ErrorMessagesDialogState {
+  const ErrorMessagesDialogState();
+}
+
+class ErrorMessagesDialogNotShown extends ErrorMessagesDialogState {
+  const ErrorMessagesDialogNotShown() : super();
+}
+
+class ErrorMessagesDialogShown extends ErrorMessagesDialogState {
+  const ErrorMessagesDialogShown(
+    this.messages,
+    this.isReadMoreButtonVisible,
+  ) : super();
+
+  final List<String> messages;
+  final bool isReadMoreButtonVisible;
 }

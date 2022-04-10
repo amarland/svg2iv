@@ -322,7 +322,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
         final largeArc = arguments[3] as bool;
         final clockwise = arguments[4] as bool;
         _onArcToCommandReceived(
-          (arguments..removeRange(3, 5)).cast<double>(),
+          (arguments.toList()..removeRange(3, 5)).cast<double>(),
           largeArc,
           clockwise,
         );
@@ -331,7 +331,7 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
         final largeArc = arguments[3] as bool;
         final clockwise = arguments[4] as bool;
         _onRelativeArcToCommandReceived(
-          (arguments..removeRange(3, 5)).cast<double>(),
+          (arguments.toList()..removeRange(3, 5)).cast<double>(),
           largeArc,
           clockwise,
         );

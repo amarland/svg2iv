@@ -2,9 +2,13 @@ abstract class MainPageEvent {
   const MainPageEvent();
 }
 
-class ToggleThemeButtonPressed extends MainPageEvent {}
+class ToggleThemeButtonPressed extends MainPageEvent {
+  const ToggleThemeButtonPressed() : super();
+}
 
-class SelectSourceButtonPressed extends MainPageEvent {}
+class SelectSourceButtonPressed extends MainPageEvent {
+  const SelectSourceButtonPressed() : super();
+}
 
 class SourceSelectionDialogClosed extends MainPageEvent {
   const SourceSelectionDialogClosed(this.paths);
@@ -12,7 +16,9 @@ class SourceSelectionDialogClosed extends MainPageEvent {
   final List<String>? paths;
 }
 
-class SelectDestinationButtonPressed extends MainPageEvent {}
+class SelectDestinationButtonPressed extends MainPageEvent {
+  const SelectDestinationButtonPressed() : super();
+}
 
 class DestinationSelectionDialogClosed extends MainPageEvent {
   const DestinationSelectionDialogClosed(this.path);
@@ -21,14 +27,16 @@ class DestinationSelectionDialogClosed extends MainPageEvent {
 }
 
 class SourceFilesParsed extends MainPageEvent {
-  const SourceFilesParsed({required this.errorMessages});
-
-  final List<String> errorMessages;
+  const SourceFilesParsed() : super();
 }
 
-class PreviousPreviewButtonClicked extends MainPageEvent {}
+class PreviousPreviewButtonClicked extends MainPageEvent {
+  const PreviousPreviewButtonClicked() : super();
+}
 
-class NextPreviewButtonClicked extends MainPageEvent {}
+class NextPreviewButtonClicked extends MainPageEvent {
+  const NextPreviewButtonClicked() : super();
+}
 
 class SnackBarActionButtonClicked extends MainPageEvent {
   const SnackBarActionButtonClicked(this.snackBarId);
@@ -36,6 +44,10 @@ class SnackBarActionButtonClicked extends MainPageEvent {
   final int snackBarId;
 }
 
-class ErrorMessagesDialogCloseRequested extends MainPageEvent {}
+class ErrorMessagesDialogCloseRequested extends MainPageEvent {
+  const ErrorMessagesDialogCloseRequested() : super();
+}
 
-class ReadMoreErrorMessagesActionClicked extends MainPageEvent {}
+class ReadMoreErrorMessagesActionClicked extends MainPageEvent {
+  const ReadMoreErrorMessagesActionClicked() : super();
+}
