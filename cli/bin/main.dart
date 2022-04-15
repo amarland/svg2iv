@@ -38,7 +38,7 @@ will assume it should lead to a directory unless it ends with '.kt'
       help: """
 The name of the receiver type for which the extension property(ies) will be
 generated. The type will NOT be created if it hasn't already been declared.
-For example, passing '--receiver MyIcons fancy_icon.svg' will result
+For example, passing '--receiver=MyIcons fancy_icon.svg' will result
 in `MyIcons.FancyIcon` being generated.
 If not set, the generated property will be declared as a top-level property.
 ​""",
@@ -71,7 +71,8 @@ If not set, the generated property will be declared as a top-level property.
   if (argResults[helpFlagName] as bool) {
     stdout
       ..writeln(
-        'Usage: svg2iv [options] <comma-separated source files/directories>',
+        'Usage: svg2iv.exe [options]'
+        ' <comma-separated source files/directories>',
       )
       ..writeln()
       ..writeln('Options:')

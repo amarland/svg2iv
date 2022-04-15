@@ -118,9 +118,7 @@ class _MainPageState extends State<MainPage>
             icon: const Icon(Icons.dark_mode_outlined),
           ),
           IconButton(
-            onPressed: () {
-              /* TODO */
-            },
+            onPressed: () => bloc.add(const AboutButtonPressed()),
             icon: const Icon(Icons.info_outlined),
           ),
         ],
@@ -203,7 +201,7 @@ class _MainPageState extends State<MainPage>
           currentState.errorMessagesDialogState,
       listener: (context, state) async {
         final dialogState = state.errorMessagesDialogState;
-        if (dialogState is ErrorMessagesDialogShown) {
+        if (dialogState is ErrorMessagesDialogVisible) {
           await showDialog<void>(
             context: context,
             builder: (context) {
@@ -334,24 +332,26 @@ class _MainPageState extends State<MainPage>
                   ),
                 ),
               ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: PreviewSelectionButton(
-                  onPressed: state.isPreviousPreviewButtonEnabled
-                      ? () => bloc.add(const PreviousPreviewButtonClicked())
-                      : null,
-                  iconData: Icons.keyboard_arrow_left_outlined,
+              if (state.isPreviousPreviewButtonVisible)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: PreviewSelectionButton(
+                    onPressed: () {
+                      bloc.add(const PreviousPreviewButtonClicked());
+                    },
+                    iconData: Icons.keyboard_arrow_left_outlined,
+                  ),
                 ),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: PreviewSelectionButton(
-                  onPressed: state.isNextPreviewButtonEnabled
-                      ? () => bloc.add(const NextPreviewButtonClicked())
-                      : null,
-                  iconData: Icons.keyboard_arrow_right_outlined,
+              if (state.isNextPreviewButtonVisible)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: PreviewSelectionButton(
+                    onPressed: () {
+                      bloc.add(const NextPreviewButtonClicked());
+                    },
+                    iconData: Icons.keyboard_arrow_right_outlined,
+                  ),
                 ),
-              ),
               Align(
                 alignment: Alignment.bottomRight,
                 // the FAB is not added to the Scaffold because we don't want it

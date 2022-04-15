@@ -6,61 +6,66 @@ import '../ui/snack_bar_info.dart';
 class MainPageState {
   const MainPageState._(
     this.isThemeDark,
+    this.isAboutDialogVisible,
     this.visibleSelectionDialog,
     this.sourceSelectionTextFieldState,
     this.destinationSelectionTextFieldState,
     this.extensionReceiverTextFieldState,
     this.imageVector,
-    this.isPreviousPreviewButtonEnabled,
-    this.isNextPreviewButtonEnabled,
+    this.isPreviousPreviewButtonVisible,
+    this.isNextPreviewButtonVisible,
     this.snackBarInfo,
     this.errorMessagesDialogState,
   );
 
   MainPageState.initial({required this.isThemeDark})
-      : visibleSelectionDialog = VisibleSelectionDialog.none,
+      : isAboutDialogVisible = false,
+        visibleSelectionDialog = VisibleSelectionDialog.none,
         sourceSelectionTextFieldState = TextFieldState.initial,
         destinationSelectionTextFieldState = TextFieldState.initial,
         extensionReceiverTextFieldState = TextFieldState.initial,
         imageVector = CustomIcons.faceIcon,
-        isPreviousPreviewButtonEnabled = false,
-        isNextPreviewButtonEnabled = false,
+        isPreviousPreviewButtonVisible = false,
+        isNextPreviewButtonVisible = false,
         snackBarInfo = null,
-        errorMessagesDialogState = const ErrorMessagesDialogNotShown();
+        errorMessagesDialogState = const ErrorMessagesDialogGone();
 
   final bool isThemeDark;
+  final bool isAboutDialogVisible;
   final VisibleSelectionDialog visibleSelectionDialog;
   final TextFieldState sourceSelectionTextFieldState;
   final TextFieldState destinationSelectionTextFieldState;
   final TextFieldState extensionReceiverTextFieldState;
   final ImageVector? imageVector;
-  final bool isPreviousPreviewButtonEnabled, isNextPreviewButtonEnabled;
+  final bool isPreviousPreviewButtonVisible, isNextPreviewButtonVisible;
   final SnackBarInfo? snackBarInfo;
   final ErrorMessagesDialogState errorMessagesDialogState;
 
   MainPageState copyWith({
     bool? isThemeDark,
+    bool? isAboutDialogVisible,
     VisibleSelectionDialog? visibleSelectionDialog,
     TextFieldState? sourceSelectionTextFieldState,
     TextFieldState? destinationSelectionTextFieldState,
     TextFieldState? extensionReceiverTextFieldState,
-    ImageVector? imageVector,
-    bool? isPreviousPreviewButtonEnabled,
-    bool? isNextPreviewButtonEnabled,
-    SnackBarInfo? snackBarInfo,
+    ImageVector? Function()? imageVector,
+    bool? isPreviousPreviewButtonVisible,
+    bool? isNextPreviewButtonVisible,
+    SnackBarInfo? Function()? snackBarInfo,
     ErrorMessagesDialogState? errorMessagesDialogState,
   }) {
     return MainPageState._(
       isThemeDark ?? this.isThemeDark,
+      isAboutDialogVisible ?? this.isAboutDialogVisible,
       visibleSelectionDialog ?? this.visibleSelectionDialog,
       sourceSelectionTextFieldState ?? this.sourceSelectionTextFieldState,
       destinationSelectionTextFieldState ??
           this.destinationSelectionTextFieldState,
       extensionReceiverTextFieldState ?? this.extensionReceiverTextFieldState,
-      imageVector ?? this.imageVector,
-      isPreviousPreviewButtonEnabled ?? this.isPreviousPreviewButtonEnabled,
-      isNextPreviewButtonEnabled ?? this.isNextPreviewButtonEnabled,
-      snackBarInfo ?? this.snackBarInfo,
+      imageVector?.call() ?? this.imageVector,
+      isPreviousPreviewButtonVisible ?? this.isPreviousPreviewButtonVisible,
+      isNextPreviewButtonVisible ?? this.isNextPreviewButtonVisible,
+      snackBarInfo?.call() ?? this.snackBarInfo,
       errorMessagesDialogState ?? this.errorMessagesDialogState,
     );
   }
@@ -94,12 +99,12 @@ abstract class ErrorMessagesDialogState {
   const ErrorMessagesDialogState();
 }
 
-class ErrorMessagesDialogNotShown extends ErrorMessagesDialogState {
-  const ErrorMessagesDialogNotShown() : super();
+class ErrorMessagesDialogGone extends ErrorMessagesDialogState {
+  const ErrorMessagesDialogGone() : super();
 }
 
-class ErrorMessagesDialogShown extends ErrorMessagesDialogState {
-  const ErrorMessagesDialogShown(
+class ErrorMessagesDialogVisible extends ErrorMessagesDialogState {
+  const ErrorMessagesDialogVisible(
     this.messages,
     this.isReadMoreButtonVisible,
   ) : super();

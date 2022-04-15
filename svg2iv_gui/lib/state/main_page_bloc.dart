@@ -49,6 +49,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       final isDarkModeEnabled = !state.isThemeDark;
       await setDarkModeEnabled(isDarkModeEnabled);
       return state.copyWith(isThemeDark: isDarkModeEnabled);
+    } else if (event is AboutButtonPressed) {
+      return state.copyWith(isAboutDialogVisible: true);
     } else if (event is SelectSourceButtonPressed) {
       return state.copyWith(
         visibleSelectionDialog: VisibleSelectionDialog.sourceSelection,
@@ -101,32 +103,36 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
             state.extensionReceiverTextFieldState.copyWith(
           placeholder: _imageVectors.singleOrNull?.name,
         ),
-        imageVector: _imageVectors.isNotEmpty
-            ? _imageVectors[_previewIndex]
-            : state.imageVector,
-        isPreviousPreviewButtonEnabled: false,
-        isNextPreviewButtonEnabled: _imageVectors.length > 1,
-        snackBarInfo: _didErrorsOccur
-            ? const SnackBarInfo(
-                id: _previewErrorsSnackBarId,
-                message: 'Error(s) occurred while trying to'
-                    ' display a preview of the source(s)',
-                actionLabel: 'View errors',
-                duration: Duration(minutes: 1),
-              )
-            : null,
+        imageVector: () {
+          return _imageVectors.isNotEmpty
+              ? _imageVectors[_previewIndex]
+              : state.imageVector;
+        },
+        isPreviousPreviewButtonVisible: false,
+        isNextPreviewButtonVisible: _imageVectors.length > 1,
+        snackBarInfo: () {
+          return _didErrorsOccur
+              ? const SnackBarInfo(
+                  id: _previewErrorsSnackBarId,
+                  message: 'Error(s) occurred while trying to'
+                      ' display a preview of the source(s)',
+                  actionLabel: 'View errors',
+                  duration: Duration(minutes: 1),
+                )
+              : null;
+        },
       );
     } else if (event is PreviousPreviewButtonClicked) {
       return state.copyWith(
-        imageVector: _imageVectors[--_previewIndex],
-        isPreviousPreviewButtonEnabled: _previewIndex > 0,
-        isNextPreviewButtonEnabled: true,
+        imageVector: () => _imageVectors[--_previewIndex],
+        isPreviousPreviewButtonVisible: _previewIndex > 0,
+        isNextPreviewButtonVisible: true,
       );
     } else if (event is NextPreviewButtonClicked) {
       return state.copyWith(
-        imageVector: _imageVectors[++_previewIndex],
-        isPreviousPreviewButtonEnabled: true,
-        isNextPreviewButtonEnabled: _previewIndex < _imageVectors.length - 1,
+        imageVector: () => _imageVectors[++_previewIndex],
+        isPreviousPreviewButtonVisible: true,
+        isNextPreviewButtonVisible: _previewIndex < _imageVectors.length - 1,
       );
     } else if (event is SnackBarActionButtonClicked) {
       switch (event.snackBarId) {
@@ -135,7 +141,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           final errorMessages = await readErrorMessages(maxErrorMessageCount);
           return state.copyWith(
             snackBarInfo: null,
-            errorMessagesDialogState: ErrorMessagesDialogShown(
+            errorMessagesDialogState: ErrorMessagesDialogVisible(
               errorMessages.item1,
               errorMessages.item2,
             ),
@@ -148,12 +154,12 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       }
     } else if (event is ErrorMessagesDialogCloseRequested) {
       return state.copyWith(
-        errorMessagesDialogState: const ErrorMessagesDialogNotShown(),
+        errorMessagesDialogState: const ErrorMessagesDialogGone(),
       );
     } else if (event is ReadMoreErrorMessagesActionClicked) {
       await openLogFileInPreferredApplication();
       return state.copyWith(
-        errorMessagesDialogState: const ErrorMessagesDialogNotShown(),
+        errorMessagesDialogState: const ErrorMessagesDialogGone(),
       );
     } else {
       throw UnimplementedError();

@@ -6,6 +6,10 @@ class ToggleThemeButtonPressed extends MainPageEvent {
   const ToggleThemeButtonPressed() : super();
 }
 
+class AboutButtonPressed extends MainPageEvent {
+  const AboutButtonPressed() : super();
+}
+
 class SelectSourceButtonPressed extends MainPageEvent {
   const SelectSourceButtonPressed() : super();
 }
