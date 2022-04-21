@@ -10,6 +10,10 @@ class AboutButtonPressed extends MainPageEvent {
   const AboutButtonPressed() : super();
 }
 
+class AboutDialogCloseRequested extends MainPageEvent {
+  const AboutDialogCloseRequested() : super();
+}
+
 class SelectSourceButtonPressed extends MainPageEvent {
   const SelectSourceButtonPressed() : super();
 }

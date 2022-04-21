@@ -51,6 +51,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       return state.copyWith(isThemeDark: isDarkModeEnabled);
     } else if (event is AboutButtonPressed) {
       return state.copyWith(isAboutDialogVisible: true);
+    } else if (event is AboutDialogCloseRequested) {
+      return state.copyWith(isAboutDialogVisible: false);
     } else if (event is SelectSourceButtonPressed) {
       return state.copyWith(
         visibleSelectionDialog: VisibleSelectionDialog.sourceSelection,

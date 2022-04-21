@@ -123,7 +123,8 @@ class _MainPageState extends State<MainPage>
           ),
         ],
       ),
-      body: _areErrorMessagesShownChangeListener(
+      body: _appDialogVisibilityChangeListener(
+        context: context,
         child: Row(
           children: [
             _buildLeftPanel(context),
@@ -194,14 +195,21 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  static Widget _areErrorMessagesShownChangeListener({required Widget child}) {
+  static Widget _appDialogVisibilityChangeListener({
+    required BuildContext context,
+    required Widget child,
+  }) {
+    final bloc = BlocProvider.of<MainPageBloc>(context);
     return BlocListener<MainPageBloc, MainPageState>(
+      bloc: bloc,
       listenWhen: (previousState, currentState) =>
           previousState.errorMessagesDialogState !=
-          currentState.errorMessagesDialogState,
+              currentState.errorMessagesDialogState ||
+          (!previousState.isAboutDialogVisible &&
+              currentState.isAboutDialogVisible),
       listener: (context, state) async {
-        final dialogState = state.errorMessagesDialogState;
-        if (dialogState is ErrorMessagesDialogVisible) {
+        final errorMessagesDialogState = state.errorMessagesDialogState;
+        if (errorMessagesDialogState is ErrorMessagesDialogVisible) {
           await showDialog<void>(
             context: context,
             builder: (context) {
@@ -212,13 +220,13 @@ class _MainPageState extends State<MainPage>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: dialogState.messages
+                    children: errorMessagesDialogState.messages
                         .map((message) => Text(message))
                         .toNonGrowableList(),
                   ),
                 ),
                 actions: [
-                  if (dialogState.isReadMoreButtonVisible)
+                  if (errorMessagesDialogState.isReadMoreButtonVisible)
                     TextButton(
                       onPressed: () {
                         bloc.add(const ReadMoreErrorMessagesActionClicked());
@@ -238,6 +246,16 @@ class _MainPageState extends State<MainPage>
             barrierDismissible: false,
             barrierColor: Colors.black.withOpacity(0.74),
           );
+        } else if (state.isAboutDialogVisible) {
+          await showDialog<void>(
+            context: context,
+            builder: (context) {
+              return const AboutDialog(
+                applicationName: '',
+              );
+            },
+          );
+          bloc.add(const AboutDialogCloseRequested());
         } else {
           Navigator.pop(context);
         }
