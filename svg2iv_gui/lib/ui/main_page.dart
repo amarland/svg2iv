@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_gui/ui/custom_icons.dart';
 
@@ -7,6 +8,7 @@ import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
+import '../util/custom_material_localizations.dart';
 import 'checkerboard.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
@@ -14,6 +16,8 @@ import 'preview_selection_button.dart';
 
 const _androidGreen = Color(0xFF00DE7A);
 const _androidBlue = Color(0xFF2196F3);
+
+const _applicationName = 'svg2iv';
 
 class App extends StatelessWidget {
   // ignore: use_key_in_widget_constructors
@@ -52,6 +56,9 @@ class App extends StatelessWidget {
             ).copyWith(inputDecorationTheme: inputDecorationTheme),
             themeMode:
                 bloc.state.isThemeDark ? ThemeMode.dark : ThemeMode.light,
+            localizationsDelegates: const [
+              CustomMaterialLocalizations.delegate,
+            ],
             debugShowCheckedModeBanner: false,
           );
         },
@@ -90,10 +97,7 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<MainPageBloc>(context);
-    return /*CircularRevealAnimation(
-      animation: _animation,
-      child: */
-        CallbackShortcuts(
+    return CallbackShortcuts(
       bindings: MainPageBloc.shortcutBindings
           .map((trigger, action) => MapEntry(trigger, () => action(bloc))),
       child: BlocBuilder<MainPageBloc, MainPageState>(
@@ -109,9 +113,18 @@ class _MainPageState extends State<MainPage>
 
   static Widget _buildScaffold(BuildContext context) {
     final bloc = BlocProvider.of<MainPageBloc>(context);
+    final title = TextSpan(
+      text: '$_applicationName | ',
+      children: [
+        TextSpan(
+          text: 'SVG to ImageVector conversion tool',
+          style: Theme.of(context).textTheme.bodyText2,
+        ),
+      ],
+    );
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SVG to ImageVector conversion tool'),
+        title: Text.rich(title),
         actions: [
           IconButton(
             onPressed: () => bloc.add(const ToggleThemeButtonPressed()),
@@ -221,7 +234,7 @@ class _MainPageState extends State<MainPage>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: errorMessagesDialogState.messages
-                        .map((message) => Text(message))
+                        .map(Text.new)
                         .toNonGrowableList(),
                   ),
                 ),
@@ -237,7 +250,9 @@ class _MainPageState extends State<MainPage>
                     onPressed: () {
                       bloc.add(const ErrorMessagesDialogCloseRequested());
                     },
-                    child: const Text('Close'),
+                    child: Text(
+                      MaterialLocalizations.of(context).closeButtonLabel,
+                    ),
                   ),
                 ],
                 elevation: 0.0,
@@ -250,8 +265,11 @@ class _MainPageState extends State<MainPage>
           await showDialog<void>(
             context: context,
             builder: (context) {
-              return const AboutDialog(
-                applicationName: '',
+              final currentTheme = Theme.of(context);
+              return AboutDialog(
+                applicationName: _applicationName,
+                applicationVersion: '0.1.0',
+                applicationIcon: SvgPicture.asset('assets/logo.svg'),
               );
             },
           );
