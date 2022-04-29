@@ -89,7 +89,8 @@ void main() {
     });
   });
   test(
-    "getNameWithoutExtension() returns a File's name without its extension",
+    "File.getNameWithoutExtension() returns a File's name"
+    ' without its extension',
     () {
       final fileNameWithoutExtension = 'test_file';
       final file = File(
@@ -99,6 +100,34 @@ void main() {
             '.test',
       );
       expect(file.getNameWithoutExtension(), fileNameWithoutExtension);
+    },
+  );
+  test(
+    'num.toStringWithMaxDecimals(max) returns a String with no more than'
+    ' max digits after the decimal point and no trailing zeros',
+    () {
+      final source = [
+        1,
+        1.2,
+        1.234,
+        1.23454321,
+        1.23456789,
+        1.00020,
+        1.000,
+        1.230,
+      ];
+      final expected = [
+        '1',
+        '1.2',
+        '1.234',
+        '1.2345',
+        '1.2346',
+        '1.0002',
+        '1',
+        '1.23',
+      ];
+      final actual = source.map((n) => n.toStringWithMaxDecimals(4));
+      expect(actual, expected);
     },
   );
 }

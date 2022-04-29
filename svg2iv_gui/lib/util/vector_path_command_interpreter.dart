@@ -316,19 +316,19 @@ void interpretPathCommands(List<PathNode> pathNodes, Path path) {
         _onRelativeSmoothQuadToCommandReceived(arguments.cast<double>());
         break;
       case PathDataCommand.arcTo:
-        final largeArc = arguments.removeAt(3) as bool;
-        final clockwise = arguments.removeAt(4) as bool;
+        final largeArc = arguments[3] as bool;
+        final clockwise = arguments[4] as bool;
         _onArcToCommandReceived(
-          arguments.cast<double>(),
+          (arguments.toList()..removeRange(3, 5)).cast<double>(),
           largeArc,
           clockwise,
         );
         break;
       case PathDataCommand.relativeArcTo:
-        final largeArc = arguments.removeAt(3) as bool;
-        final clockwise = arguments.removeAt(4) as bool;
+        final largeArc = arguments[3] as bool;
+        final clockwise = arguments[4] as bool;
         _onRelativeArcToCommandReceived(
-          arguments.cast<double>(),
+          (arguments.toList()..removeRange(3, 5)).cast<double>(),
           largeArc,
           clockwise,
         );

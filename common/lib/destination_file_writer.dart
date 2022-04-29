@@ -561,13 +561,8 @@ String _generateIndentation(int indentationLevel) =>
     String.fromCharCodes(List.filled(indentationLevel * 4, 0x20));
 
 // @internal
-String numToKotlinFloatAsString(num number) {
-  // erase trailing zeros and make sure the string doesn't end with '.'
-  return number.toStringAsFixed(4).replaceFirst(RegExp(r'0*$'), '').let((s) {
-    final lastIndex = s.length - 1;
-    return (s[lastIndex] == '.' ? s.substring(0, lastIndex) : s) + 'F';
-  });
-}
+String numToKotlinFloatAsString(num number) =>
+    number.toStringWithMaxDecimals(4) + 'F';
 
 extension _StringSinkWriting on StringSink {
   void writeIndent(int indentationLevel, Object obj) {

@@ -10,17 +10,21 @@ import 'package:svg2iv_common/color_utils.dart';
 
 extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
   List<int> toJson() {
+    final imageVectors = map((imageVector) => imageVector != null
+        ? _formatDoubles(_mapImageVector(imageVector))
+        : null);
     return JsonUtf8Encoder(
       null,
-      (o) => o is Iterable
-          ? o.toNonGrowableList()
-          : throw JsonUnsupportedObjectError(o),
-    ).convert(map(_mapImageVector));
+      (o) {
+        return o is Iterable
+            ? o.toNonGrowableList()
+            : throw JsonUnsupportedObjectError(o);
+      },
+    ).convert(imageVectors);
   }
 }
 
-Map<String, dynamic>? _mapImageVector(ImageVector? imageVector) {
-  if (imageVector == null) return null;
+Map<String, dynamic> _mapImageVector(ImageVector imageVector) {
   return {
     'vectorName': imageVector.name,
     'viewportWidth': imageVector.viewportWidth,
@@ -75,8 +79,12 @@ Map<String, dynamic> _mapVectorPath(VectorPath path) {
   }..removeWhereValueIsNull();
 }
 
-Map<String, dynamic> _mapPathNode(PathNode pathNode) =>
-    {'command': pathNode.command.name, 'arguments': pathNode.arguments};
+Map<String, dynamic> _mapPathNode(PathNode pathNode) {
+  return {
+    'command': pathNode.command.name,
+    'arguments': pathNode.arguments,
+  };
+}
 
 // returns either a Map<String, dynamic> (gradient)
 // or an array of RGB values (solid color)
@@ -110,4 +118,24 @@ dynamic _mapGradient(Gradient? gradient) {
     ...typeSpecificAttributes,
     'tileMode': gradient.tileMode?.name,
   }..removeWhereValueIsNull();
+}
+
+List<int> _mapColor(int value) {
+  return [
+    (0xFF000000 & value) >> 24,
+    (0x00FF0000 & value) >> 16,
+    (0x0000ff00 & value) >> 8,
+    0x000000FF & value,
+  ];
+}
+
+void _formatDoubles(Map<String, dynamic> map) {
+  for (final entry in map.entries) {
+    final value = entry.value;
+    if (value is double) {
+      map[entry.key] = value.toStringWithMaxDecimals(4);
+    } else if (value is Map<String, dynamic>) {
+      _formatDoubles(value);
+    }
+  }
 }

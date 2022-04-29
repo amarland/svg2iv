@@ -10,11 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  bitsdojo_window: ^0.1.1+1
   flutter_bloc: ^8.0.1
-  shared_preferences: ^2.0.13
+  flutter_svg: ^1.0.3
+  path_provider: ^2.0.9
   svg2iv_common:
     path: ../common
-  bitsdojo_window: ^0.1.1+1
 
 dev_dependencies:
   flutter_test:
@@ -23,6 +24,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/logo.svg
   fonts:
     - family: JetBrainsMono
       fonts:
