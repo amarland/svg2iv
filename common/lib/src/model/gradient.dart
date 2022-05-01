@@ -60,7 +60,7 @@ abstract class Gradient {
 
   @override
   bool operator ==(Object other) {
-    const listEquality = ListEquality();
+    const listEquality = ListEquality<num>();
     return identical(this, other) ||
         other is Gradient &&
             runtimeType == other.runtimeType &&
@@ -71,7 +71,7 @@ abstract class Gradient {
 
   @override
   int get hashCode {
-    const listEquality = ListEquality();
+    const listEquality = ListEquality<num>();
     return listEquality.hash(colors) ^
         listEquality.hash(stops) ^
         tileMode.hashCode;

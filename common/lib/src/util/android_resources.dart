@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/model/gradient.dart';
-import 'package:svg2iv_common/path_building_helpers.dart';
+import '../model/gradient.dart';
+import '../util/path_building_helpers.dart';
 import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
 
-import 'extensions.dart';
-import 'file_parser.dart';
+import '../extensions.dart';
+import '../file_parser.dart';
 
 const aaptNamespaceUri = 'http://schemas.android.com/aapt';
 const androidNamespaceUri = 'http://schemas.android.com/apk/res/android';

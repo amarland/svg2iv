@@ -1,5 +1,5 @@
-import 'package:svg2iv_common/svg_preprocessor.dart';
 import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common/src/util/svg_preprocessor.dart';
 import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 

@@ -1,15 +1,15 @@
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/file_parser.dart';
-import 'package:svg2iv_common/model/gradient.dart';
-import 'package:svg2iv_common/model/vector_node.dart';
-import 'package:svg2iv_common/model/vector_path.dart';
-import 'package:svg2iv_common/path_building_helpers.dart';
+import '../file_parser.dart';
+import '../model/gradient.dart';
+import '../model/vector_node.dart';
+import '../model/vector_path.dart';
+import '../util/path_building_helpers.dart';
 import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
 
-import 'android_resources.dart';
-import 'extensions.dart';
-import 'model/image_vector.dart';
+import '../util/android_resources.dart';
+import '../extensions.dart';
+import '../model/image_vector.dart';
 
 enum _Shape { rectangle, oval, line, ring }
 

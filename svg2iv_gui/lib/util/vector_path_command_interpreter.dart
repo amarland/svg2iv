@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:svg2iv_common/model/vector_path.dart';
+import 'package:svg2iv_common/models.dart';
 
 class _Point {
   double x = 0.0, y = 0.0;

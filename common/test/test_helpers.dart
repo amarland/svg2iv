@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:svg2iv_common/extensions.dart';
-import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
+import 'package:test/test.dart';
 
 Tuple2<String, String> executeKotlinScript(String source) {
   final tempDirectoryPath = Directory.systemTemp.path.replaceAll('\\', '/');

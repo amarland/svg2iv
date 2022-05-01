@@ -1,16 +1,21 @@
 import 'package:collection/collection.dart';
+// import 'package:csslib/parser.dart' as css;
+// import 'package:csslib/visitor.dart';
+import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 
-import 'extensions.dart';
-import 'svg2iv.dart';
+import '../converter/svg2iv.dart';
+import '../extensions.dart';
 
 const useElementCustomAttributePrefix = 'use_';
 
+@internal
 void preprocessSvg(XmlElement svgElement) {
   _moveDefsElementToFirstPositionIfAny(svgElement);
   _inlineUseElements(svgElement);
   _reorderClipPathElementsIfNeeded(svgElement);
-  _convertCssStyleAttributesToSvgPresentationAttributes(svgElement);
+  _convertCssStylesheetToSvgPresentationAttributes(svgElement);
+  _convertInlineCssStylesToSvgPresentationAttributes(svgElement);
 }
 
 void _moveDefsElementToFirstPositionIfAny(XmlElement svgElement) {
@@ -137,8 +142,7 @@ void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
         final referencedElementId = extractIdFromUrlFunctionCall(
           childClipPathAttribute.value,
         );
-        final referencedElement =
-            defsElement.children.whereType<XmlElement>().where((element) {
+        final referencedElement = defsElement.childElements.where((element) {
           final id = element.getAttribute('id');
           return id != null && id == referencedElementId;
         }).singleOrNull;
@@ -164,9 +168,8 @@ XmlElement _getOrCreateDefsElement(XmlElement svgElement) =>
     svgElement.getElement('defs') ??
     XmlElement(XmlName('defs')).also((e) => svgElement.children.insert(0, e));
 
-void _convertCssStyleAttributesToSvgPresentationAttributes(
-    XmlElement svgElement) {
-  for (final element in svgElement.children.whereType<XmlElement>()) {
+void _convertInlineCssStylesToSvgPresentationAttributes(XmlElement svgElement) {
+  for (final element in svgElement.childElements) {
     final styleAttributeNode = element.getAttributeNode('style');
     final styleAttributeValues = styleAttributeNode?.value
         .split(RegExp(r';\s*'))
@@ -182,5 +185,15 @@ void _convertCssStyleAttributesToSvgPresentationAttributes(
         }
       }
     }
+  }
+}
+
+void _convertCssStylesheetToSvgPresentationAttributes(XmlElement svgElement) {
+  XmlElement? findSingleStyleElement(XmlElement e) =>
+      e.childElements.where((e) => e.name.local == 'style').singleOrNull;
+  final styleElement = findSingleStyleElement(svgElement) ??
+      svgElement.getElement('defs')?.let(findSingleStyleElement);
+  if (styleElement != null) {
+    // css.parse(styleElement.text).topLevels.whereType<RuleSet>(); TODO
   }
 }

@@ -50,7 +50,7 @@ class ImageVector {
       identical(this, other) ||
       other is ImageVector &&
           runtimeType == other.runtimeType &&
-          const ListEquality().equals(nodes, other.nodes) &&
+          const ListEquality<VectorNode>().equals(nodes, other.nodes) &&
           name == other.name &&
           width == other.width &&
           height == other.height &&
@@ -61,7 +61,7 @@ class ImageVector {
 
   @override
   int get hashCode =>
-      const ListEquality().hash(nodes) ^
+      const ListEquality<VectorNode>().hash(nodes) ^
       name.hashCode ^
       width.hashCode ^
       height.hashCode ^

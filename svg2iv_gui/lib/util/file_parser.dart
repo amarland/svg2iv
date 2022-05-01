@@ -1,10 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:svg2iv_common/file_parser.dart';
-import 'package:svg2iv_common/model/image_vector.dart';
-import 'package:svg2iv_gui/outer_world/log_file.dart';
-import 'package:tuple/tuple.dart';
+import 'package:svg2iv_common/parser.dart';
+import '../outer_world/log_file.dart';
 
 Stream<ImageVector?> parseFiles(List<String> paths) async* {
   for (final path in paths) {

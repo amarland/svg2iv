@@ -1,16 +1,16 @@
 import 'package:collection/collection.dart';
 import 'package:xml/xml.dart';
 
-import 'android_resources.dart';
-import 'extensions.dart';
-import 'file_parser.dart';
-import 'model/gradient.dart';
-import 'model/image_vector.dart';
-import 'model/transformations.dart';
-import 'model/vector_group.dart';
-import 'model/vector_node.dart';
-import 'model/vector_path.dart';
-import 'path_data_parser.dart';
+import '../util/android_resources.dart';
+import '../extensions.dart';
+import '../file_parser.dart';
+import '../model/gradient.dart';
+import '../model/image_vector.dart';
+import '../model/transformations.dart';
+import '../model/vector_group.dart';
+import '../model/vector_node.dart';
+import '../model/vector_path.dart';
+import '../path_data_parser.dart';
 
 ImageVector parseVectorDrawableElement(XmlElement rootElement) {
   final parsedRequiredAttributes = <String, dynamic>{
@@ -44,7 +44,7 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
       .getAndroidNSAttribute<String>('tintBlendMode')
       ?.let(blendModeFromString)
       ?.let(builder.tintBlendMode);
-  for (final element in rootElement.children.whereType<XmlElement>()) {
+  for (final element in rootElement.childElements) {
     switch (element.name.local) {
       case 'group':
         builder.addNodes(_parseGroupElement(element));
@@ -176,8 +176,7 @@ VectorPath? _parsePathElement(XmlElement pathElement) {
     if (singleAttribute == null || singleAttribute.name.local != 'name') {
       continue;
     }
-    final singleChildElement =
-        attrElement.children.whereType<XmlElement>().singleOrNull;
+    final singleChildElement = attrElement.childElements.singleOrNull;
     if (singleChildElement == null ||
         singleChildElement.name.local != 'gradient') {
       continue;

@@ -1,11 +1,7 @@
 import 'dart:convert';
 
 import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/model/gradient.dart';
-import 'package:svg2iv_common/model/image_vector.dart';
-import 'package:svg2iv_common/model/vector_group.dart';
-import 'package:svg2iv_common/model/vector_node.dart';
-import 'package:svg2iv_common/model/vector_path.dart';
+import 'package:svg2iv_common/models.dart';
 
 extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
   List<int> toJson() {

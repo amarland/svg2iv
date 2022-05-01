@@ -2,10 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/model/gradient.dart';
-import 'package:svg2iv_common/model/vector_group.dart';
-import 'package:svg2iv_common/model/vector_node.dart';
-import 'package:svg2iv_common/model/vector_path.dart';
+import 'package:svg2iv_common/models.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 extension GroupTransformMatrixExtraction on VectorGroup {

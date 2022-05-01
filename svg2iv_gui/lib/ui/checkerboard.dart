@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/model/image_vector.dart';
+import 'package:svg2iv_common/models.dart';
 
 import '../util/image_vector_painter.dart';
 

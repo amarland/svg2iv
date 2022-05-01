@@ -1,4 +1,4 @@
-import 'model/vector_path.dart';
+import '../model/vector_path.dart';
 
 class Rect {
   Rect(this.left, this.top, this.right, this.bottom);

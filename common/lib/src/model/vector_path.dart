@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart' show ListEquality;
-import 'package:svg2iv_common/extensions.dart';
+import '../extensions.dart';
 
 import 'gradient.dart';
 import 'vector_node.dart';
@@ -103,7 +103,7 @@ class VectorPath extends VectorNode {
       identical(this, other) ||
       other is VectorPath &&
           runtimeType == other.runtimeType &&
-          const ListEquality().equals(pathData, other.pathData) &&
+          const ListEquality<PathNode>().equals(pathData, other.pathData) &&
           fill == other.fill &&
           fillAlpha == other.fillAlpha &&
           stroke == other.stroke &&
@@ -119,7 +119,7 @@ class VectorPath extends VectorNode {
 
   @override
   int get hashCode =>
-      const ListEquality().hash(pathData) ^
+      const ListEquality<PathNode>().hash(pathData) ^
       fill.hashCode ^
       fillAlpha.hashCode ^
       stroke.hashCode ^
@@ -214,8 +214,9 @@ class PathNode {
       other is PathNode &&
           runtimeType == other.runtimeType &&
           command == other.command &&
-          const ListEquality().equals(arguments, other.arguments);
+          const ListEquality<dynamic>().equals(arguments, other.arguments);
 
   @override
-  int get hashCode => command.hashCode ^ const ListEquality().hash(arguments);
+  int get hashCode =>
+      command.hashCode ^ const ListEquality<dynamic>().hash(arguments);
 }

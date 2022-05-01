@@ -265,7 +265,6 @@ class _MainPageState extends State<MainPage>
           await showDialog<void>(
             context: context,
             builder: (context) {
-              final currentTheme = Theme.of(context);
               return AboutDialog(
                 applicationName: _applicationName,
                 applicationVersion: '0.1.0',

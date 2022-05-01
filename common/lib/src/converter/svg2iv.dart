@@ -1,18 +1,19 @@
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/path_building_helpers.dart';
+import '../util/css_colors.dart';
+import '../util/path_building_helpers.dart';
 import 'package:vector_math/vector_math.dart' show Matrix4;
 import 'package:xml/xml.dart';
 
-import 'extensions.dart';
-import 'file_parser.dart';
-import 'model/gradient.dart';
-import 'model/image_vector.dart';
-import 'model/transformations.dart';
-import 'model/vector_group.dart';
-import 'model/vector_node.dart';
-import 'model/vector_path.dart';
-import 'path_data_parser.dart';
-import 'svg_preprocessor.dart';
+import '../extensions.dart';
+import '../file_parser.dart';
+import '../model/gradient.dart';
+import '../model/image_vector.dart';
+import '../model/transformations.dart';
+import '../model/vector_group.dart';
+import '../model/vector_node.dart';
+import '../model/vector_path.dart';
+import '../path_data_parser.dart';
+import '../util/svg_preprocessor.dart';
 
 final _definitionSeparatorPattern = RegExp(r'[,\s]\s*');
 
@@ -92,7 +93,7 @@ ImageVector parseSvgElement(XmlElement rootElement) {
 }
 
 Iterable<VectorNode> _extractNodesOfInterest(XmlElement rootElement) sync* {
-  for (final element in rootElement.children.whereType<XmlElement>().where(
+  for (final element in rootElement.childElements.where(
     (element) {
       final displayAttribute = element.getAttribute('display');
       return displayAttribute == null || displayAttribute != 'none';
@@ -630,15 +631,7 @@ Gradient? _parseBrush(String brushAsString) {
       gradient = candidate;
     }
   } else {
-    switch (brushAsString) {
-      case 'black':
-        gradient = Gradient.fromArgbComponents(255, 0, 0, 0);
-        break;
-      case 'white':
-        gradient = Gradient.fromArgbComponents(255, 255, 255, 255);
-        break;
-      // TODO: add more colors
-    }
+    gradient = cssColors[brushAsString]?.let(Gradient.fromArgb);
   }
   return gradient;
 }
