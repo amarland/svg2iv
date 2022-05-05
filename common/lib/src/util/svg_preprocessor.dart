@@ -1,6 +1,6 @@
+import 'dart:collection';
+
 import 'package:collection/collection.dart';
-// import 'package:csslib/parser.dart' as css;
-// import 'package:csslib/visitor.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 
@@ -14,8 +14,8 @@ void preprocessSvg(XmlElement svgElement) {
   _moveDefsElementToFirstPositionIfAny(svgElement);
   _inlineUseElements(svgElement);
   _reorderClipPathElementsIfNeeded(svgElement);
-  _convertCssStylesheetToSvgPresentationAttributes(svgElement);
   _convertInlineCssStylesToSvgPresentationAttributes(svgElement);
+  _convertCssStylesheetToSvgPresentationAttributes(svgElement);
 }
 
 void _moveDefsElementToFirstPositionIfAny(XmlElement svgElement) {
@@ -63,9 +63,11 @@ void _inlineUseElements(XmlElement svgElement) {
           } else {
             // use custom attribute names to avoid confusion with possible
             // "illegally"-defined x/y attributes
-            referencedElement.setAttribute(
-              useElementCustomAttributePrefix + attributeName,
-              attributeValueAsDouble.toString(),
+            referencedElement.attributes.add(
+              XmlAttribute(
+                XmlName(useElementCustomAttributePrefix + attributeName),
+                attributeValueAsDouble.toString(),
+              ),
             );
           }
         }
@@ -175,12 +177,13 @@ void _convertInlineCssStylesToSvgPresentationAttributes(XmlElement svgElement) {
         .split(RegExp(r';\s*'))
         .takeIf((it) => it.isNotEmpty);
     if (styleAttributeValues != null) {
-      element.attributes.remove(styleAttributeNode);
-      for (final keyValuePairAsString in styleAttributeValues) {
-        final keyValuePair = keyValuePairAsString.split(RegExp(r':\s*'));
-        if (keyValuePair.length == 2) {
-          element.attributes.add(
-            XmlAttribute(XmlName(keyValuePair[0]), keyValuePair[1]),
+      final attributes = element.attributes;
+      attributes.remove(styleAttributeNode);
+      for (final nameValuePairAsString in styleAttributeValues) {
+        final nameValuePair = nameValuePairAsString.split(RegExp(r'\s*:\s*'));
+        if (nameValuePair.length == 2) {
+          attributes.add(
+            XmlAttribute(XmlName(nameValuePair[0]), nameValuePair[1]),
           );
         }
       }
@@ -194,6 +197,92 @@ void _convertCssStylesheetToSvgPresentationAttributes(XmlElement svgElement) {
   final styleElement = findSingleStyleElement(svgElement) ??
       svgElement.getElement('defs')?.let(findSingleStyleElement);
   if (styleElement != null) {
-    // css.parse(styleElement.text).topLevels.whereType<RuleSet>(); TODO
+    styleElement.parentElement!.children.remove(styleElement);
+    final declarationBlocks = styleElement.text
+        .replaceAll(RegExp(r'\s'), '')
+        .split('}')
+      ..removeWhere((block) => block.isEmpty)
+      ..sort((block1, block2) => _getSpecificityForSelector(block1)
+          .compareTo(_getSpecificityForSelector(block2)));
+    final attributesToKeep = HashSet<XmlAttribute>.identity();
+    declarationBlocks.forEachIndexed((declarationBlockIndex, declarationBlock) {
+      final declarationBlockParts = declarationBlock.split('{');
+      if (declarationBlockParts.length != 2) {
+        return;
+      }
+      // continue if there's only one selector
+      if (declarationBlockParts[0].contains(',')) {
+        return;
+      }
+      final targetElements = svgElement.descendantElements.where((e) {
+        final selector = declarationBlockParts[0];
+        switch (selector[0]) {
+          case '*':
+            return selector.length == 1;
+          case '#':
+            return selector.substring(1) == e.getAttribute('id');
+          case '.':
+            return selector.substring(1) == e.getAttribute('class');
+          default:
+            return selector == e.name.local;
+        }
+      });
+      if (targetElements.isEmpty) {
+        return;
+      }
+      final splitDeclarations = declarationBlockParts[1]
+          .split(';')
+          .where((s) => s.isNotEmpty)
+          .map((s) => s.split(':').takeIf((list) => list.length == 2))
+          .whereNotNull();
+      for (final nameValuePair in splitDeclarations) {
+        for (final targetElement in targetElements) {
+          final name = nameValuePair[0];
+          final value = nameValuePair[1];
+          final attributes = targetElement.attributes;
+          final existingAttributeIndex =
+              attributes.indexWhere((a) => a.name.local == name);
+          if (existingAttributeIndex >= 0) {
+            final existingAttribute = attributes[existingAttributeIndex];
+            if (declarationBlockIndex == 0) {
+              // this is the first "pass", which means the existing attribute
+              // has the highest specificity;
+              // keep a reference to it so it's not overridden
+              attributesToKeep.add(existingAttribute);
+            } else {
+              // for subsequent "passes", if the existing attribute
+              // isn't one that was previously saved, this means it has a lower
+              // specificity since the blocks are sorted; replace it
+              if (attributesToKeep.none((savedAttribute) =>
+                  identical(savedAttribute, existingAttribute))) {
+                attributes[existingAttributeIndex] =
+                    XmlAttribute(XmlName(name), value);
+              }
+            }
+          } else {
+            attributes.add(XmlAttribute(XmlName(name), value));
+          }
+        }
+      }
+    });
   }
+}
+
+int _getSpecificityForSelector(String declarationBlock) {
+  final int specificity;
+  switch (declarationBlock[0]) {
+    case '*':
+      specificity = 0;
+      break;
+    case '.':
+      specificity = 2;
+      break;
+    case '#':
+      specificity = 3;
+      break;
+    default:
+      specificity = 1;
+      break;
+  }
+  return specificity;
 }

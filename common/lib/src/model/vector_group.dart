@@ -155,18 +155,25 @@ class VectorGroupBuilder
         _clipPathData = onlyChild.clipPathData;
       }
     }
-    _nodes.whereType<VectorGroup>().forEachIndexed((index, group) {
-      if (group.rotation == null &&
-          group.scale == null &&
-          group.translation == null &&
-          group.clipPathData.isNullOrEmpty) {
-        // the child is useless, merge it with its parent (the current group)
-        _nodes
-          ..removeAt(index)
-          ..insertAll(index, group.nodes);
-        group.id?.let((id) => this.id(id));
+    final indicesOfGroupsToRemove = List<int>.empty(growable: true);
+    _nodes.forEachIndexed((index, node) {
+      if (node is VectorGroup) {
+        if (node.rotation == null &&
+            node.scale == null &&
+            node.translation == null &&
+            node.clipPathData.isNullOrEmpty) {
+          // the child is useless, merge it with its parent (the current group)
+          indicesOfGroupsToRemove.add(index);
+        }
       }
     });
+    for (final index in indicesOfGroupsToRemove) {
+      final group = _nodes[index] as VectorGroup;
+      _nodes
+        ..removeAt(index)
+        ..insertAll(index, group.nodes);
+      group.id?.let((id) => this.id(id));
+    }
     return VectorGroup._init(
       _nodes.toNonGrowableList(),
       id: id_,
