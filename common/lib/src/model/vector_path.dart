@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart' show ListEquality;
-import 'package:svg2iv_common/extensions.dart';
+import '../extensions.dart';
 
 import 'gradient.dart';
 import 'vector_node.dart';

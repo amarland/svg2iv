@@ -1,13 +1,7 @@
 import 'dart:convert';
 
-import 'package:svg2iv_common/destination_file_writer.dart';
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/model/gradient.dart';
-import 'package:svg2iv_common/model/image_vector.dart';
-import 'package:svg2iv_common/model/transformations.dart';
-import 'package:svg2iv_common/model/vector_group.dart';
-import 'package:svg2iv_common/model/vector_node.dart';
-import 'package:svg2iv_common/model/vector_path.dart';
+import 'package:svg2iv_common/utils.dart';
+import 'package:svg2iv_common/writer.dart';
 import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
 

@@ -1,12 +1,7 @@
 import 'dart:convert';
 
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/model/gradient.dart';
-import 'package:svg2iv_common/model/image_vector.dart';
-import 'package:svg2iv_common/model/vector_group.dart';
-import 'package:svg2iv_common/model/vector_node.dart';
-import 'package:svg2iv_common/model/vector_path.dart';
-import 'package:svg2iv_common/color_utils.dart';
+import 'package:svg2iv_common/models.dart';
+import 'package:svg2iv_common/utils.dart';
 
 extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
   List<int> toJson() {
@@ -118,15 +113,6 @@ dynamic _mapGradient(Gradient? gradient) {
     ...typeSpecificAttributes,
     'tileMode': gradient.tileMode?.name,
   }..removeWhereValueIsNull();
-}
-
-List<int> _mapColor(int value) {
-  return [
-    (0xFF000000 & value) >> 24,
-    (0x00FF0000 & value) >> 16,
-    (0x0000ff00 & value) >> 8,
-    0x000000FF & value,
-  ];
 }
 
 void _formatDoubles(Map<String, dynamic> map) {

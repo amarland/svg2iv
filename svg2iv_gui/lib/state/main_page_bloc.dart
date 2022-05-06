@@ -5,8 +5,8 @@ import 'package:bloc/bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/model/image_vector.dart';
+import 'package:svg2iv_common/utils.dart';
+import 'package:svg2iv_common/parser.dart';
 import 'package:svg2iv_gui/outer_world/log_file.dart';
 
 import '../outer_world/preferences.dart';

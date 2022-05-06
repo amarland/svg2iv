@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common/utils.dart';
 
 Future<List<String>?> openFileSelectionDialog() async {
   if (Platform.isWindows) {

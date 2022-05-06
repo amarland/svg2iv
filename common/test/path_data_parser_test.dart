@@ -1,11 +1,10 @@
-import 'package:svg2iv_common/model/vector_path.dart';
-import 'package:svg2iv_common/path_data_parser.dart';
+import 'package:svg2iv_common/parser.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('parsePathData() returns the expected pathNodes;', () {
     test('null', () {
-      expect(parsePathData(null), List<dynamic>.empty());
+      expect(parsePathData(null), List<PathNode>.empty());
     });
     group('moveTo + [h|v]lineTo;', () {
       test('relative', () {

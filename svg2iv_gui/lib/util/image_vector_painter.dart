@@ -2,10 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
-import 'package:svg2iv_common/model/image_vector.dart';
-import 'package:svg2iv_common/model/vector_group.dart';
-import 'package:svg2iv_common/model/vector_node.dart';
-import 'package:svg2iv_common/model/vector_path.dart';
+import 'package:svg2iv_common/models.dart';
 
 import 'extensions.dart';
 import 'vector_path_command_interpreter.dart';

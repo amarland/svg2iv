@@ -4,11 +4,9 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:collection/collection.dart';
 import 'package:svg2iv/image_vector_json_adapter.dart';
-import 'package:svg2iv_common/destination_file_writer.dart';
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/file_parser.dart';
-import 'package:svg2iv_common/model/image_vector.dart';
-import 'package:tuple/tuple.dart';
+import 'package:svg2iv_common/utils.dart';
+import 'package:svg2iv_common/parser.dart';
+import 'package:svg2iv_common/writer.dart';
 
 const outputOptionName = 'output';
 const forceLottieFlagName = 'force-lottie';

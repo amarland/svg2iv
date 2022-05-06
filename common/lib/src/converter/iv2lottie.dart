@@ -1,16 +1,11 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:svg2iv_common/color_utils.dart';
-import 'package:svg2iv_common/model/gradient.dart';
-import 'package:svg2iv_common/model/vector_group.dart';
-import 'package:svg2iv_common/model/vector_node.dart';
-import 'package:svg2iv_common/model/vector_path.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'extensions.dart';
-import 'model/image_vector.dart';
+import '../../models.dart';
+import '../../utils.dart';
 
 extension ImageVectorToLottieJsonConversion on ImageVector? {
   List<int> toLottieJson() => JsonUtf8Encoder().convert(_mapImageVector);

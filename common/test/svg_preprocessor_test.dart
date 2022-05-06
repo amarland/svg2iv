@@ -1,5 +1,5 @@
-import 'package:svg2iv_common/svg_preprocessor.dart';
-import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common/utils.dart';
+import 'package:svg2iv_common/src/util/svg_preprocessor.dart';
 import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 
@@ -140,15 +140,56 @@ void main() {
       expect(_prettify(actualSvgElement), _prettify(expectedSvgElement));
     },
   );
+
+  test(
+    'internal CSS stylesheet is deconstructed to SVG presentation attributes',
+    () {
+      const sourceDocument = '''
+<svg viewBox="0 0 96 24" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    #second { stroke: black; }
+    .clazz {
+      fill: blue;
+      stroke: white;
+    }
+    circle {
+      fill: white;
+      stroke: red;
+      stroke-width: 3px;
+    }
+  </style>
+  <circle id="first"               cx="12" cy="12" r="10" />
+  <circle id="second"              cx="36" cy="12" r="10" />
+  <circle id="third" class="clazz" cx="60" cy="12" r="10" />
+  <circle id="fourth" fill="green" cx="84" cy="12" r="10" />
+</svg>''';
+      const expectedDocument = '''
+<svg viewBox="0 0 96 24" xmlns="http://www.w3.org/2000/svg">
+  <circle id="first" cx="12" cy="12" r="10"
+          fill="white" stroke="red" stroke-width="3px" />
+  <circle id="second" cx="36" cy="12" r="10"
+          fill="white" stroke="black" stroke-width="3px" />
+  <circle id="third" class="clazz" cx="60" cy="12" r="10"
+          fill="blue" stroke="white" stroke-width="3px" />
+  <circle id="fourth" cx="84" cy="12" r="10"
+          fill="green" stroke="red" stroke-width="3px" />
+</svg>''';
+      final expectedSvgElement =
+          XmlDocument.parse(expectedDocument).rootElement;
+      final actualSvgElement = XmlDocument.parse(sourceDocument).rootElement;
+      preprocessSvg(actualSvgElement);
+      expect(_prettify(actualSvgElement), _prettify(expectedSvgElement));
+    },
+  );
 }
 
-int _sortAttributes(XmlAttribute attr1, XmlAttribute attr2) =>
-    attr1.name.qualified.compareTo(attr2.name.qualified);
-
-String _prettify(XmlElement element) => element.toXmlString(
-      pretty: true,
-      sortAttributes: _sortAttributes,
-    );
+String _prettify(XmlElement element) {
+  return element.toXmlString(
+    pretty: true,
+    sortAttributes: (attr1, attr2) =>
+        attr1.name.qualified.compareTo(attr2.name.qualified),
+  );
+}
 
 void _sortDefinitions(XmlElement rootElement) {
   rootElement.firstElementChild!.children.sort(

@@ -1,5 +1,5 @@
 import 'package:meta/meta.dart';
-import 'package:svg2iv_common/extensions.dart';
+import '../extensions.dart';
 
 import 'gradient.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common/utils.dart';
 import 'package:test/test.dart';
 import 'package:tuple/tuple.dart';
 
@@ -15,7 +15,7 @@ void main() {
       );
     });
     test('chunked returns an empty Iterable when the receiver is empty', () {
-      expect(true, Iterable<String>.empty().chunked(2).isEmpty);
+      expect(true, Iterable<int>.empty().chunked(2).isEmpty);
     });
     const secondTestDescription = 'chunked(`size`) returns an Iterable<List>'
         " whose Lists are of length `size`, with all the receiver's elements"

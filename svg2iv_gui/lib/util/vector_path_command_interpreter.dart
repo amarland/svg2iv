@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:svg2iv_common/model/vector_path.dart';
+import 'package:svg2iv_common/models.dart';
 import 'package:vector_math/vector_math.dart';
 
 void interpretPathCommands(List<PathNode> pathNodes, Path path) {

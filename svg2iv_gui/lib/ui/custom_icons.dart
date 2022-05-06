@@ -1,5 +1,4 @@
-import 'package:svg2iv_common/model/image_vector.dart';
-import 'package:svg2iv_common/model/vector_path.dart';
+import 'package:svg2iv_common/models.dart';
 
 class CustomIcons {
   CustomIcons._();

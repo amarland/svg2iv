@@ -3,10 +3,10 @@ import 'dart:io' show File, FileSystemException;
 import 'package:tuple/tuple.dart' show Tuple2;
 import 'package:xml/xml.dart';
 
-import 'gd2iv.dart';
+import 'converter/gd2iv.dart';
 import 'model/image_vector.dart';
-import 'svg2iv.dart';
-import 'vd2iv.dart';
+import 'converter/svg2iv.dart';
+import 'converter/vd2iv.dart';
 
 enum SourceDefinitionType { explicit, implicit }
 

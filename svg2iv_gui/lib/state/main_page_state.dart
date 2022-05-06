@@ -1,4 +1,4 @@
-import 'package:svg2iv_common/model/image_vector.dart';
+import 'package:svg2iv_common/models.dart';
 
 import '../ui/custom_icons.dart';
 import '../ui/snack_bar_info.dart';

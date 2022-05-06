@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common/utils.dart';
 import 'package:svg2iv_gui/ui/custom_icons.dart';
 
 import '../outer_world/file_pickers.dart' as file_pickers;
@@ -265,7 +265,6 @@ class _MainPageState extends State<MainPage>
           await showDialog<void>(
             context: context,
             builder: (context) {
-              final currentTheme = Theme.of(context);
               return AboutDialog(
                 applicationName: _applicationName,
                 applicationVersion: '0.1.0',
