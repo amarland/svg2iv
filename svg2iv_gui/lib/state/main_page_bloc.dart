@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:svg2iv_common/extensions.dart';
@@ -49,19 +48,24 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       final isDarkModeEnabled = !state.isThemeDark;
       await setDarkModeEnabled(isDarkModeEnabled);
       return state.copyWith(isThemeDark: isDarkModeEnabled);
-    } else if (event is AboutButtonPressed) {
+    }
+    if (event is AboutButtonPressed) {
       return state.copyWith(isAboutDialogVisible: true);
-    } else if (event is AboutDialogCloseRequested) {
+    }
+    if (event is AboutDialogCloseRequested) {
       return state.copyWith(isAboutDialogVisible: false);
-    } else if (event is SelectSourceButtonPressed) {
+    }
+    if (event is SelectSourceButtonPressed) {
       return state.copyWith(
         visibleSelectionDialog: VisibleSelectionDialog.sourceSelection,
       );
-    } else if (event is SelectDestinationButtonPressed) {
+    }
+    if (event is SelectDestinationButtonPressed) {
       return state.copyWith(
         visibleSelectionDialog: VisibleSelectionDialog.destinationSelection,
       );
-    } else if (event is SourceSelectionDialogClosed) {
+    }
+    if (event is SourceSelectionDialogClosed) {
       final paths = event.paths;
       var isError = false;
       if (paths != null && paths.isNotEmpty) {
@@ -76,9 +80,11 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           _imageVectors.add(imageVector);
         }
         _previewIndex = 0;
+        // await Future<void>.delayed(const Duration(seconds: 3));
         add(const SourceFilesParsed());
       }
       return state.copyWith(
+        isWorkInProgress: true,
         visibleSelectionDialog: VisibleSelectionDialog.none,
         sourceSelectionTextFieldState:
             state.sourceSelectionTextFieldState.copyWith(
@@ -86,7 +92,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           isError: isError,
         ),
       );
-    } else if (event is DestinationSelectionDialogClosed) {
+    }
+    if (event is DestinationSelectionDialogClosed) {
       final path = event.path;
       final isError = path != null && !(await Directory(path).exists());
       return state.copyWith(
@@ -97,8 +104,10 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           isError: isError,
         ),
       );
-    } else if (event is SourceFilesParsed) {
+    }
+    if (event is SourceFilesParsed) {
       return state.copyWith(
+        isWorkInProgress: false,
         sourceSelectionTextFieldState: state.sourceSelectionTextFieldState
             .copyWith(isError: _didErrorsOccur),
         extensionReceiverTextFieldState:
@@ -124,19 +133,22 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
               : null;
         },
       );
-    } else if (event is PreviousPreviewButtonClicked) {
+    }
+    if (event is PreviousPreviewButtonClicked) {
       return state.copyWith(
         imageVector: () => _imageVectors[--_previewIndex],
         isPreviousPreviewButtonVisible: _previewIndex > 0,
         isNextPreviewButtonVisible: true,
       );
-    } else if (event is NextPreviewButtonClicked) {
+    }
+    if (event is NextPreviewButtonClicked) {
       return state.copyWith(
         imageVector: () => _imageVectors[++_previewIndex],
         isPreviousPreviewButtonVisible: true,
         isNextPreviewButtonVisible: _previewIndex < _imageVectors.length - 1,
       );
-    } else if (event is SnackBarActionButtonClicked) {
+    }
+    if (event is SnackBarActionButtonClicked) {
       switch (event.snackBarId) {
         case _previewErrorsSnackBarId:
           const maxErrorMessageCount = 8;
@@ -154,11 +166,13 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
             'event.snackBarId',
           );
       }
-    } else if (event is ErrorMessagesDialogCloseRequested) {
+    }
+    if (event is ErrorMessagesDialogCloseRequested) {
       return state.copyWith(
         errorMessagesDialogState: const ErrorMessagesDialogGone(),
       );
-    } else if (event is ReadMoreErrorMessagesActionClicked) {
+    }
+    if (event is ReadMoreErrorMessagesActionClicked) {
       await openLogFileInPreferredApplication();
       return state.copyWith(
         errorMessagesDialogState: const ErrorMessagesDialogGone(),

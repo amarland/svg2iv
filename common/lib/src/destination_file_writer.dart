@@ -184,9 +184,9 @@ void writeImageVector(
 ]) {
   var indentationLevel = 0;
   final extensionReceiverDeclaration =
-      extensionReceiver.isNullOrEmpty ? '' : extensionReceiver! + '.';
+      extensionReceiver.isNullOrEmpty ? '' : '${extensionReceiver!}.';
   final imageVectorName = (imageVector.name ?? nameIfVectorNameNull);
-  final backingPropertyName = '_' + imageVectorName.toCamelCase();
+  final backingPropertyName = '_${imageVectorName.toCamelCase()}';
   sink
     ..writeln(
       'private var $backingPropertyName: ImageVector? = null',
@@ -562,7 +562,7 @@ String _generateIndentation(int indentationLevel) =>
 
 // @internal
 String numToKotlinFloatAsString(num number) =>
-    number.toStringWithMaxDecimals(4) + 'F';
+    '${number.toStringWithMaxDecimals(4)}F';
 
 extension _StringSinkWriting on StringSink {
   void writeIndent(int indentationLevel, Object obj) {
@@ -616,6 +616,6 @@ extension _StringSinkWriting on StringSink {
     } else {
       argumentAsString = argument.toString();
     }
-    writeln(argumentAsString + ',');
+    writeln('$argumentAsString,');
   }
 }

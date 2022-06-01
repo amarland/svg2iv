@@ -38,7 +38,7 @@ class App extends StatelessWidget {
           const inputDecorationTheme =
               InputDecorationTheme(border: OutlineInputBorder());
           return MaterialApp(
-            home: const MainPage(),
+            home: const _MainPage(),
             title: 'svg2iv',
             theme: ThemeData.from(
               colorScheme: const ColorScheme.light(
@@ -67,15 +67,15 @@ class App extends StatelessWidget {
   }
 }
 
-class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+class _MainPage extends StatefulWidget {
+  const _MainPage({Key? key}) : super(key: key);
 
   @override
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage>
-    with SingleTickerProviderStateMixin<MainPage> {
+class _MainPageState extends State<_MainPage>
+    with SingleTickerProviderStateMixin<_MainPage> {
   /*
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -215,52 +215,24 @@ class _MainPageState extends State<MainPage>
     final bloc = BlocProvider.of<MainPageBloc>(context);
     return BlocListener<MainPageBloc, MainPageState>(
       bloc: bloc,
-      listenWhen: (previousState, currentState) =>
-          previousState.errorMessagesDialogState !=
-              currentState.errorMessagesDialogState ||
-          (!previousState.isAboutDialogVisible &&
-              currentState.isAboutDialogVisible),
+      listenWhen: (previousState, currentState) {
+        if (previousState.errorMessagesDialogState !=
+            currentState.errorMessagesDialogState) {
+          return true;
+        }
+        if (!previousState.isAboutDialogVisible &&
+            currentState.isAboutDialogVisible) {
+          return true;
+        }
+        if (previousState.isWorkInProgress != currentState.isWorkInProgress) {
+          return true;
+        }
+        return false;
+      },
       listener: (context, state) async {
         final errorMessagesDialogState = state.errorMessagesDialogState;
         if (errorMessagesDialogState is ErrorMessagesDialogVisible) {
-          await showDialog<void>(
-            context: context,
-            builder: (context) {
-              final bloc = BlocProvider.of<MainPageBloc>(context);
-              return AlertDialog(
-                content: DefaultTextStyle(
-                  style: const TextStyle(fontFamily: 'JetBrainsMono'),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: errorMessagesDialogState.messages
-                        .map(Text.new)
-                        .toNonGrowableList(),
-                  ),
-                ),
-                actions: [
-                  if (errorMessagesDialogState.isReadMoreButtonVisible)
-                    TextButton(
-                      onPressed: () {
-                        bloc.add(const ReadMoreErrorMessagesActionClicked());
-                      },
-                      child: const Text('Read more'),
-                    ),
-                  TextButton(
-                    onPressed: () {
-                      bloc.add(const ErrorMessagesDialogCloseRequested());
-                    },
-                    child: Text(
-                      MaterialLocalizations.of(context).closeButtonLabel,
-                    ),
-                  ),
-                ],
-                elevation: 0.0,
-              );
-            },
-            barrierDismissible: false,
-            barrierColor: Colors.black.withOpacity(0.74),
-          );
+          await showErrorMessagesDialog(context, errorMessagesDialogState);
         } else if (state.isAboutDialogVisible) {
           await showDialog<void>(
             context: context,
@@ -274,10 +246,66 @@ class _MainPageState extends State<MainPage>
           );
           bloc.add(const AboutDialogCloseRequested());
         } else {
-          Navigator.pop(context);
+          if (state.isWorkInProgress) {
+            await showDialog<void>(
+              context: context,
+              builder: (context) {
+                return const SizedBox(
+                  width: 48.0,
+                  height: 48.0,
+                  child: CircularProgressIndicator(),
+                );
+              },
+            );
+          } else {
+            // dismiss the error messages dialog
+            Navigator.pop(context);
+          }
         }
       },
       child: child,
+    );
+  }
+
+  static Future<void> showErrorMessagesDialog(
+    BuildContext context,
+    ErrorMessagesDialogVisible errorMessagesDialogState,
+  ) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) {
+        final bloc = BlocProvider.of<MainPageBloc>(context);
+        return AlertDialog(
+          content: DefaultTextStyle(
+            style: const TextStyle(fontFamily: 'JetBrainsMono'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: errorMessagesDialogState.messages
+                  .map(Text.new)
+                  .toNonGrowableList(),
+            ),
+          ),
+          actions: [
+            if (errorMessagesDialogState.isReadMoreButtonVisible)
+              TextButton(
+                onPressed: () {
+                  bloc.add(const ReadMoreErrorMessagesActionClicked());
+                },
+                child: const Text('Read more'),
+              ),
+            TextButton(
+              onPressed: () {
+                bloc.add(const ErrorMessagesDialogCloseRequested());
+              },
+              child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+            ),
+          ],
+          elevation: 0.0,
+        );
+      },
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.74),
     );
   }
 

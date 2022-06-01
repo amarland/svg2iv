@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 
 Tuple2<String, String> executeKotlinScript(String source) {
   final tempDirectoryPath = Directory.systemTemp.path.replaceAll('\\', '/');
-  final scriptSourceFile = File(tempDirectoryPath + '/test_script.main.kts')
+  final scriptSourceFile = File('$tempDirectoryPath/test_script.main.kts')
     ..createSync()
     ..writeAsStringSync(
       source,
@@ -36,6 +36,7 @@ Tuple2<String, String> executeKotlinScript(String source) {
     if (extractionResult.exitCode != 0) {
       fail(extractionResult.stderr as String);
     }
+    // ignore: prefer_interpolation_to_compose_strings
     final extractedDirectoryPath = '$tempDirectoryPath/' +
         compilerArchiveFile.getNameWithoutExtension().replaceAll('.tar', '');
     _runProcess('mv', [
@@ -57,7 +58,7 @@ Tuple2<String, String> executeKotlinScript(String source) {
       Process.runSync('chmod', ['+x', executable]);
     }
     final result = _runProcess(
-      isPlatformWindows ? executable + '.bat' : executable,
+      isPlatformWindows ? '$executable.bat' : executable,
       arguments,
     );
     return Tuple2(result.stdout as String, result.stderr as String);

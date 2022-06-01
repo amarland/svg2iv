@@ -289,7 +289,7 @@ listOf(
     PathNode.ArcTo(2.34F, 2.34F, 0F, false, false, 9.72F, 10.93F),
     PathNode.Close,
 )'''
-    .replaceAll('\n', '\n' + List.filled(indentationLevel * 4, ' ').join());
+    .replaceAll('\n', '\n${List.filled(indentationLevel * 4, ' ').join()}');
 
 VectorPath _buildVectorPath({required bool trimPath}) =>
     VectorPathBuilder(_pathData)
