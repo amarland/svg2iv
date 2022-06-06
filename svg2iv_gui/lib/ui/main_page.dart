@@ -236,26 +236,24 @@ class _MainPageState extends State<_MainPage>
         } else if (state.isAboutDialogVisible) {
           await showDialog<void>(
             context: context,
-            builder: (context) {
-              return AboutDialog(
-                applicationName: _applicationName,
-                applicationVersion: '0.1.0',
-                applicationIcon: SvgPicture.asset('assets/logo.svg'),
-              );
-            },
+            builder: (context) => AboutDialog(
+              applicationName: _applicationName,
+              applicationVersion: '0.1.0',
+              applicationIcon: SvgPicture.asset('assets/logo.svg'),
+            ),
           );
           bloc.add(const AboutDialogCloseRequested());
         } else {
           if (state.isWorkInProgress) {
             await showDialog<void>(
               context: context,
-              builder: (context) {
-                return const SizedBox(
+              builder: (context) => const Center(
+                child: SizedBox(
                   width: 48.0,
                   height: 48.0,
                   child: CircularProgressIndicator(),
-                );
-              },
+                ),
+              ),
             );
           } else {
             // dismiss the error messages dialog
@@ -422,7 +420,7 @@ class _MainPageState extends State<_MainPage>
                 // being sized so as not to overlap the button
                 child: FloatingActionButton.extended(
                   onPressed: () {
-                    /* TODO */
+                    bloc.add(const ConvertButtonClicked());
                   },
                   icon: const Icon(Icons.build_outlined),
                   label: const Text(

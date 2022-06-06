@@ -98,6 +98,12 @@ class _CheckerboardPainter extends CustomPainter {
     final offsetX = (size.width - actualWidth) / 2,
         offsetY = (size.height - actualHeight) / 2;
     double x = offsetX, y = offsetY;
+    /*
+    canvas.drawRect(
+      ui.Rect.fromLTWH(0.0, 0.0, size.width, size.height),
+      Paint()..color = Colors.deepPurple.withOpacity(0.5),
+    );
+    */
     var odd = true;
     final paint = Paint()..isAntiAlias = false;
     while (y < actualHeight) {
@@ -105,13 +111,13 @@ class _CheckerboardPainter extends CustomPainter {
         Rect.fromLTWH(x, y, squareSize, squareSize),
         paint..color = odd ? oddSquareColor : evenSquareColor,
       );
-      if (x < size.width - offsetX) {
+      if (x + squareSize < size.width - offsetX) {
         x += squareSize;
-        odd = !odd;
       } else {
         x = (y + squareSize) % (squareSize);
         y += squareSize;
       }
+      odd = !odd;
     }
   }
 
@@ -128,7 +134,16 @@ class _ImagePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawImage(picture, const ui.Offset(0.0, 0.0), ui.Paint());
+    const scaleFactor = 0.925;
+    final offsetX = (size.width - size.width * scaleFactor) / 2,
+        offsetY = (size.height - size.height * scaleFactor) / 2;
+    canvas.scale(scaleFactor, scaleFactor);
+    canvas.translate(offsetX, offsetY);
+    canvas.drawImage(
+      picture,
+      const ui.Offset(0.0, 0.0),
+      ui.Paint(),
+    );
   }
 
   @override

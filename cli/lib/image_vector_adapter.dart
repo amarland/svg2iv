@@ -6,7 +6,7 @@ import 'package:svg2iv_common/models.dart';
 extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
   List<int> toJson() {
     final imageVectors = map((imageVector) => imageVector != null
-        ? _formatDoubles(_mapImageVector(imageVector))
+        ? _mapImageVector(imageVector).also(_formatDoubles)
         : null);
     return JsonUtf8Encoder(
       null,

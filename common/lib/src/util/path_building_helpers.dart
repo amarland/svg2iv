@@ -30,7 +30,7 @@ List<PathNode> obtainPathNodesForRectangle({
 }) {
   if (radii == null || radii.isEmpty || radii.every((it) => it == 0.0)) {
     return [
-      PathNode(PathDataCommand.moveTo, [bounds.left, bounds.right]),
+      PathNode(PathDataCommand.moveTo, [bounds.left, bounds.top]),
       PathNode(PathDataCommand.relativeHorizontalLineTo, [bounds.width]),
       PathNode(PathDataCommand.relativeVerticalLineTo, [bounds.height]),
       PathNode(PathDataCommand.relativeHorizontalLineTo, [-bounds.width]),

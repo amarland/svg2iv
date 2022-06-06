@@ -5,7 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/parser.dart';
+import 'package:svg2iv_common/writer.dart';
 import 'package:svg2iv_gui/outer_world/log_file.dart';
 
 import '../outer_world/preferences.dart';
@@ -34,7 +34,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
   MainPageBloc({required bool isThemeDark})
       : super(MainPageState.initial(isThemeDark: isThemeDark)) {
     on<MainPageEvent>(
-      (event, emit) async => emit(await mapEventToState(event)),
+      (event, emit) async => await mapEventToState(event).forEach(emit),
     );
   }
 
@@ -43,60 +43,29 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
 
   bool get _didErrorsOccur => _imageVectors.anyNull();
 
-  FutureOr<MainPageState> mapEventToState(MainPageEvent event) async {
+  Stream<MainPageState> mapEventToState(MainPageEvent event) async* {
     if (event is ToggleThemeButtonPressed) {
       final isDarkModeEnabled = !state.isThemeDark;
       await setDarkModeEnabled(isDarkModeEnabled);
-      return state.copyWith(isThemeDark: isDarkModeEnabled);
-    }
-    if (event is AboutButtonPressed) {
-      return state.copyWith(isAboutDialogVisible: true);
-    }
-    if (event is AboutDialogCloseRequested) {
-      return state.copyWith(isAboutDialogVisible: false);
-    }
-    if (event is SelectSourceButtonPressed) {
-      return state.copyWith(
+      yield state.copyWith(isThemeDark: isDarkModeEnabled);
+    } else if (event is AboutButtonPressed) {
+      yield state.copyWith(isAboutDialogVisible: true);
+    } else if (event is AboutDialogCloseRequested) {
+      yield state.copyWith(isAboutDialogVisible: false);
+    } else if (event is SelectSourceButtonPressed) {
+      yield state.copyWith(
         visibleSelectionDialog: VisibleSelectionDialog.sourceSelection,
       );
-    }
-    if (event is SelectDestinationButtonPressed) {
-      return state.copyWith(
+    } else if (event is SelectDestinationButtonPressed) {
+      yield state.copyWith(
         visibleSelectionDialog: VisibleSelectionDialog.destinationSelection,
       );
-    }
-    if (event is SourceSelectionDialogClosed) {
-      final paths = event.paths;
-      var isError = false;
-      if (paths != null && paths.isNotEmpty) {
-        for (final path in paths) {
-          if (!(await File(path).exists())) {
-            isError = true;
-            break;
-          }
-        }
-        _imageVectors.clear();
-        await for (final imageVector in parseFiles(paths)) {
-          _imageVectors.add(imageVector);
-        }
-        _previewIndex = 0;
-        // await Future<void>.delayed(const Duration(seconds: 3));
-        add(const SourceFilesParsed());
-      }
-      return state.copyWith(
-        isWorkInProgress: true,
-        visibleSelectionDialog: VisibleSelectionDialog.none,
-        sourceSelectionTextFieldState:
-            state.sourceSelectionTextFieldState.copyWith(
-          value: paths?.join(', '),
-          isError: isError,
-        ),
-      );
-    }
-    if (event is DestinationSelectionDialogClosed) {
+    } else if (event is SourceSelectionDialogClosed) {
+      yield* _onSourceSelectionDialogClosed(event.paths);
+    } else if (event is DestinationSelectionDialogClosed) {
       final path = event.path;
       final isError = path != null && !(await Directory(path).exists());
-      return state.copyWith(
+      yield state.copyWith(
         visibleSelectionDialog: VisibleSelectionDialog.none,
         destinationSelectionTextFieldState:
             state.destinationSelectionTextFieldState.copyWith(
@@ -104,9 +73,79 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           isError: isError,
         ),
       );
+    } else if (event is PreviousPreviewButtonClicked) {
+      yield state.copyWith(
+        imageVector: () => _imageVectors[--_previewIndex],
+        isPreviousPreviewButtonVisible: _previewIndex > 0,
+        isNextPreviewButtonVisible: true,
+      );
+    } else if (event is NextPreviewButtonClicked) {
+      yield state.copyWith(
+        imageVector: () => _imageVectors[++_previewIndex],
+        isPreviousPreviewButtonVisible: true,
+        isNextPreviewButtonVisible: _previewIndex < _imageVectors.length - 1,
+      );
+    } else if (event is ConvertButtonClicked) {
+      yield state.copyWith(isWorkInProgress: true);
+      await writeImageVectorsToFile(
+        state.destinationSelectionTextFieldState.value,
+        _imageVectors.whereNotNull().toNonGrowableList(),
+        extensionReceiver: state.extensionReceiverTextFieldState.value,
+      );
+      yield state.copyWith(isWorkInProgress: false);
+    } else if (event is SnackBarActionButtonClicked) {
+      switch (event.snackBarId) {
+        case _previewErrorsSnackBarId:
+          const maxErrorMessageCount = 8;
+          final errorMessages = await readErrorMessages(maxErrorMessageCount);
+          yield state.copyWith(
+            snackBarInfo: null,
+            errorMessagesDialogState: ErrorMessagesDialogVisible(
+              errorMessages.item1,
+              errorMessages.item2,
+            ),
+          );
+          break;
+        default:
+          throw ArgumentError.value(
+            event.snackBarId.toRadixString(16),
+            'event.snackBarId',
+          );
+      }
+    } else if (event is ErrorMessagesDialogCloseRequested) {
+      yield state.copyWith(
+        errorMessagesDialogState: const ErrorMessagesDialogGone(),
+      );
+    } else if (event is ReadMoreErrorMessagesActionClicked) {
+      await openLogFileInPreferredApplication();
+      yield state.copyWith(
+        errorMessagesDialogState: const ErrorMessagesDialogGone(),
+      );
+    } else {
+      throw UnimplementedError();
     }
-    if (event is SourceFilesParsed) {
-      return state.copyWith(
+  }
+
+  Stream<MainPageState> _onSourceSelectionDialogClosed(
+    List<String>? paths,
+  ) async* {
+    yield state.copyWith(
+      isWorkInProgress: true,
+      visibleSelectionDialog: VisibleSelectionDialog.none,
+    );
+    var isError = false;
+    if (paths != null && paths.isNotEmpty) {
+      for (final path in paths) {
+        if (!(await File(path).exists())) {
+          isError = true;
+          break;
+        }
+      }
+      _imageVectors.clear();
+      await parseFiles(paths).forEach(_imageVectors.add);
+      _previewIndex = 0;
+      // await Future<void>.delayed(const Duration(seconds: 3));
+      yield state.copyWith(
         isWorkInProgress: false,
         sourceSelectionTextFieldState: state.sourceSelectionTextFieldState
             .copyWith(isError: _didErrorsOccur),
@@ -114,11 +153,9 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
             state.extensionReceiverTextFieldState.copyWith(
           placeholder: _imageVectors.singleOrNull?.name,
         ),
-        imageVector: () {
-          return _imageVectors.isNotEmpty
-              ? _imageVectors[_previewIndex]
-              : state.imageVector;
-        },
+        imageVector: () => _imageVectors.isNotEmpty
+            ? _imageVectors[_previewIndex]
+            : state.imageVector,
         isPreviousPreviewButtonVisible: false,
         isNextPreviewButtonVisible: _imageVectors.length > 1,
         snackBarInfo: () {
@@ -134,51 +171,12 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         },
       );
     }
-    if (event is PreviousPreviewButtonClicked) {
-      return state.copyWith(
-        imageVector: () => _imageVectors[--_previewIndex],
-        isPreviousPreviewButtonVisible: _previewIndex > 0,
-        isNextPreviewButtonVisible: true,
-      );
-    }
-    if (event is NextPreviewButtonClicked) {
-      return state.copyWith(
-        imageVector: () => _imageVectors[++_previewIndex],
-        isPreviousPreviewButtonVisible: true,
-        isNextPreviewButtonVisible: _previewIndex < _imageVectors.length - 1,
-      );
-    }
-    if (event is SnackBarActionButtonClicked) {
-      switch (event.snackBarId) {
-        case _previewErrorsSnackBarId:
-          const maxErrorMessageCount = 8;
-          final errorMessages = await readErrorMessages(maxErrorMessageCount);
-          return state.copyWith(
-            snackBarInfo: null,
-            errorMessagesDialogState: ErrorMessagesDialogVisible(
-              errorMessages.item1,
-              errorMessages.item2,
-            ),
-          );
-        default:
-          throw ArgumentError.value(
-            event.snackBarId.toRadixString(16),
-            'event.snackBarId',
-          );
-      }
-    }
-    if (event is ErrorMessagesDialogCloseRequested) {
-      return state.copyWith(
-        errorMessagesDialogState: const ErrorMessagesDialogGone(),
-      );
-    }
-    if (event is ReadMoreErrorMessagesActionClicked) {
-      await openLogFileInPreferredApplication();
-      return state.copyWith(
-        errorMessagesDialogState: const ErrorMessagesDialogGone(),
-      );
-    } else {
-      throw UnimplementedError();
-    }
+    yield state.copyWith(
+      sourceSelectionTextFieldState:
+          state.sourceSelectionTextFieldState.copyWith(
+        value: paths?.join(', '),
+        isError: isError,
+      ),
+    );
   }
 }

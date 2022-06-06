@@ -217,10 +217,7 @@ group(
 
 ''';
       final generatedSourceBuffer = StringBuffer(dependencyAnnotations);
-      writeFileContents(
-        generatedSourceBuffer,
-        [Tuple2('test_vector.svg', imageVector)],
-      );
+      writeFileContents(generatedSourceBuffer, [imageVector]);
       generatedSourceBuffer.writeln('\nprint(TestVector.name)');
       final executionResult = executeKotlinScript(
         generatedSourceBuffer.toString(),
