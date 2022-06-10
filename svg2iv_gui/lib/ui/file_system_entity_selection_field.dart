@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:svg2iv_gui/ui/svg_icon.dart';
 
 import '../ui/file_system_entity_selection_mode.dart';
 import '../util/mnemonic_text_spans.dart';
@@ -38,15 +39,15 @@ class _State extends State<FileSystemEntitySelectionField> {
 
   @override
   Widget build(BuildContext context) {
-    final IconData icon;
+    final String iconAssetName;
     final TextSpan defaultLabelSpan;
     switch (widget.selectionMode) {
       case FileSystemEntitySelectionMode.sourceFiles:
-        icon = Icons.upload_file_outlined;
+        iconAssetName = 'assets/source_files.svg';
         defaultLabelSpan = 'Source files'.asMnemonic();
         break;
       case FileSystemEntitySelectionMode.destinationDirectory:
-        icon = Icons.snippet_folder_outlined;
+        iconAssetName = 'assets/destination_directory.svg';
         defaultLabelSpan = 'Destination directory'.asMnemonic();
         break;
     }
@@ -74,7 +75,7 @@ class _State extends State<FileSystemEntitySelectionField> {
             controller: _textEditingController,
             decoration: InputDecoration(
               label: Text.rich(labelSpan, overflow: TextOverflow.ellipsis),
-              prefixIcon: Icon(icon),
+              prefixIcon: SvgIcon(iconAssetName),
               enabledBorder: inputBorder,
             ),
             readOnly: true,
@@ -85,7 +86,7 @@ class _State extends State<FileSystemEntitySelectionField> {
           onPressed: widget.onButtonPressed,
           child: SizedBox.fromSize(
             size: const Size(24.0, 52.0),
-            child: const Icon(Icons.folder_outlined),
+            child: const SvgIcon('assets/explore_files.svg'),
           ),
         ),
       ],

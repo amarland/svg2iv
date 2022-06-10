@@ -30,7 +30,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/convert_vector.svg
+    - assets/destination_directory.svg
+    - assets/explore_files.svg
     - assets/logo.svg
+    - assets/source_files.svg
+    - assets/toggle_theme.svg
   fonts:
     - family: JetBrainsMono
       fonts:

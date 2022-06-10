@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_gui/ui/custom_icons.dart';
 
 import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
@@ -10,9 +9,11 @@ import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
 import '../util/custom_material_localizations.dart';
 import 'checkerboard.dart';
+import 'default_image_vectors.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
 import 'preview_selection_button.dart';
+import 'svg_icon.dart';
 
 const _androidGreen = Color(0xFF00DE7A);
 const _androidBlue = Color(0xFF2196F3);
@@ -128,7 +129,7 @@ class _MainPageState extends State<_MainPage>
         actions: [
           IconButton(
             onPressed: () => bloc.add(const ToggleThemeButtonPressed()),
-            icon: const Icon(Icons.dark_mode_outlined),
+            icon: const SvgIcon('assets/toggle_theme.svg'),
           ),
           IconButton(
             onPressed: () => bloc.add(const AboutButtonPressed()),
@@ -422,7 +423,7 @@ class _MainPageState extends State<_MainPage>
                   onPressed: () {
                     bloc.add(const ConvertButtonClicked());
                   },
-                  icon: const Icon(Icons.build_outlined),
+                  icon: const SvgIcon('assets/convert_vector.svg'),
                   label: const Text(
                     'Convert',
                     style: TextStyle(fontWeight: FontWeight.w600),

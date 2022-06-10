@@ -1,6 +1,6 @@
 import 'package:svg2iv_common/models.dart';
 
-import '../ui/custom_icons.dart';
+import '../ui/default_image_vectors.dart';
 import '../ui/snack_bar_info.dart';
 
 class MainPageState {
