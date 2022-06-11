@@ -1,18 +1,23 @@
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
 import '../../models.dart';
 import '../../utils.dart';
 
-extension ImageVectorToLottieJsonConversion on ImageVector? {
-  List<int> toLottieJson() => JsonUtf8Encoder().convert(_mapImageVector);
+typedef _Vector2Triple = Tuple3<Vector2, Vector2, Vector2>;
+
+extension ImageVectorToLottieJsonConversion on ImageVector {
+  List<int> toLottieJson() => JsonUtf8Encoder(
+        null,
+        (obj) => obj is Iterable
+            ? obj.toNonGrowableList()
+            : throw JsonUnsupportedObjectError(obj),
+      ).convert(_mapImageVector(this));
 }
 
-Map<String, dynamic>? _mapImageVector(ImageVector? imageVector) {
-  if (imageVector == null) return null;
+Map<String, dynamic> _mapImageVector(ImageVector imageVector) {
   final nodes = imageVector.nodes.any((node) => node is VectorPath)
       ? [
           VectorGroupBuilder()
@@ -34,7 +39,7 @@ Map<String, dynamic>? _mapImageVector(ImageVector? imageVector) {
         'shapes': nodes.reversed.map(_mapVectorNode).toNonGrowableList(),
       },
     ],
-  };
+  }..removeWhereValueIsNull();
 }
 
 dynamic _mapVectorNode(VectorNode node) => node is VectorGroup
@@ -89,7 +94,7 @@ Map<String, dynamic> _mapVectorPath(VectorPath path) {
           }..removeWhereValueIsNull());
         }
       }),
-  };
+  }..removeWhereValueIsNull();
 }
 
 Map<String, dynamic> _mapPathFill(VectorPath path) {
@@ -193,9 +198,10 @@ List<Map<String, Object?>> _mapPathShapes(VectorPath path, String? pathId) {
   final pathShapes = paths.mapIndexed((pathIndex, nodes) {
     final isClosed = nodes.last.command == PathDataCommand.close;
     final pointCount = isClosed ? nodes.length - 1 : nodes.length;
-    final irList =
-        nodes.map(_getIntermediateRepresentationForNode).toNonGrowableList();
-    final points = List<Tuple3<Vector2, Vector2, Vector2>>.generate(
+    final irList = (isClosed ? nodes.slice(0, pointCount) : nodes)
+        .map(_getIntermediateRepresentationForNode)
+        .toList();
+    final points = List<_Vector2Triple>.generate(
       pointCount,
       (index) {
         final zero = Vector2.zero();
@@ -207,11 +213,12 @@ List<Map<String, Object?>> _mapPathShapes(VectorPath path, String? pathId) {
             ir is Vector2 ? ir : zero,
           );
         } else {
-          final castIrList = irList.cast<Tuple3<Vector2, Vector2, Vector2>>();
-          final point = castIrList[index].item3;
+          final point = (irList[index] as _Vector2Triple).item3;
+          final previousIr = irList[index - 1];
+          final nextIr = irList[index + 1] as _Vector2Triple;
           return Tuple3(
-            castIrList[index - 1].item2 - point,
-            (index < pointCount ? castIrList[index + 1].item1 : zero) - point,
+            (previousIr is _Vector2Triple ? previousIr.item2 : zero) - point,
+            (index < pointCount ? nextIr.item1 : zero) - point,
             point,
           );
         }
@@ -251,7 +258,7 @@ dynamic _getIntermediateRepresentationForNode(PathNode node) {
         Vector2(arguments[0], arguments[1]),
       );
     default:
-      return Tuple3<Vector2, Vector2, Vector2>.fromList(
+      return _Vector2Triple.fromList(
         arguments
             .chunked(2)
             .map((c) => Vector2(c[0], c[1]))
