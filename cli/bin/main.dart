@@ -131,7 +131,7 @@ If not set, the generated property will be declared as a top-level property.
         final pathSegments = file.uri.pathSegments;
         return pathSegments.isNotEmpty
             ? pathSegments
-                .sublist(0, pathSegments.length - 1)
+                .slice(0, pathSegments.length - 1)
                 .join(Platform.pathSeparator)
             : '';
       });
@@ -206,7 +206,7 @@ If not set, the generated property will be declared as a top-level property.
     stdout.add(imageVectors.toJson());
   } else {
     final nonNullImageVectors = imageVectors.whereNotNull().toNonGrowableList();
-    if (imageVectors.isNotEmpty) {
+    if (nonNullImageVectors.isNotEmpty) {
       final extensionReceiver = argResults[receiverOptionName] as String?;
       if (destination != null) {
         if (destination is File) {
