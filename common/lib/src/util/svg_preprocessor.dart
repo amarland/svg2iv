@@ -63,11 +63,9 @@ void _inlineUseElements(XmlElement svgElement) {
           } else {
             // use custom attribute names to avoid confusion with possible
             // "illegally"-defined x/y attributes
-            referencedElement.attributes.add(
-              XmlAttribute(
-                XmlName(useElementCustomAttributePrefix + attributeName),
-                attributeValueAsDouble.toString(),
-              ),
+            referencedElement.setAttribute(
+              useElementCustomAttributePrefix + attributeName,
+              attributeValueAsDouble.toString(),
             );
           }
         }
@@ -89,10 +87,11 @@ void _inlineUseElements(XmlElement svgElement) {
               .where((attr) => attr.name == useElementAttributeName)
               .singleOrNull;
           if (referencedElementAttribute == null) {
-            referencedElement.setAttribute(
-              useElementAttribute.name.local,
-              useElementAttribute.value,
-              namespace: useElementAttribute.name.namespaceUri,
+            referencedElement.attributes.add(
+              XmlAttribute(
+                useElementAttribute.name.copy(),
+                useElementAttribute.value,
+              ),
             );
           }
         }
@@ -253,8 +252,7 @@ void _convertCssStylesheetToSvgPresentationAttributes(XmlElement svgElement) {
               // for subsequent "passes", if the existing attribute
               // isn't one that was previously saved, this means it has a lower
               // specificity since the blocks are sorted; replace it
-              if (attributesToKeep.none((savedAttribute) =>
-                  identical(savedAttribute, existingAttribute))) {
+              if (!attributesToKeep.contains(existingAttribute)) {
                 attributes[existingAttributeIndex] =
                     XmlAttribute(XmlName(name), value);
               }

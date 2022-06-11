@@ -169,7 +169,7 @@ class VectorGroupBuilder
     });
     for (final index in indicesOfGroupsToRemove) {
       final group = _nodes[index] as VectorGroup;
-      _nodes
+      _nodes = _nodes.toList()
         ..removeAt(index)
         ..insertAll(index, group.nodes);
       group.id?.let((id) => this.id(id));

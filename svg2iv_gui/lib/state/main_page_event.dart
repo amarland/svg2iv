@@ -34,16 +34,16 @@ class DestinationSelectionDialogClosed extends MainPageEvent {
   final String? path;
 }
 
-class SourceFilesParsed extends MainPageEvent {
-  const SourceFilesParsed() : super();
-}
-
 class PreviousPreviewButtonClicked extends MainPageEvent {
   const PreviousPreviewButtonClicked() : super();
 }
 
 class NextPreviewButtonClicked extends MainPageEvent {
   const NextPreviewButtonClicked() : super();
+}
+
+class ConvertButtonClicked extends MainPageEvent {
+  const ConvertButtonClicked() : super();
 }
 
 class SnackBarActionButtonClicked extends MainPageEvent {

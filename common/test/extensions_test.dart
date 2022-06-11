@@ -94,6 +94,7 @@ void main() {
     () {
       final fileNameWithoutExtension = 'test_file';
       final file = File(
+        // ignore: prefer_interpolation_to_compose_strings
         Directory.systemTemp.absolute.path +
             Platform.pathSeparator +
             fileNameWithoutExtension +

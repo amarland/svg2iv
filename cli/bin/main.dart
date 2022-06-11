@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:collection/collection.dart';
 import 'package:svg2iv/image_vector_json_adapter.dart';
-import 'package:svg2iv_common/utils.dart';
 import 'package:svg2iv_common/parser.dart';
+import 'package:svg2iv_common/utils.dart';
 import 'package:svg2iv_common/writer.dart';
 
 const outputOptionName = 'output';
@@ -66,7 +65,8 @@ If not set, the generated property will be declared as a top-level property.
     exit(2);
   }
   final outputOptionValue = argResults[outputOptionName] as String?;
-  final isOutputJson = argResults[jsonFlagName] as bool;
+  final convertToLottie = argResults[forceLottieFlagName] as bool;
+  final isOutputJson = argResults[jsonFlagName] as bool && !convertToLottie;
   final shouldWriteToStdOut = outputOptionValue == '-' || isOutputJson;
   _isInQuietMode = shouldWriteToStdOut || argResults[quietFlagName] as bool;
   if (argResults[helpFlagName] as bool) {
@@ -172,21 +172,19 @@ If not set, the generated property will be declared as a top-level property.
       }
     }
   }
-  final convertToLottie = argResults[forceLottieFlagName] as bool;
-  final imageVectors = List<Tuple2<String, ImageVector?>>.empty(growable: true);
+  final imageVectors = List<ImageVector?>.empty(growable: true);
   final errorMessages = List<String>.empty(growable: true);
   if (sourceString != null) {
-    final parseResult = parseXmlString(
-      sourceString,
-      normalizePaths: convertToLottie,
-    );
+    final parseResult = parseXmlString(sourceString);
+    final imageVector = parseResult.item1;
     imageVectors.add(
-      Tuple2(
-        destination is File
-            ? destination.getNameWithoutExtension()
-            : 'your_name_here',
-        parseResult.item1,
-      ),
+      imageVector?.name != null
+          ? imageVector
+          : imageVector?.copyWith(
+              name: destination is File
+                  ? destination.getNameWithoutExtension()
+                  : null,
+            ),
     );
     errorMessages.addAll(parseResult.item2);
   } else {
@@ -195,11 +193,11 @@ If not set, the generated property will be declared as a top-level property.
         file,
         normalizePaths: convertToLottie,
       );
+      final imageVector = parseResult.item1;
       imageVectors.add(
-        Tuple2(
-          file.item1.getNameWithoutExtension(),
-          parseResult.item1,
-        ),
+        imageVector?.name != null
+            ? imageVector
+            : imageVector?.copyWith(name: file.item1.getNameWithoutExtension()),
       );
       errorMessages.addAll(parseResult.item2);
     }
@@ -211,33 +209,47 @@ If not set, the generated property will be declared as a top-level property.
   // `destination` is null if the actual destination
   // is the standard output stream
   if (isOutputJson) {
-    stdout.add(imageVectors.map((pair) => pair.item2).toJson());
+    stdout.add(imageVectors.toJson());
   } else {
-    if (imageVectors.isNotEmpty) {
+    final nonNullImageVectors = imageVectors.whereNotNull().toNonGrowableList();
+    if (nonNullImageVectors.isNotEmpty) {
       final extensionReceiver = argResults[receiverOptionName] as String?;
       if (destination != null) {
         if (destination is File) {
           await writeImageVectorsToFile(
             destination.path,
-            imageVectors,
+            nonNullImageVectors,
             extensionReceiver: extensionReceiver,
           );
         } else {
-          for (final pair in imageVectors) {
+          for (final imageVector in nonNullImageVectors) {
             await writeImageVectorsToFile(
-              destination.path + Platform.pathSeparator + pair.item1,
-              [pair],
+              destination.path +
+                  Platform.pathSeparator +
+                  (imageVector.name ?? 'your_name_here'),
+              [imageVector],
               extensionReceiver: extensionReceiver,
             );
           }
         }
         _log("File(s) generated in '${destination.path}'.");
       } else {
-        writeFileContents(
-          stdout,
-          imageVectors,
-          extensionReceiver: extensionReceiver,
-        );
+        if (convertToLottie) {
+          final lastIndex = nonNullImageVectors.length - 1;
+          for (var index = 0; index <= lastIndex; index++) {
+            final imageVector = nonNullImageVectors[index];
+            stdout.add(imageVector.toLottieJson());
+            if (index < lastIndex) {
+              stdout.writeln();
+            }
+          }
+        } else {
+          writeFileContents(
+            stdout,
+            nonNullImageVectors,
+            extensionReceiver: extensionReceiver,
+          );
+        }
       }
     } else if (errorMessages.isEmpty) {
       // assume no eligible files were found

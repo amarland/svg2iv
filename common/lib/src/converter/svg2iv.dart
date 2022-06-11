@@ -281,7 +281,7 @@ Transformations? _parseTransformations(XmlElement element) {
 
 VectorNode? _parsePathElement(XmlElement pathElement) {
   final transformations = _parseTransformations(pathElement);
-  final translation = _consumeTranslationIfPossible(transformations);
+  final translation = _tryConsumeTranslation(transformations);
   final pathData = parsePathData(
     pathElement.getAttribute('d'),
     translation: translation,
@@ -333,8 +333,7 @@ VectorNode? _parsePolyShapeElement(XmlElement polyShapeElement) {
 
 VectorNode? _parseRectElement(XmlElement rectElement) {
   final transformations = _parseTransformations(rectElement);
-  final translation =
-      _consumeTranslationIfPossible(transformations).orDefault();
+  final translation = _tryConsumeTranslation(transformations).orDefault();
   final offsetX = translation.x;
   final offsetY = translation.y;
   final mappedAttributes = _mapCoordinateAttributes(rectElement.attributes);
@@ -350,12 +349,14 @@ VectorNode? _parseRectElement(XmlElement rectElement) {
   return _buildVectorNodeFromPathData(
     rectElement,
     obtainPathNodesForRectangle(
-      bounds: Rect(x, y, width, height),
-      radii: List.generate(
-        8,
-        ((index) => index.isEven ? rx! : ry!),
-        growable: false,
-      ),
+      bounds: Rect(x, y, width + x, height + y),
+      radii: rx != 0.0 || ry != 0.0
+          ? List.generate(
+              8,
+              ((index) => index.isEven ? rx! : ry!),
+              growable: false,
+            )
+          : null,
     ),
     transformations,
   );
@@ -364,8 +365,7 @@ VectorNode? _parseRectElement(XmlElement rectElement) {
 // circle included
 VectorNode? _parseEllipseElement(XmlElement ellipseElement) {
   final transformations = _parseTransformations(ellipseElement);
-  final translation =
-      _consumeTranslationIfPossible(transformations).orDefault();
+  final translation = _tryConsumeTranslation(transformations).orDefault();
   final offsetX = translation.x;
   final offsetY = translation.y;
   final mappedAttributes = _mapCoordinateAttributes(ellipseElement.attributes);
@@ -387,7 +387,7 @@ VectorNode? _parseEllipseElement(XmlElement ellipseElement) {
   );
 }
 
-Translation? _consumeTranslationIfPossible(Transformations? transformations) =>
+Translation? _tryConsumeTranslation(Transformations? transformations) =>
     transformations != null && transformations.definesTranslationOnly
         ? transformations.consumeTranslation()
         : null;
@@ -457,7 +457,7 @@ List<PathNode> _extractPathDataFromLinePoints(
       points.length.isOdd) {
     return List.empty();
   }
-  final translation = _consumeTranslationIfPossible(transformations);
+  final translation = _tryConsumeTranslation(transformations);
   if (translation != null) {
     points = points
         .mapIndexed((i, p) => p! + (i.isEven ? translation.x : translation.y))

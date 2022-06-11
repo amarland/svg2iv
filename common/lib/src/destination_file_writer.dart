@@ -42,7 +42,7 @@ const _commandsToFunctionAndClassNames = {
 
 Future<void> writeImageVectorsToFile(
   String destinationPath,
-  List<Tuple2<String, ImageVector?>> imageVectors, {
+  List<ImageVector> imageVectors, {
   String? extensionReceiver,
   String? heading,
 }) async {
@@ -80,7 +80,7 @@ Future<void> writeImageVectorsToFile(
 
 void writeFileContents(
   StringSink sink,
-  List<Tuple2<String, ImageVector?>> imageVectors, {
+  List<ImageVector> imageVectors, {
   String? packageName,
   String? extensionReceiver,
   String? heading,
@@ -95,18 +95,9 @@ void writeFileContents(
       ..writeln('package $packageName')
       ..writeln();
   }
-  writeImports(sink, imageVectors.map((pair) => pair.item2).whereNotNull());
-  for (final pair in imageVectors) {
-    final imageVector = pair.item2;
-    if (imageVector != null) {
-      final sourceFileName = pair.item1;
-      writeImageVector(
-        sink,
-        imageVector,
-        sourceFileName.toPascalCase(),
-        extensionReceiver,
-      );
-    }
+  writeImports(sink, imageVectors.whereNotNull());
+  for (final imageVector in imageVectors) {
+    writeImageVector(sink, imageVector, extensionReceiver);
   }
 }
 
@@ -178,15 +169,14 @@ void writeImports(
 @visibleForTesting
 void writeImageVector(
   StringSink sink,
-  ImageVector imageVector,
-  String nameIfVectorNameNull, [
+  ImageVector imageVector, [
   String? extensionReceiver,
 ]) {
   var indentationLevel = 0;
   final extensionReceiverDeclaration =
-      extensionReceiver.isNullOrEmpty ? '' : extensionReceiver! + '.';
-  final imageVectorName = (imageVector.name ?? nameIfVectorNameNull);
-  final backingPropertyName = '_' + imageVectorName.toCamelCase();
+      extensionReceiver.isNullOrEmpty ? '' : '${extensionReceiver!}.';
+  final imageVectorName = (imageVector.name ?? '');
+  final backingPropertyName = '_${imageVectorName.toCamelCase()}';
   sink
     ..writeln(
       'private var $backingPropertyName: ImageVector? = null',
@@ -244,7 +234,7 @@ void writeImageVector(
   );
   sink
     ..writelnIndent(indentationLevel, '.build()')
-    ..writelnIndent(--indentationLevel, '}')
+    ..writelnIndent(indentationLevel - 2, '}')
     ..writelnIndent(indentationLevel, 'return $backingPropertyName!!')
     ..writelnIndent(--indentationLevel, '}');
 }
@@ -562,7 +552,7 @@ String _generateIndentation(int indentationLevel) =>
 
 // @internal
 String numToKotlinFloatAsString(num number) =>
-    number.toStringWithMaxDecimals(4) + 'F';
+    '${number.toStringWithMaxDecimals(4)}F';
 
 extension _StringSinkWriting on StringSink {
   void writeIndent(int indentationLevel, Object obj) {
@@ -616,6 +606,6 @@ extension _StringSinkWriting on StringSink {
     } else {
       argumentAsString = argument.toString();
     }
-    writeln(argumentAsString + ',');
+    writeln('$argumentAsString,');
   }
 }

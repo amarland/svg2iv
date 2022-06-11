@@ -34,8 +34,8 @@ void main() {
   <use href="#ref_circle" x="30" stroke-opacity="0.7" />
 </svg>''';
       const expectedDocument = '''
-  <!--suppress HtmlUnknownAttribute-->
-  <svg viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg">
+<!--suppress HtmlUnknownAttribute-->
+<svg viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg">
   <circle cx="5" cy="5" r="4"              stroke="blue" id="circle" />
   <circle cx="5" cy="5" r="4" fill="blue"  stroke="blue" use_x="10.0" />
   <circle cx="5" cy="5" r="4" fill="white" stroke="blue" use_x="20.0"

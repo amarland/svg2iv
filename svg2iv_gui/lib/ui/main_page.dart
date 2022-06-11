@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:svg2iv_common/utils.dart';
-import 'package:svg2iv_gui/ui/custom_icons.dart';
 
 import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
@@ -10,9 +9,11 @@ import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
 import '../util/custom_material_localizations.dart';
 import 'checkerboard.dart';
+import 'default_image_vectors.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
 import 'preview_selection_button.dart';
+import 'svg_icon.dart';
 
 const _androidGreen = Color(0xFF00DE7A);
 const _androidBlue = Color(0xFF2196F3);
@@ -38,7 +39,7 @@ class App extends StatelessWidget {
           const inputDecorationTheme =
               InputDecorationTheme(border: OutlineInputBorder());
           return MaterialApp(
-            home: const MainPage(),
+            home: const _MainPage(),
             title: 'svg2iv',
             theme: ThemeData.from(
               colorScheme: const ColorScheme.light(
@@ -67,15 +68,15 @@ class App extends StatelessWidget {
   }
 }
 
-class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+class _MainPage extends StatefulWidget {
+  const _MainPage({Key? key}) : super(key: key);
 
   @override
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage>
-    with SingleTickerProviderStateMixin<MainPage> {
+class _MainPageState extends State<_MainPage>
+    with SingleTickerProviderStateMixin<_MainPage> {
   /*
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -128,7 +129,7 @@ class _MainPageState extends State<MainPage>
         actions: [
           IconButton(
             onPressed: () => bloc.add(const ToggleThemeButtonPressed()),
-            icon: const Icon(Icons.dark_mode_outlined),
+            icon: const SvgIcon('assets/toggle_theme.svg'),
           ),
           IconButton(
             onPressed: () => bloc.add(const AboutButtonPressed()),
@@ -215,69 +216,95 @@ class _MainPageState extends State<MainPage>
     final bloc = BlocProvider.of<MainPageBloc>(context);
     return BlocListener<MainPageBloc, MainPageState>(
       bloc: bloc,
-      listenWhen: (previousState, currentState) =>
-          previousState.errorMessagesDialogState !=
-              currentState.errorMessagesDialogState ||
-          (!previousState.isAboutDialogVisible &&
-              currentState.isAboutDialogVisible),
+      listenWhen: (previousState, currentState) {
+        if (previousState.errorMessagesDialogState !=
+            currentState.errorMessagesDialogState) {
+          return true;
+        }
+        if (!previousState.isAboutDialogVisible &&
+            currentState.isAboutDialogVisible) {
+          return true;
+        }
+        if (previousState.isWorkInProgress != currentState.isWorkInProgress) {
+          return true;
+        }
+        return false;
+      },
       listener: (context, state) async {
         final errorMessagesDialogState = state.errorMessagesDialogState;
         if (errorMessagesDialogState is ErrorMessagesDialogVisible) {
-          await showDialog<void>(
-            context: context,
-            builder: (context) {
-              final bloc = BlocProvider.of<MainPageBloc>(context);
-              return AlertDialog(
-                content: DefaultTextStyle(
-                  style: const TextStyle(fontFamily: 'JetBrainsMono'),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: errorMessagesDialogState.messages
-                        .map(Text.new)
-                        .toNonGrowableList(),
-                  ),
-                ),
-                actions: [
-                  if (errorMessagesDialogState.isReadMoreButtonVisible)
-                    TextButton(
-                      onPressed: () {
-                        bloc.add(const ReadMoreErrorMessagesActionClicked());
-                      },
-                      child: const Text('Read more'),
-                    ),
-                  TextButton(
-                    onPressed: () {
-                      bloc.add(const ErrorMessagesDialogCloseRequested());
-                    },
-                    child: Text(
-                      MaterialLocalizations.of(context).closeButtonLabel,
-                    ),
-                  ),
-                ],
-                elevation: 0.0,
-              );
-            },
-            barrierDismissible: false,
-            barrierColor: Colors.black.withOpacity(0.74),
-          );
+          await showErrorMessagesDialog(context, errorMessagesDialogState);
         } else if (state.isAboutDialogVisible) {
           await showDialog<void>(
             context: context,
-            builder: (context) {
-              return AboutDialog(
-                applicationName: _applicationName,
-                applicationVersion: '0.1.0',
-                applicationIcon: SvgPicture.asset('assets/logo.svg'),
-              );
-            },
+            builder: (context) => AboutDialog(
+              applicationName: _applicationName,
+              applicationVersion: '0.1.0',
+              applicationIcon: SvgPicture.asset('assets/logo.svg'),
+            ),
           );
           bloc.add(const AboutDialogCloseRequested());
         } else {
-          Navigator.pop(context);
+          if (state.isWorkInProgress) {
+            await showDialog<void>(
+              context: context,
+              builder: (context) => const Center(
+                child: SizedBox(
+                  width: 48.0,
+                  height: 48.0,
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            );
+          } else {
+            // dismiss the error messages dialog
+            Navigator.pop(context);
+          }
         }
       },
       child: child,
+    );
+  }
+
+  static Future<void> showErrorMessagesDialog(
+    BuildContext context,
+    ErrorMessagesDialogVisible errorMessagesDialogState,
+  ) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) {
+        final bloc = BlocProvider.of<MainPageBloc>(context);
+        return AlertDialog(
+          content: DefaultTextStyle(
+            style: const TextStyle(fontFamily: 'JetBrainsMono'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: errorMessagesDialogState.messages
+                  .map(Text.new)
+                  .toNonGrowableList(),
+            ),
+          ),
+          actions: [
+            if (errorMessagesDialogState.isReadMoreButtonVisible)
+              TextButton(
+                onPressed: () {
+                  bloc.add(const ReadMoreErrorMessagesActionClicked());
+                },
+                child: const Text('Read more'),
+              ),
+            TextButton(
+              onPressed: () {
+                bloc.add(const ErrorMessagesDialogCloseRequested());
+              },
+              child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+            ),
+          ],
+          elevation: 0.0,
+        );
+      },
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.74),
     );
   }
 
@@ -394,9 +421,9 @@ class _MainPageState extends State<MainPage>
                 // being sized so as not to overlap the button
                 child: FloatingActionButton.extended(
                   onPressed: () {
-                    /* TODO */
+                    bloc.add(const ConvertButtonClicked());
                   },
-                  icon: const Icon(Icons.build_outlined),
+                  icon: const SvgIcon('assets/convert_vector.svg'),
                   label: const Text(
                     'Convert',
                     style: TextStyle(fontWeight: FontWeight.w600),

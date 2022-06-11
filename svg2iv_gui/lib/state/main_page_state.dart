@@ -1,11 +1,12 @@
 import 'package:svg2iv_common/models.dart';
 
-import '../ui/custom_icons.dart';
+import '../ui/default_image_vectors.dart';
 import '../ui/snack_bar_info.dart';
 
 class MainPageState {
   const MainPageState._(
     this.isThemeDark,
+    this.isWorkInProgress,
     this.isAboutDialogVisible,
     this.visibleSelectionDialog,
     this.sourceSelectionTextFieldState,
@@ -20,6 +21,7 @@ class MainPageState {
 
   MainPageState.initial({required this.isThemeDark})
       : isAboutDialogVisible = false,
+        isWorkInProgress = false,
         visibleSelectionDialog = VisibleSelectionDialog.none,
         sourceSelectionTextFieldState = TextFieldState.initial,
         destinationSelectionTextFieldState = TextFieldState.initial,
@@ -31,6 +33,7 @@ class MainPageState {
         errorMessagesDialogState = const ErrorMessagesDialogGone();
 
   final bool isThemeDark;
+  final bool isWorkInProgress;
   final bool isAboutDialogVisible;
   final VisibleSelectionDialog visibleSelectionDialog;
   final TextFieldState sourceSelectionTextFieldState;
@@ -43,6 +46,7 @@ class MainPageState {
 
   MainPageState copyWith({
     bool? isThemeDark,
+    bool? isWorkInProgress,
     bool? isAboutDialogVisible,
     VisibleSelectionDialog? visibleSelectionDialog,
     TextFieldState? sourceSelectionTextFieldState,
@@ -56,6 +60,7 @@ class MainPageState {
   }) {
     return MainPageState._(
       isThemeDark ?? this.isThemeDark,
+      isWorkInProgress ?? this.isWorkInProgress,
       isAboutDialogVisible ?? this.isAboutDialogVisible,
       visibleSelectionDialog ?? this.visibleSelectionDialog,
       sourceSelectionTextFieldState ?? this.sourceSelectionTextFieldState,

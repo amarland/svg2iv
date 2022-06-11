@@ -6,15 +6,13 @@ import 'package:svg2iv_common/utils.dart';
 extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
   List<int> toJson() {
     final imageVectors = map((imageVector) => imageVector != null
-        ? _formatDoubles(_mapImageVector(imageVector))
+        ? _mapImageVector(imageVector).also(_formatDoubles)
         : null);
     return JsonUtf8Encoder(
       null,
-      (o) {
-        return o is Iterable
-            ? o.toNonGrowableList()
-            : throw JsonUnsupportedObjectError(o);
-      },
+      (obj) => obj is Iterable
+            ? obj.toNonGrowableList()
+            : throw JsonUnsupportedObjectError(obj),
     ).convert(imageVectors);
   }
 }
