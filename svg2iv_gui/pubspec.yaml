@@ -16,7 +16,7 @@ dependencies:
   flutter_bloc: ^8.0.1
   flutter_svg: ^1.1.0
   path: ^1.8.1
-  path_provider: ^2.0.10
+  path_provider: ^2.0.11
   svg2iv_common:
     path: ../common
   tuple: ^2.0.0
