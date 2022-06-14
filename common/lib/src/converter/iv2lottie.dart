@@ -209,16 +209,18 @@ List<Map<String, Object?>> _mapPathShapes(VectorPath path, String? pathId) {
           final ir = irList[index];
           return Tuple3(
             zero,
-            irList[index + 1].item1 as Vector2,
+            index + 1 < pointCount ? irList[index + 1].item1 as Vector2 : zero,
             ir is Vector2 ? ir : zero,
           );
         } else {
           final point = (irList[index] as _Vector2Triple).item3;
           final previousIr = irList[index - 1];
-          final nextIr = irList[index + 1] as _Vector2Triple;
+          final nextIr = index + 1 < pointCount
+              ? irList[index + 1] as _Vector2Triple
+              : null;
           return Tuple3(
             (previousIr is _Vector2Triple ? previousIr.item2 : zero) - point,
-            (index < pointCount ? nextIr.item1 : zero) - point,
+            (nextIr?.item1 ?? zero) - point,
             point,
           );
         }
@@ -257,13 +259,15 @@ dynamic _getIntermediateRepresentationForNode(PathNode node) {
         Vector2.zero(),
         Vector2(arguments[0], arguments[1]),
       );
-    default:
+    case PathDataCommand.curveTo:
       return _Vector2Triple.fromList(
         arguments
             .chunked(2)
             .map((c) => Vector2(c[0], c[1]))
             .toNonGrowableList(),
       );
+    default:
+      throw ArgumentError('Invalid command: ${node.command}');
   }
 }
 

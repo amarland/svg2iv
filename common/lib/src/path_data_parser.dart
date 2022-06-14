@@ -149,7 +149,7 @@ List<PathNode> parsePathData(
 class _PathProxy implements PathProxy {
   _PathProxy(this.offsetX, this.offsetY);
 
-  final List<PathNode> pathNodes = [];
+  final pathNodes = <PathNode>[];
 
   final double offsetX;
   final double offsetY;
