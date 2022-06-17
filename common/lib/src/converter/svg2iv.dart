@@ -357,6 +357,7 @@ VectorNode? _parseRectElement(XmlElement rectElement) {
               growable: false,
             )
           : null,
+      normalizePaths: _normalizePaths,
     ),
     transformations,
   );
@@ -382,7 +383,13 @@ VectorNode? _parseEllipseElement(XmlElement ellipseElement) {
   if (rx == double.nan || ry == double.nan) return null;
   return _buildVectorNodeFromPathData(
     ellipseElement,
-    obtainPathNodesForEllipse(cx: cx, cy: cy, rx: rx, ry: ry),
+    obtainPathNodesForEllipse(
+      cx: cx,
+      cy: cy,
+      rx: rx,
+      ry: ry,
+      normalizePaths: _normalizePaths,
+    ),
     transformations,
   );
 }

@@ -1,4 +1,5 @@
-import '../model/vector_path.dart';
+import 'package:svg2iv_common/parser.dart';
+import 'package:svg2iv_common/utils.dart';
 
 class Rect {
   Rect(this.left, this.top, this.right, this.bottom);
@@ -27,13 +28,14 @@ List<PathNode> obtainPathNodesForRectangle({
   required Rect bounds,
   // 8 values: X + Y for each corner, in clockwise order
   required List<double>? radii,
+  bool normalizePaths = false,
 }) {
   if (radii == null || radii.isEmpty || radii.every((it) => it == 0.0)) {
     return [
       PathNode(PathDataCommand.moveTo, [bounds.left, bounds.top]),
-      PathNode(PathDataCommand.relativeHorizontalLineTo, [bounds.width]),
-      PathNode(PathDataCommand.relativeVerticalLineTo, [bounds.height]),
-      PathNode(PathDataCommand.relativeHorizontalLineTo, [-bounds.width]),
+      PathNode(PathDataCommand.horizontalLineTo, [bounds.right]),
+      PathNode(PathDataCommand.verticalLineTo, [bounds.bottom]),
+      PathNode(PathDataCommand.horizontalLineTo, [-bounds.right]),
       PathNode(PathDataCommand.close, List.empty()),
     ];
   } else {
@@ -47,7 +49,7 @@ List<PathNode> obtainPathNodesForRectangle({
     final bottomRightY = radii[5] > halfHeight ? halfHeight : radii[5];
     final bottomLeftX = radii[6] > halfWidth ? halfWidth : radii[6];
     final bottomLeftY = radii[7] > halfHeight ? halfHeight : radii[7];
-    return [
+    final pathNodes = [
       PathNode(
         PathDataCommand.moveTo,
         [bounds.left + topLeftX, bounds.top],
@@ -117,6 +119,13 @@ List<PathNode> obtainPathNodesForRectangle({
         ],
       ),
     ];
+    if (normalizePaths) {
+      return parsePathData(
+        pathNodes.toSvgPathDataString(),
+        shouldNormalize: true,
+      );
+    }
+    return pathNodes;
   }
 }
 
@@ -125,10 +134,11 @@ List<PathNode> obtainPathNodesForEllipse({
   required double cy,
   required double rx,
   required double ry,
+  bool normalizePaths = false,
 }) {
   final isShapeACircle = rx == ry;
   final diameter = 2 * rx;
-  return [
+  final pathNodes = [
     PathNode(PathDataCommand.moveTo, [cx - rx, cy]),
     PathNode(
       PathDataCommand.relativeArcTo,
@@ -140,4 +150,11 @@ List<PathNode> obtainPathNodesForEllipse({
     ),
     if (isShapeACircle) PathNode(PathDataCommand.close, List.empty()),
   ];
+  if (normalizePaths) {
+    return parsePathData(
+      pathNodes.toSvgPathDataString(),
+      shouldNormalize: true,
+    );
+  }
+  return pathNodes;
 }

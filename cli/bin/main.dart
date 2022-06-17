@@ -240,7 +240,9 @@ If not set, the generated property will be declared as a top-level property.
             final imageVector = nonNullImageVectors[index];
             stdout.add(imageVector.toLottieJson());
             if (index < lastIndex) {
-              stdout.writeln();
+              stdout
+                ..writeln()
+                ..writeln('--------------------');
             }
           }
         } else {
