@@ -1,19 +1,11 @@
-import 'dart:convert';
-
 import 'package:svg2iv_common/models.dart';
 import 'package:svg2iv_common/utils.dart';
 
 extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
-  List<int> toJson() {
-    final imageVectors = map((imageVector) => imageVector != null
-        ? _mapImageVector(imageVector).also(_formatDoubles)
-        : null);
-    return JsonUtf8Encoder(
-      null,
-      (obj) => obj is Iterable
-            ? obj.toNonGrowableList()
-            : throw JsonUnsupportedObjectError(obj),
-    ).convert(imageVectors);
+  String toJson() {
+    return CustomJsonEncoder().convert(
+      map((imageVector) => imageVector?.let(_mapImageVector)),
+    );
   }
 }
 
@@ -87,7 +79,7 @@ dynamic _mapGradient(Gradient? gradient) {
   if (gradient.colors.length == 1) {
     return colorIntToArgb(gradient.colors[0]);
   }
-  final Map<String, double> typeSpecificAttributes;
+  final Map<String, dynamic> typeSpecificAttributes;
   final isLinear = gradient is LinearGradient;
   if (isLinear) {
     typeSpecificAttributes = {
@@ -111,15 +103,4 @@ dynamic _mapGradient(Gradient? gradient) {
     ...typeSpecificAttributes,
     'tileMode': gradient.tileMode?.name,
   }..removeWhereValueIsNull();
-}
-
-void _formatDoubles(Map<String, dynamic> map) {
-  for (final entry in map.entries) {
-    final value = entry.value;
-    if (value is double) {
-      map[entry.key] = value.toStringWithMaxDecimals(4);
-    } else if (value is Map<String, dynamic>) {
-      _formatDoubles(value);
-    }
-  }
 }

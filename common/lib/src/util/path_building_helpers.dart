@@ -33,9 +33,9 @@ List<PathNode> obtainPathNodesForRectangle({
   if (radii == null || radii.isEmpty || radii.every((it) => it == 0.0)) {
     return [
       PathNode(PathDataCommand.moveTo, [bounds.left, bounds.top]),
-      PathNode(PathDataCommand.horizontalLineTo, [bounds.right]),
-      PathNode(PathDataCommand.verticalLineTo, [bounds.bottom]),
-      PathNode(PathDataCommand.horizontalLineTo, [-bounds.right]),
+      PathNode(PathDataCommand.lineTo, [bounds.right, 0.0]),
+      PathNode(PathDataCommand.lineTo, [0.0, bounds.bottom]),
+      PathNode(PathDataCommand.lineTo, [-bounds.right, 0.0]),
       PathNode(PathDataCommand.close, List.empty()),
     ];
   } else {

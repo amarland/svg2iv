@@ -209,7 +209,7 @@ If not set, the generated property will be declared as a top-level property.
   // `destination` is null if the actual destination
   // is the standard output stream
   if (isOutputJson) {
-    stdout.add(imageVectors.toJson());
+    stdout.write(imageVectors.toJson());
   } else {
     final nonNullImageVectors = imageVectors.whereNotNull().toNonGrowableList();
     if (nonNullImageVectors.isNotEmpty) {
@@ -238,7 +238,7 @@ If not set, the generated property will be declared as a top-level property.
           final lastIndex = nonNullImageVectors.length - 1;
           for (var index = 0; index <= lastIndex; index++) {
             final imageVector = nonNullImageVectors[index];
-            stdout.add(imageVector.toLottieJson());
+            stdout.write(imageVector.toLottieJson());
             if (index < lastIndex) {
               stdout
                 ..writeln()

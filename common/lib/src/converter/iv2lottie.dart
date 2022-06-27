@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -9,12 +7,7 @@ import '../../utils.dart';
 typedef _Vector2Triple = Tuple3<Vector2, Vector2, Vector2>;
 
 extension ImageVectorToLottieJsonConversion on ImageVector {
-  List<int> toLottieJson() => JsonUtf8Encoder(
-        null,
-        (obj) => obj is Iterable
-            ? obj.toNonGrowableList()
-            : throw JsonUnsupportedObjectError(obj),
-      ).convert(_mapImageVector(this));
+  String toLottieJson() => CustomJsonEncoder().convert(_mapImageVector(this));
 }
 
 Map<String, dynamic> _mapImageVector(ImageVector imageVector) {
@@ -27,11 +20,12 @@ Map<String, dynamic> _mapImageVector(ImageVector imageVector) {
       : imageVector.nodes;
   return {
     'nm': imageVector.name,
+    'v': '5.5.2', // TODO: latest version?
     'ip': 0,
     'op': 1,
     'fr': 1,
-    'w': imageVector.viewportWidth,
-    'h': imageVector.viewportHeight,
+    'w': imageVector.viewportWidth.round(),
+    'h': imageVector.viewportHeight.round(),
     'layers': [
       {
         'ty': 4,
@@ -230,12 +224,12 @@ List<Map<String, Object?>> _mapPathShapes(VectorPath path, String? pathId) {
       'nm': pathId != null ? '${pathId}_$pathIndex' : null,
       'ty': 'sh',
       'ks': {
-        'c': isClosed,
+        'c': isClosed ? 1 : 0,
         'i': points.map((tuple) => tuple.item1.storage),
         'o': points.map((tuple) => tuple.item2.storage),
         'v': points.map((tuple) => tuple.item3.storage),
       },
-    };
+    }..removeWhereValueIsNull();
   }).toList(growable: true);
   return pathShapes;
 }
