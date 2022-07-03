@@ -29,7 +29,9 @@ Map<String, dynamic> _mapImageVector(ImageVector imageVector) {
     'layers': [
       {
         'ty': 4,
-        'ks': {'o': 100.0.toNonAnimatedProperty()},
+        'st': 0,
+        'ip': 0,
+        'op': 1,
         'shapes': nodes.reversed.map(_mapVectorNode).toNonGrowableList(),
       },
     ],
@@ -182,8 +184,8 @@ Map<String, dynamic>? _mapPathStroke(VectorPath path) {
   return strokeShape..removeWhereValueIsNull();
 }
 
-double _getOpacityForColorInt(int color, double? alpha) =>
-    100.0 * (alpha ?? 1.0) * (alphaForColorInt(color));
+int _getOpacityForColorInt(int color, double? alpha) =>
+    (100 * ((alpha ?? 1.0) * (alphaForColorInt(color) / 255))).round();
 
 List<Map<String, Object?>> _mapPathShapes(VectorPath path, String? pathId) {
   final List<List<PathNode>> paths = path.pathData
@@ -228,7 +230,7 @@ List<Map<String, Object?>> _mapPathShapes(VectorPath path, String? pathId) {
         'i': points.map((tuple) => tuple.item1.storage),
         'o': points.map((tuple) => tuple.item2.storage),
         'v': points.map((tuple) => tuple.item3.storage),
-      },
+      }.toNonAnimatedProperty(),
     }..removeWhereValueIsNull();
   }).toList(growable: true);
   return pathShapes;
