@@ -16,13 +16,13 @@ class MainPageState {
     this.isPreviousPreviewButtonVisible,
     this.isNextPreviewButtonVisible,
     this.snackBarInfo,
-    this.errorMessagesDialogState,
+    this.errorMessagesDialog,
   );
 
   MainPageState.initial({required this.isThemeDark})
       : isAboutDialogVisible = false,
         isWorkInProgress = false,
-        visibleSelectionDialog = VisibleSelectionDialog.none,
+        visibleSelectionDialog = null,
         sourceSelectionTextFieldState = TextFieldState.initial,
         destinationSelectionTextFieldState = TextFieldState.initial,
         extensionReceiverTextFieldState = TextFieldState.initial,
@@ -30,25 +30,25 @@ class MainPageState {
         isPreviousPreviewButtonVisible = false,
         isNextPreviewButtonVisible = false,
         snackBarInfo = null,
-        errorMessagesDialogState = const ErrorMessagesDialogGone();
+        errorMessagesDialog = null;
 
   final bool isThemeDark;
   final bool isWorkInProgress;
   final bool isAboutDialogVisible;
-  final VisibleSelectionDialog visibleSelectionDialog;
+  final SelectionDialog? visibleSelectionDialog;
   final TextFieldState sourceSelectionTextFieldState;
   final TextFieldState destinationSelectionTextFieldState;
   final TextFieldState extensionReceiverTextFieldState;
   final ImageVector? imageVector;
   final bool isPreviousPreviewButtonVisible, isNextPreviewButtonVisible;
   final SnackBarInfo? snackBarInfo;
-  final ErrorMessagesDialogState errorMessagesDialogState;
+  final ErrorMessagesDialog? errorMessagesDialog;
 
   MainPageState copyWith({
     bool? isThemeDark,
     bool? isWorkInProgress,
     bool? isAboutDialogVisible,
-    VisibleSelectionDialog? visibleSelectionDialog,
+    SelectionDialog? Function()? visibleSelectionDialog,
     TextFieldState? sourceSelectionTextFieldState,
     TextFieldState? destinationSelectionTextFieldState,
     TextFieldState? extensionReceiverTextFieldState,
@@ -56,30 +56,33 @@ class MainPageState {
     bool? isPreviousPreviewButtonVisible,
     bool? isNextPreviewButtonVisible,
     SnackBarInfo? Function()? snackBarInfo,
-    ErrorMessagesDialogState? errorMessagesDialogState,
+    ErrorMessagesDialog? Function()? errorMessagesDialog,
   }) {
     return MainPageState._(
       isThemeDark ?? this.isThemeDark,
       isWorkInProgress ?? this.isWorkInProgress,
       isAboutDialogVisible ?? this.isAboutDialogVisible,
-      visibleSelectionDialog ?? this.visibleSelectionDialog,
+      visibleSelectionDialog != null
+          ? visibleSelectionDialog()
+          : this.visibleSelectionDialog,
       sourceSelectionTextFieldState ?? this.sourceSelectionTextFieldState,
       destinationSelectionTextFieldState ??
           this.destinationSelectionTextFieldState,
       extensionReceiverTextFieldState ?? this.extensionReceiverTextFieldState,
-      imageVector?.call() ?? this.imageVector,
+      imageVector != null ? imageVector() : this.imageVector,
       isPreviousPreviewButtonVisible ?? this.isPreviousPreviewButtonVisible,
       isNextPreviewButtonVisible ?? this.isNextPreviewButtonVisible,
-      snackBarInfo?.call() ?? this.snackBarInfo,
-      errorMessagesDialogState ?? this.errorMessagesDialogState,
+      snackBarInfo != null ? snackBarInfo() : this.snackBarInfo,
+      errorMessagesDialog != null
+          ? errorMessagesDialog()
+          : this.errorMessagesDialog,
     );
   }
 }
 
-enum VisibleSelectionDialog {
+enum SelectionDialog {
   sourceSelection,
   destinationSelection,
-  none,
 }
 
 class TextFieldState {
@@ -100,16 +103,8 @@ class TextFieldState {
   }
 }
 
-abstract class ErrorMessagesDialogState {
-  const ErrorMessagesDialogState();
-}
-
-class ErrorMessagesDialogGone extends ErrorMessagesDialogState {
-  const ErrorMessagesDialogGone() : super();
-}
-
-class ErrorMessagesDialogVisible extends ErrorMessagesDialogState {
-  const ErrorMessagesDialogVisible(
+class ErrorMessagesDialog {
+  const ErrorMessagesDialog(
     this.messages,
     this.isReadMoreButtonVisible,
   ) : super();

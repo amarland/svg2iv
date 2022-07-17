@@ -152,12 +152,12 @@ class _MainPageState extends State<_MainPage>
   static Widget _visibleSelectionDialogChangeListener({required Widget child}) {
     return BlocListener<MainPageBloc, MainPageState>(
       listenWhen: (previousState, currentState) =>
-          previousState.visibleSelectionDialog == VisibleSelectionDialog.none &&
-          currentState.visibleSelectionDialog != VisibleSelectionDialog.none,
+          previousState.visibleSelectionDialog == null &&
+          currentState.visibleSelectionDialog != null,
       listener: (context, state) {
         final dialog = state.visibleSelectionDialog;
         final bloc = BlocProvider.of<MainPageBloc>(context);
-        if (dialog == VisibleSelectionDialog.sourceSelection) {
+        if (dialog == SelectionDialog.sourceSelection) {
           file_pickers.openFileSelectionDialog().then((selectedPaths) {
             bloc.add(SourceSelectionDialogClosed(selectedPaths));
           });
@@ -217,8 +217,8 @@ class _MainPageState extends State<_MainPage>
     return BlocListener<MainPageBloc, MainPageState>(
       bloc: bloc,
       listenWhen: (previousState, currentState) {
-        if (previousState.errorMessagesDialogState !=
-            currentState.errorMessagesDialogState) {
+        if (previousState.errorMessagesDialog !=
+            currentState.errorMessagesDialog) {
           return true;
         }
         if (!previousState.isAboutDialogVisible &&
@@ -231,9 +231,9 @@ class _MainPageState extends State<_MainPage>
         return false;
       },
       listener: (context, state) async {
-        final errorMessagesDialogState = state.errorMessagesDialogState;
-        if (errorMessagesDialogState is ErrorMessagesDialogVisible) {
-          await showErrorMessagesDialog(context, errorMessagesDialogState);
+        final errorMessagesDialog = state.errorMessagesDialog;
+        if (errorMessagesDialog is ErrorMessagesDialog) {
+          await showErrorMessagesDialog(context, errorMessagesDialog);
         } else if (state.isAboutDialogVisible) {
           await showDialog<void>(
             context: context,
@@ -268,7 +268,7 @@ class _MainPageState extends State<_MainPage>
 
   static Future<void> showErrorMessagesDialog(
     BuildContext context,
-    ErrorMessagesDialogVisible errorMessagesDialogState,
+    ErrorMessagesDialog errorMessagesDialog,
   ) {
     return showDialog<void>(
       context: context,
@@ -280,13 +280,13 @@ class _MainPageState extends State<_MainPage>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: errorMessagesDialogState.messages
+              children: errorMessagesDialog.messages
                   .map(Text.new)
                   .toNonGrowableList(),
             ),
           ),
           actions: [
-            if (errorMessagesDialogState.isReadMoreButtonVisible)
+            if (errorMessagesDialog.isReadMoreButtonVisible)
               TextButton(
                 onPressed: () {
                   bloc.add(const ReadMoreErrorMessagesActionClicked());
@@ -312,7 +312,7 @@ class _MainPageState extends State<_MainPage>
     final bloc = BlocProvider.of<MainPageBloc>(context);
     final state = bloc.state;
     final areSelectionFieldButtonsEnabled =
-        state.visibleSelectionDialog == VisibleSelectionDialog.none;
+        state.visibleSelectionDialog == null;
     return Expanded(
       flex: 2,
       child: _visibleSelectionDialogChangeListener(
