@@ -54,11 +54,11 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       yield state.copyWith(isAboutDialogVisible: false);
     } else if (event is SelectSourceButtonPressed) {
       yield state.copyWith(
-        visibleSelectionDialog: VisibleSelectionDialog.sourceSelection,
+        visibleSelectionDialog: () => SelectionDialog.sourceSelection,
       );
     } else if (event is SelectDestinationButtonPressed) {
       yield state.copyWith(
-        visibleSelectionDialog: VisibleSelectionDialog.destinationSelection,
+        visibleSelectionDialog: () => SelectionDialog.destinationSelection,
       );
     } else if (event is SourceSelectionDialogClosed) {
       yield* _onSourceSelectionDialogClosed(event.paths);
@@ -66,7 +66,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       final path = event.path;
       final isError = path != null && !(await Directory(path).exists());
       yield state.copyWith(
-        visibleSelectionDialog: VisibleSelectionDialog.none,
+        visibleSelectionDialog: () => null,
         destinationSelectionTextFieldState:
             state.destinationSelectionTextFieldState.copyWith(
           value: path,
@@ -99,8 +99,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           const maxErrorMessageCount = 8;
           final errorMessages = await readErrorMessages(maxErrorMessageCount);
           yield state.copyWith(
-            snackBarInfo: null,
-            errorMessagesDialogState: ErrorMessagesDialogVisible(
+            snackBarInfo: () => null,
+            errorMessagesDialog: () => ErrorMessagesDialog(
               errorMessages.item1,
               errorMessages.item2,
             ),
@@ -114,12 +114,12 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       }
     } else if (event is ErrorMessagesDialogCloseRequested) {
       yield state.copyWith(
-        errorMessagesDialogState: const ErrorMessagesDialogGone(),
+        errorMessagesDialog: () => null,
       );
     } else if (event is ReadMoreErrorMessagesActionClicked) {
       await openLogFileInPreferredApplication();
       yield state.copyWith(
-        errorMessagesDialogState: const ErrorMessagesDialogGone(),
+        errorMessagesDialog: () => null,
       );
     } else {
       throw UnimplementedError();
@@ -131,7 +131,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
   ) async* {
     yield state.copyWith(
       isWorkInProgress: true,
-      visibleSelectionDialog: VisibleSelectionDialog.none,
+      visibleSelectionDialog: () => null,
     );
     var isError = false;
     if (paths != null && paths.isNotEmpty) {
