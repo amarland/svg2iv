@@ -1,21 +1,13 @@
-import 'dart:convert';
-
+import 'package:cbor/cbor.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/models.dart';
 
-extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
-  List<int> toJson() {
+extension ImageVectorIterableToCborSerialization on Iterable<ImageVector?> {
+  List<int> toCbor() {
     final imageVectors = map((imageVector) => imageVector != null
-        ? _mapImageVector(imageVector).also(_formatDoubles)
+        ? _mapImageVector(imageVector)
         : null);
-    return JsonUtf8Encoder(
-      null,
-      (o) {
-        return o is Iterable
-            ? o.toNonGrowableList()
-            : throw JsonUnsupportedObjectError(o);
-      },
-    ).convert(imageVectors);
+    return CborSimpleEncoder().convert(imageVectors);
   }
 }
 
@@ -26,8 +18,8 @@ Map<String, dynamic> _mapImageVector(ImageVector imageVector) {
     'viewportHeight': imageVector.viewportHeight,
     'width': imageVector.width,
     'height': imageVector.height,
-    'tintColor': imageVector.tintColor?.let(_mapColor),
-    'tintBlendMode': imageVector.tintBlendMode?.name,
+    'tintColor': imageVector.tintColor,
+    'tintBlendMode': imageVector.tintBlendMode?.index,
     'nodes': _mapVectorNodes(imageVector.nodes),
   }..removeWhereValueIsNull();
 }
@@ -63,10 +55,10 @@ Map<String, dynamic> _mapVectorPath(VectorPath path) {
     'stroke': _mapGradient(path.stroke),
     'strokeAlpha': path.strokeAlpha,
     'strokeLineWidth': path.strokeLineWidth,
-    'strokeLineCap': strokeLineCap?.name,
-    'strokeLineJoin': strokeLineJoin?.name,
+    'strokeLineCap': strokeLineCap?.index,
+    'strokeLineJoin': strokeLineJoin?.index,
     'strokeLineMiter': path.strokeLineMiter,
-    'fillType': pathFillType?.name,
+    'fillType': pathFillType?.index,
     'trimPathStart': path.trimPathStart,
     'trimPathEnd': path.trimPathEnd,
     'trimPathOffset': path.trimPathOffset,
@@ -76,18 +68,22 @@ Map<String, dynamic> _mapVectorPath(VectorPath path) {
 
 Map<String, dynamic> _mapPathNode(PathNode pathNode) {
   return {
-    'command': pathNode.command.name,
-    'arguments': pathNode.arguments,
+    'command': pathNode.command.index,
+    'arguments': pathNode.arguments.map<double>((value) {
+      if (value is double) return value;
+      if (value is bool) return value ? 1.0 : 0.0;
+      throw 'Argument $value for path node $pathNode'
+          ' is neither a double nor a boolean.';
+    }),
   };
 }
 
-// returns either a Map<String, dynamic> (gradient)
-// or an array of RGB values (solid color)
+// returns either a Map<String, dynamic> (gradient) or a color int (solid color)
 dynamic _mapGradient(Gradient? gradient) {
   if (gradient == null) return null;
 
   if (gradient.colors.length == 1) {
-    return _mapColor(gradient.colors[0]);
+    return gradient.colors[0];
   }
   final Map<String, double> typeSpecificAttributes;
   final isLinear = gradient is LinearGradient;
@@ -107,30 +103,10 @@ dynamic _mapGradient(Gradient? gradient) {
     };
   }
   return {
-    'type': isLinear ? 'linear' : 'radial',
-    'colors': gradient.colors.map(_mapColor),
+    'isLinear': isLinear,
+    'colors': gradient.colors,
     'stops': gradient.stops,
     ...typeSpecificAttributes,
-    'tileMode': gradient.tileMode?.name,
+    'tileMode': gradient.tileMode?.index,
   }..removeWhereValueIsNull();
-}
-
-List<int> _mapColor(int value) {
-  return [
-    (0xFF000000 & value) >> 24,
-    (0x00FF0000 & value) >> 16,
-    (0x0000ff00 & value) >> 8,
-    0x000000FF & value,
-  ];
-}
-
-void _formatDoubles(Map<String, dynamic> map) {
-  for (final entry in map.entries) {
-    final value = entry.value;
-    if (value is double) {
-      map[entry.key] = value.toStringWithMaxDecimals(4);
-    } else if (value is Map<String, dynamic>) {
-      _formatDoubles(value);
-    }
-  }
 }
