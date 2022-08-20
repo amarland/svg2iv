@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:svg2iv/image_vector_adapter.dart';
+import 'package:svg2iv/image_vector_iterable_serializer.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/parser.dart';
 import 'package:svg2iv_common/writer.dart';
@@ -203,7 +203,7 @@ If not set, the generated property will be declared as a top-level property.
   // `destination` is null if the actual destination
   // is the standard output stream
   if (isOutputJson) {
-    stdout.add(imageVectors.toJson());
+    stdout.add(imageVectors.toCbor());
   } else {
     final nonNullImageVectors = imageVectors.whereNotNull().toNonGrowableList();
     if (nonNullImageVectors.isNotEmpty) {

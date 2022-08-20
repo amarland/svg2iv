@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
-import '../extensions.dart';
 
+import '../extensions.dart';
 import 'gradient.dart';
 
 abstract class VectorNode {
@@ -171,7 +171,7 @@ StrokeCap? strokeCapFromString(String valueAsString) {
   return null;
 }
 
-enum StrokeJoin { miter, round, bevel }
+enum StrokeJoin { bevel, miter, round }
 
 StrokeJoin? strokeJoinFromString(String valueAsString) {
   switch (valueAsString) {
