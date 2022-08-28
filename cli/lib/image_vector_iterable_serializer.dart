@@ -4,9 +4,8 @@ import 'package:svg2iv_common/models.dart';
 
 extension ImageVectorIterableToCborSerialization on Iterable<ImageVector?> {
   List<int> toCbor() {
-    final imageVectors = map((imageVector) => imageVector != null
-        ? _mapImageVector(imageVector)
-        : null);
+    final imageVectors = map((imageVector) =>
+        imageVector != null ? _mapImageVector(imageVector) : null);
     return CborSimpleEncoder().convert(imageVectors);
   }
 }
@@ -79,34 +78,36 @@ Map<String, dynamic> _mapPathNode(PathNode pathNode) {
 }
 
 // returns either a Map<String, dynamic> (gradient) or a color int (solid color)
-dynamic _mapGradient(Gradient? gradient) {
-  if (gradient == null) return null;
-
-  if (gradient.colors.length == 1) {
-    return gradient.colors[0];
+dynamic _mapGradient(Brush? paint) {
+  if (paint == null) {
+    return null;
   }
+  if (paint is SolidColor) {
+    return paint.colorInt;
+  }
+  paint as Gradient;
   final Map<String, double> typeSpecificAttributes;
-  final isLinear = gradient is LinearGradient;
+  final isLinear = paint is LinearGradient;
   if (isLinear) {
     typeSpecificAttributes = {
-      'startX': gradient.startX,
-      'startY': gradient.startY,
-      'endX': gradient.endX,
-      'endY': gradient.endY,
+      'startX': paint.startX,
+      'startY': paint.startY,
+      'endX': paint.endX,
+      'endY': paint.endY,
     };
   } else {
-    gradient as RadialGradient;
+    paint as RadialGradient;
     typeSpecificAttributes = {
-      'centerX': gradient.centerX,
-      'centerY': gradient.centerY,
-      'radius': gradient.radius,
+      'centerX': paint.centerX,
+      'centerY': paint.centerY,
+      'radius': paint.radius,
     };
   }
   return {
     'isLinear': isLinear,
-    'colors': gradient.colors,
-    'stops': gradient.stops,
+    'colors': paint.colors,
+    'stops': paint.stops,
     ...typeSpecificAttributes,
-    'tileMode': gradient.tileMode?.index,
+    'tileMode': paint.tileMode?.index,
   }..removeWhereValueIsNull();
 }

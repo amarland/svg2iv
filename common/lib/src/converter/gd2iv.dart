@@ -1,15 +1,15 @@
 import 'package:collection/collection.dart';
-import '../file_parser.dart';
-import '../model/gradient.dart';
-import '../model/vector_node.dart';
-import '../model/vector_path.dart';
-import '../util/path_building_helpers.dart';
 import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
 
-import '../util/android_resources.dart';
 import '../extensions.dart';
+import '../file_parser.dart';
+import '../model/brush.dart';
 import '../model/image_vector.dart';
+import '../model/vector_node.dart';
+import '../model/vector_path.dart';
+import '../util/android_resources.dart';
+import '../util/path_building_helpers.dart';
 
 enum _Shape { rectangle, oval, line, ring }
 
@@ -133,9 +133,10 @@ VectorPathBuilder _buildRingPathGeometry(
   return VectorPathBuilder(pathData).pathFillType(PathFillType.evenOdd);
 }
 
-Gradient? _parseFill(XmlElement rootElement, Rect bounds) {
-  final singleColor =
-      rootElement.getElement('solid')?.getAndroidNSAttribute<Gradient>('color');
+Brush? _parseFill(XmlElement rootElement, Rect bounds) {
+  final singleColor = rootElement
+      .getElement('solid')
+      ?.getAndroidNSAttribute<SolidColor>('color');
   final gradientElement = rootElement.getElement('gradient');
   if (singleColor != null) {
     if (gradientElement != null) {
@@ -148,9 +149,9 @@ Gradient? _parseFill(XmlElement rootElement, Rect bounds) {
   return gradientElement?.let((element) => parseGradient(element, bounds));
 }
 
-Tuple2<Gradient, double>? _parseStroke(XmlElement rootElement) {
+Tuple2<Brush, double>? _parseStroke(XmlElement rootElement) {
   final strokeElement = rootElement.getElement('stroke');
-  final color = strokeElement?.getAndroidNSAttribute<Gradient>('color');
+  final color = strokeElement?.getAndroidNSAttribute<SolidColor>('color');
   final width = strokeElement?.getAndroidNSAttribute<Dimension>('width')?.value;
   if (color != null && width != null) {
     return Tuple2(color, width);

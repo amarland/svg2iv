@@ -4,9 +4,9 @@ import 'package:tuple/tuple.dart' show Tuple2;
 import 'package:xml/xml.dart';
 
 import 'converter/gd2iv.dart';
-import 'model/image_vector.dart';
 import 'converter/svg2iv.dart';
 import 'converter/vd2iv.dart';
+import 'model/image_vector.dart';
 
 enum SourceDefinitionType { explicit, implicit }
 

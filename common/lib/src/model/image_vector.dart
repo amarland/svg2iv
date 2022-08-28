@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+
 import '../extensions.dart';
 import 'vector_node.dart';
 

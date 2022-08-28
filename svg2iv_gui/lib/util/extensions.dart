@@ -58,30 +58,29 @@ extension StrokeJoinToFlutterStrokeJoinMapping on StrokeJoin? {
   }
 }
 
-extension GradientToPaintMapping on Gradient {
+extension BrushToPaintMapping on Brush {
   ui.Paint asPaint({double? alpha}) {
     final paint = ui.Paint();
-    final gradient = this;
-    if (gradient is LinearGradient) {
-      if (gradient.colors.length == 1) {
-        paint.color = ui.Color(gradient.colors[0]);
-      } else {
-        paint.shader = ui.Gradient.linear(
-          ui.Offset(gradient.startX, gradient.startY),
-          ui.Offset(gradient.endX, gradient.endY),
-          gradient.colors.map(ui.Color.new).toList(),
-          gradient.stops,
-          gradient.tileMode.toFlutterTileMode(),
-        );
-      }
+    final brush = this;
+    if (brush is SolidColor) {
+      paint.color = ui.Color(brush.colorInt);
+    }
+    if (brush is LinearGradient) {
+      paint.shader = ui.Gradient.linear(
+        ui.Offset(brush.startX, brush.startY),
+        ui.Offset(brush.endX, brush.endY),
+        brush.colors.map(ui.Color.new).toList(),
+        brush.stops,
+        brush.tileMode.toFlutterTileMode(),
+      );
     } else {
-      gradient as RadialGradient;
+      brush as RadialGradient;
       paint.shader = ui.Gradient.radial(
-        ui.Offset(gradient.centerX, gradient.centerY),
-        gradient.radius,
-        gradient.colors.map(ui.Color.new).toList(),
-        gradient.stops,
-        gradient.tileMode.toFlutterTileMode(),
+        ui.Offset(brush.centerX, brush.centerY),
+        brush.radius,
+        brush.colors.map(ui.Color.new).toList(),
+        brush.stops,
+        brush.tileMode.toFlutterTileMode(),
       );
     }
     alpha?.takeIf((alpha) => alpha < 1.0)?.let((targetAlpha) {
