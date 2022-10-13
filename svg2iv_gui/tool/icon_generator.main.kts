@@ -7,4 +7,7 @@ import net.sf.image4j.codec.ico.ICOEncoder
 import java.io.File
 import javax.imageio.ImageIO
 
-ICOEncoder.write(ImageIO.read(File("../assets/logo.svg")), File("../windows/runner/resources/app_icon.ico"))
+ICOEncoder.write(
+    ImageIO.read(File("../assets/logo.svg")),
+    File("../windows/runner/resources/app_icon.ico")
+)
