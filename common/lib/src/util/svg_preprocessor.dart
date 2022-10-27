@@ -133,7 +133,7 @@ void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
     final parentElement = clipPathElement.parentElement!;
     parentElement.children.remove(clipPathElement);
 
-    XmlElement _nestReferencedClipPathElementIfAny(XmlElement clipPathElement) {
+    XmlElement nestReferencedClipPathElementIfAny(XmlElement clipPathElement) {
       final childElement = clipPathElement.firstElementChild;
       final childClipPathAttribute = childElement?.attributes
           .singleWhereOrNull((attr) => attr.name.local == 'clip-path');
@@ -148,7 +148,7 @@ void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
           return id != null && id == referencedElementId;
         }).singleOrNull;
         if (referencedElement != null) {
-          return _nestReferencedClipPathElementIfAny(
+          return nestReferencedClipPathElementIfAny(
             referencedElement.copy()
               ..removeAttribute('id')
               ..children.add(clipPathElement),
@@ -159,7 +159,7 @@ void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
     }
 
     defsElement.children.add(
-      _nestReferencedClipPathElementIfAny(clipPathElement)
+      nestReferencedClipPathElementIfAny(clipPathElement)
         ..setAttribute('id', clipPathElementId),
     );
   }

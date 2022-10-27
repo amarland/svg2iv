@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+// ignore: unnecessary_import
+import 'dart:typed_data' show BytesBuilder;
 
 import 'package:args/args.dart';
 import 'package:svg2iv/image_vector_iterable_serializer.dart';
