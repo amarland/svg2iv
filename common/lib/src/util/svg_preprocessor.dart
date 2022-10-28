@@ -82,9 +82,9 @@ void _inlineUseElements(XmlElement svgElement) {
           (attr) => nonInheritedAttributeNames.contains(attr.name.local),
         );
         for (final useElementAttribute in inheritableAttributes) {
-          final useElementAttributeName = useElementAttribute.name;
+          final useElementAttributeName = useElementAttribute.name.qualified;
           final referencedElementAttribute = referencedElement.attributes
-              .where((attr) => attr.name == useElementAttributeName)
+              .where((attr) => attr.name.qualified == useElementAttributeName)
               .singleOrNull;
           if (referencedElementAttribute == null) {
             referencedElement.attributes.add(
