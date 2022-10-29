@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.1.0
       - uses: dart-lang/setup-dart@v1.3
       - id: install
         name: Install dependencies
@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: nschloe/action-cached-lfs-checkout@v1.1.2
       - uses: dart-lang/setup-dart@v1.3
-      - uses: actions/setup-java@v3 # needed for tests which rely on the Kotlin compiler
+      - uses: actions/setup-java@v3.6.0 # needed for tests which rely on the Kotlin compiler
         with:
           distribution: 'temurin'
           java-version: '11'

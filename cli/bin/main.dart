@@ -13,7 +13,7 @@ const outputOptionName = 'output';
 const helpFlagName = 'help';
 const quietFlagName = 'quiet';
 const receiverOptionName = 'receiver';
-const jsonFlagName = 'json'; // overrides '--output'
+const cborFlagName = 'cbor'; // overrides '--output'
 
 var _isInQuietMode = false;
 
@@ -44,7 +44,7 @@ If not set, the generated property will be declared as a top-level property.
 ​""",
       valueHelp: 'type',
     )
-    ..addFlag(jsonFlagName, negatable: false, hide: true)
+    ..addFlag(cborFlagName, negatable: false, hide: true)
     ..addFlag(
       quietFlagName,
       abbr: 'q',
@@ -65,8 +65,8 @@ If not set, the generated property will be declared as a top-level property.
     exit(2);
   }
   final outputOptionValue = argResults[outputOptionName] as String?;
-  final isOutputJson = argResults[jsonFlagName] as bool;
-  final shouldWriteToStdOut = outputOptionValue == '-' || isOutputJson;
+  final isOutputCbor = argResults[cborFlagName] as bool;
+  final shouldWriteToStdOut = outputOptionValue == '-' || isOutputCbor;
   _isInQuietMode = shouldWriteToStdOut || argResults[quietFlagName] as bool;
   if (argResults[helpFlagName] as bool) {
     stdout
@@ -204,7 +204,7 @@ If not set, the generated property will be declared as a top-level property.
   }
   // `destination` is null if the actual destination
   // is the standard output stream
-  if (isOutputJson) {
+  if (isOutputCbor) {
     stdout.add(imageVectors.toCbor());
   } else {
     final nonNullImageVectors = imageVectors.whereNotNull().toNonGrowableList();
