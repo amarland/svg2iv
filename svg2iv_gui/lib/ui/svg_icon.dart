@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class SvgIcon extends StatelessWidget {
-  const SvgIcon(this.assetName, {Key? key}) : super(key: key);
+  const SvgIcon(this.assetName, {super.key});
 
   final String assetName;
 

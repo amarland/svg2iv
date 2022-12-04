@@ -30,16 +30,16 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/convert_vector.svg
-    - assets/destination_directory.svg
-    - assets/explore_files.svg
-    - assets/logo.svg
-    - assets/source_files.svg
-    - assets/toggle_theme.svg
+    - res/convert_vector.svg
+    - res/destination_directory.svg
+    - res/explore_files.svg
+    - res/logo.svg
+    - res/source_files.svg
+    - res/toggle_theme.svg
   fonts:
     - family: JetBrainsMono
       fonts:
-        - asset: assets/fonts/jetbrains_mono_regular.ttf
+        - asset: res/font/jetbrains_mono_regular.ttf
     - family: WorkSans
       fonts:
-        - asset: assets/fonts/work_sans_variable.ttf
+        - asset: res/font/work_sans_variable.ttf

@@ -8,12 +8,12 @@ import '../util/image_vector_painter.dart';
 
 class Checkerboard extends StatefulWidget {
   const Checkerboard({
-    Key? key,
+    super.key,
     required this.size,
     required this.foregroundImageVector,
     this.oddSquareColor,
     this.evenSquareColor,
-  }) : super(key: key);
+  });
 
   final Size size;
   final Color? oddSquareColor;

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:svg2iv_common/models.dart';
 
 import '../ui/default_image_vectors.dart';
@@ -5,7 +6,7 @@ import '../ui/snack_bar_info.dart';
 
 class MainPageState {
   const MainPageState._(
-    this.isThemeDark,
+    this.themeMode,
     this.isWorkInProgress,
     this.isAboutDialogVisible,
     this.visibleSelectionDialog,
@@ -19,7 +20,7 @@ class MainPageState {
     this.errorMessagesDialog,
   );
 
-  MainPageState.initial({required this.isThemeDark})
+  MainPageState.initial({required this.themeMode})
       : isAboutDialogVisible = false,
         isWorkInProgress = false,
         visibleSelectionDialog = null,
@@ -32,7 +33,7 @@ class MainPageState {
         snackBarInfo = null,
         errorMessagesDialog = null;
 
-  final bool isThemeDark;
+  final ThemeMode themeMode;
   final bool isWorkInProgress;
   final bool isAboutDialogVisible;
   final SelectionDialog? visibleSelectionDialog;
@@ -45,7 +46,7 @@ class MainPageState {
   final ErrorMessagesDialog? errorMessagesDialog;
 
   MainPageState copyWith({
-    bool? isThemeDark,
+    ThemeMode? themeMode,
     bool? isWorkInProgress,
     bool? isAboutDialogVisible,
     SelectionDialog? Function()? visibleSelectionDialog,
@@ -59,7 +60,7 @@ class MainPageState {
     ErrorMessagesDialog? Function()? errorMessagesDialog,
   }) {
     return MainPageState._(
-      isThemeDark ?? this.isThemeDark,
+      themeMode ?? this.themeMode,
       isWorkInProgress ?? this.isWorkInProgress,
       isAboutDialogVisible ?? this.isAboutDialogVisible,
       visibleSelectionDialog != null

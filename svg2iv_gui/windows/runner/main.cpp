@@ -28,7 +28,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
   FlutterWindow window(project);
-  Win32Window::Point origin(10, 10);
+  Win32Window::Point origin(INT_MIN, INT_MIN);
   Win32Window::Size size(800, 350);
   if (!window.CreateAndShow(L"svg2iv_gui", origin, size)) {
     return EXIT_FAILURE;

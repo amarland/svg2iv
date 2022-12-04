@@ -7,7 +7,7 @@ import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
-import '../util/custom_material_localizations.dart';
+import 'app.dart';
 import 'checkerboard.dart';
 import 'default_image_vectors.dart';
 import 'file_system_entity_selection_field.dart';
@@ -15,68 +15,15 @@ import 'file_system_entity_selection_mode.dart';
 import 'preview_selection_button.dart';
 import 'svg_icon.dart';
 
-const _androidGreen = Color(0xFF00DE7A);
-const _androidBlue = Color(0xFF2196F3);
-
-const _applicationName = 'svg2iv';
-
-class App extends StatelessWidget {
-  // ignore: use_key_in_widget_constructors
-  const App(this.bloc);
-
-  final MainPageBloc bloc;
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => bloc,
-      child: BlocBuilder<MainPageBloc, MainPageState>(
-        bloc: bloc,
-        builder: (context, _) {
-          final textTheme = Typography.material2018()
-              .englishLike
-              .apply(fontFamily: 'WorkSans');
-          const inputDecorationTheme =
-              InputDecorationTheme(border: OutlineInputBorder());
-          return MaterialApp(
-            home: const _MainPage(),
-            title: 'svg2iv',
-            theme: ThemeData.from(
-              colorScheme: const ColorScheme.light(
-                primary: _androidBlue,
-                secondary: _androidGreen,
-              ),
-              textTheme: textTheme,
-            ).copyWith(inputDecorationTheme: inputDecorationTheme),
-            darkTheme: ThemeData.from(
-              colorScheme: const ColorScheme.dark(
-                primary: _androidGreen,
-                secondary: _androidBlue,
-              ),
-              textTheme: textTheme,
-            ).copyWith(inputDecorationTheme: inputDecorationTheme),
-            themeMode:
-                bloc.state.isThemeDark ? ThemeMode.dark : ThemeMode.light,
-            localizationsDelegates: const [
-              CustomMaterialLocalizations.delegate,
-            ],
-            debugShowCheckedModeBanner: false,
-          );
-        },
-      ),
-    );
-  }
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPage extends StatefulWidget {
-  const _MainPage({Key? key}) : super(key: key);
-
-  @override
-  _MainPageState createState() => _MainPageState();
-}
-
-class _MainPageState extends State<_MainPage>
-    with SingleTickerProviderStateMixin<_MainPage> {
+class _MainPageState extends State<MainPage>
+    with SingleTickerProviderStateMixin<MainPage> {
   /*
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -114,12 +61,19 @@ class _MainPageState extends State<_MainPage>
 
   static Widget _buildScaffold(BuildContext context) {
     final bloc = BlocProvider.of<MainPageBloc>(context);
+    final themeData = Theme.of(context);
+    final colors = themeData.colorScheme;
+    final foregroundColor = colors.brightness == Brightness.dark
+        ? colors.onSurface
+        : colors.onPrimary;
     final title = TextSpan(
-      text: '$_applicationName | ',
+      text: '${App.name} | ',
       children: [
         TextSpan(
           text: 'SVG to ImageVector conversion tool',
-          style: Theme.of(context).textTheme.bodyText2,
+          style: themeData.textTheme.bodyText2?.copyWith(
+            color: foregroundColor,
+          ),
         ),
       ],
     );
@@ -128,14 +82,17 @@ class _MainPageState extends State<_MainPage>
         title: Text.rich(title),
         actions: [
           IconButton(
-            onPressed: () => bloc.add(const ToggleThemeButtonPressed()),
-            icon: const SvgIcon('assets/toggle_theme.svg'),
+            onPressed: () => bloc.add(
+              ToggleThemeButtonPressed(themeData.brightness),
+            ),
+            icon: const SvgIcon('res/toggle_theme.svg'),
           ),
           IconButton(
             onPressed: () => bloc.add(const AboutButtonPressed()),
             icon: const Icon(Icons.info_outlined),
           ),
         ],
+        foregroundColor: foregroundColor,
       ),
       body: _appDialogVisibilityChangeListener(
         context: context,
@@ -238,9 +195,9 @@ class _MainPageState extends State<_MainPage>
           await showDialog<void>(
             context: context,
             builder: (context) => AboutDialog(
-              applicationName: _applicationName,
+              applicationName: App.name,
               applicationVersion: '0.1.0',
-              applicationIcon: SvgPicture.asset('assets/logo.svg'),
+              applicationIcon: SvgPicture.asset('res/logo.svg'),
             ),
           );
           bloc.add(const AboutDialogCloseRequested());
@@ -423,7 +380,7 @@ class _MainPageState extends State<_MainPage>
                   onPressed: () {
                     bloc.add(const ConvertButtonClicked());
                   },
-                  icon: const SvgIcon('assets/convert_vector.svg'),
+                  icon: const SvgIcon('res/convert_vector.svg'),
                   label: const Text(
                     'Convert',
                     style: TextStyle(fontWeight: FontWeight.w600),

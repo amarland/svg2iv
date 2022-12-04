@@ -6,12 +6,12 @@ import '../util/mnemonic_text_spans.dart';
 
 class FileSystemEntitySelectionField extends StatefulWidget {
   const FileSystemEntitySelectionField({
-    Key? key,
+    super.key,
     required this.onButtonPressed,
     required this.selectionMode,
     this.value = '',
     this.isError = false,
-  }) : super(key: key);
+  });
 
   final VoidCallback? onButtonPressed;
   final FileSystemEntitySelectionMode selectionMode;
@@ -43,11 +43,11 @@ class _State extends State<FileSystemEntitySelectionField> {
     final TextSpan defaultLabelSpan;
     switch (widget.selectionMode) {
       case FileSystemEntitySelectionMode.sourceFiles:
-        iconAssetName = 'assets/source_files.svg';
+        iconAssetName = 'res/source_files.svg';
         defaultLabelSpan = 'Source files'.asMnemonic();
         break;
       case FileSystemEntitySelectionMode.destinationDirectory:
-        iconAssetName = 'assets/destination_directory.svg';
+        iconAssetName = 'res/destination_directory.svg';
         defaultLabelSpan = 'Destination directory'.asMnemonic();
         break;
     }
@@ -86,7 +86,7 @@ class _State extends State<FileSystemEntitySelectionField> {
           onPressed: widget.onButtonPressed,
           child: SizedBox.fromSize(
             size: const Size(24.0, 52.0),
-            child: const SvgIcon('assets/explore_files.svg'),
+            child: const SvgIcon('res/explore_files.svg'),
           ),
         ),
       ],

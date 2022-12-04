@@ -8,6 +8,6 @@ import java.io.File
 import javax.imageio.ImageIO
 
 ICOEncoder.write(
-    ImageIO.read(File("../assets/logo.svg")),
+    ImageIO.read(File("../res/logo.svg")),
     File("../windows/runner/resources/app_icon.ico")
 )

@@ -31,8 +31,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
     */
   };
 
-  MainPageBloc({required bool isThemeDark})
-      : super(MainPageState.initial(isThemeDark: isThemeDark)) {
+  MainPageBloc({required ThemeMode themeMode})
+      : super(MainPageState.initial(themeMode: themeMode)) {
     on<MainPageEvent>(
       (event, emit) async => await mapEventToState(event).forEach(emit),
     );
@@ -45,9 +45,12 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
 
   Stream<MainPageState> mapEventToState(MainPageEvent event) async* {
     if (event is ToggleThemeButtonPressed) {
-      final isDarkModeEnabled = !state.isThemeDark;
-      await setDarkModeEnabled(isDarkModeEnabled);
-      yield state.copyWith(isThemeDark: isDarkModeEnabled);
+      final shouldDarkModeBeEnabled =
+          event.currentBrightness == Brightness.light;
+      await setDarkModeEnabled(shouldDarkModeBeEnabled);
+      yield state.copyWith(
+        themeMode: shouldDarkModeBeEnabled ? ThemeMode.dark : ThemeMode.light,
+      );
     } else if (event is AboutButtonPressed) {
       yield state.copyWith(isAboutDialogVisible: true);
     } else if (event is AboutDialogCloseRequested) {

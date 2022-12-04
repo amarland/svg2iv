@@ -1,8 +1,11 @@
-#include "win32_window.h"
-
-#include <flutter_windows.h>
-
 #include "resource.h"
+#include "win32_window.h"
+#include <flutter_windows.h>
+#include <dwmapi.h>
+
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
 
 namespace {
 
@@ -121,6 +124,9 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
       Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
       Scale(size.width, scale_factor), Scale(size.height, scale_factor),
       nullptr, nullptr, GetModuleHandle(nullptr), this);
+
+  BOOL value = TRUE;
+  ::DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
 
   if (!window) {
     return false;

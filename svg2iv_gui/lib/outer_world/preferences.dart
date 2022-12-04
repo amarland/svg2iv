@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:svg2iv_common/extensions.dart';
 
 import '../util/exception_handlers.dart';
 
@@ -15,20 +17,27 @@ Future<String> get _filePath async {
   );
 }
 
-Future<bool> isDarkModeEnabled() async {
+Future<ThemeMode> getThemeMode() async {
   final file = File(await _filePath);
-  var isDarkModeEnabled = false;
+  var themeMode = ThemeMode.system;
   await runIgnoringException<FileSystemException>(() async {
     if (await file.exists()) {
-      final line = (await file.readAsLines())[0];
-      if (line.startsWith(_isDarkModeEnabled) &&
-          line.substring(_isDarkModeEnabled.length + 1).toLowerCase() ==
-              'true') {
-        isDarkModeEnabled = true;
+      final line = (await file.readAsLines())
+          .firstOrNull
+          ?.takeIf((line) => line.startsWith(_isDarkModeEnabled));
+      if (line != null) {
+        switch (line.substring(_isDarkModeEnabled.length + 1).toLowerCase()) {
+          case 'true':
+            themeMode = ThemeMode.dark;
+            break;
+          case 'false':
+            themeMode = ThemeMode.light;
+            break;
+        }
       }
     }
   });
-  return isDarkModeEnabled;
+  return themeMode;
 }
 
 Future<void> setDarkModeEnabled(bool enabled) async {
