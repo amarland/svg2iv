@@ -61,18 +61,16 @@ class _MainPageState extends State<MainPage>
 
   static Widget _buildScaffold(BuildContext context) {
     final bloc = BlocProvider.of<MainPageBloc>(context);
-    final themeData = Theme.of(context);
-    final colors = themeData.colorScheme;
-    final foregroundColor = colors.brightness == Brightness.dark
-        ? colors.onSurface
-        : colors.onPrimary;
+    final theme = Theme.of(context);
     final title = TextSpan(
       text: '${App.name} | ',
       children: [
         TextSpan(
           text: 'SVG to ImageVector conversion tool',
-          style: themeData.textTheme.bodyText2?.copyWith(
-            color: foregroundColor,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.useMaterial3 || theme.brightness == Brightness.dark
+                ? theme.colorScheme.onSurface
+                : theme.colorScheme.onPrimary,
           ),
         ),
       ],
@@ -83,7 +81,7 @@ class _MainPageState extends State<MainPage>
         actions: [
           IconButton(
             onPressed: () => bloc.add(
-              ToggleThemeButtonPressed(themeData.brightness),
+              ToggleThemeButtonPressed(theme.brightness),
             ),
             icon: const SvgIcon('res/toggle_theme.svg'),
           ),
@@ -91,8 +89,8 @@ class _MainPageState extends State<MainPage>
             onPressed: () => bloc.add(const AboutButtonPressed()),
             icon: const Icon(Icons.info_outlined),
           ),
+          const SizedBox(width: 8.0),
         ],
-        foregroundColor: foregroundColor,
       ),
       body: _appDialogVisibilityChangeListener(
         context: context,
@@ -274,7 +272,7 @@ class _MainPageState extends State<MainPage>
       flex: 2,
       child: _visibleSelectionDialogChangeListener(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -286,6 +284,7 @@ class _MainPageState extends State<MainPage>
                 value: state.sourceSelectionTextFieldState.value,
                 isError: state.sourceSelectionTextFieldState.isError,
               ),
+              const SizedBox(height: 8.0),
               Row(
                 children: [
                   Checkbox(
@@ -298,6 +297,7 @@ class _MainPageState extends State<MainPage>
                   const Text('Generate all assets in a single file'),
                 ],
               ),
+              const SizedBox(height: 8.0),
               FileSystemEntitySelectionField(
                 onButtonPressed: areSelectionFieldButtonsEnabled
                     ? () => bloc.add(const SelectDestinationButtonPressed())
@@ -307,7 +307,7 @@ class _MainPageState extends State<MainPage>
                 value: state.destinationSelectionTextFieldState.value,
                 isError: state.destinationSelectionTextFieldState.isError,
               ),
-              const SizedBox(height: 8.0),
+              const SizedBox(height: 12.0),
               TextField(
                 decoration: InputDecoration(
                   labelText: 'Extension receiver (optional)',

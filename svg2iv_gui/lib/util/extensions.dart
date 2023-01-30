@@ -64,8 +64,7 @@ extension BrushToPaintMapping on Brush {
     final brush = this;
     if (brush is SolidColor) {
       paint.color = ui.Color(brush.colorInt);
-    }
-    if (brush is LinearGradient) {
+    } else if (brush is LinearGradient) {
       paint.shader = ui.Gradient.linear(
         ui.Offset(brush.startX, brush.startY),
         ui.Offset(brush.endX, brush.endY),

@@ -52,44 +52,44 @@ class _State extends State<FileSystemEntitySelectionField> {
         break;
     }
     final theme = Theme.of(context);
-    final defaultInputBorder = theme.inputDecorationTheme.border;
-    final inputBorder = defaultInputBorder?.copyWith(
-      borderSide: defaultInputBorder.borderSide.copyWith(
-        color: widget.isError
-            ? theme.colorScheme.error
-            // from 'input_decorator.dart',
-            // `_InputDecoratorState._getDefaultBorderColor`
-            : theme.colorScheme.onSurface.withOpacity(0.38),
-      ),
-    );
+    final inputDecorationTheme = theme.inputDecorationTheme;
+    final inputBorder = widget.isError
+        ? inputDecorationTheme.errorBorder
+        : inputDecorationTheme.enabledBorder;
     final labelSpan = widget.isError
         ? TextSpan(
             children: [defaultLabelSpan],
             style: TextStyle(color: theme.colorScheme.error),
           )
         : defaultLabelSpan;
-    return Row(
-      children: [
-        Flexible(
-          child: TextField(
-            controller: _textEditingController,
-            decoration: InputDecoration(
-              label: Text.rich(labelSpan, overflow: TextOverflow.ellipsis),
-              prefixIcon: SvgIcon(iconAssetName),
-              enabledBorder: inputBorder,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _textEditingController,
+              decoration: InputDecoration(
+                label: Text.rich(labelSpan, overflow: TextOverflow.ellipsis),
+                prefixIcon: SvgIcon(iconAssetName),
+                enabledBorder: inputBorder,
+              ),
+              readOnly: true,
             ),
-            readOnly: true,
           ),
-        ),
-        const SizedBox(width: 8.0),
-        OutlinedButton(
-          onPressed: widget.onButtonPressed,
-          child: SizedBox.fromSize(
-            size: const Size(24.0, 52.0),
+          const SizedBox(width: 8.0),
+          OutlinedButton(
+            onPressed: widget.onButtonPressed,
+            style: OutlinedButton.styleFrom(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(4.0)),
+              ),
+              side: theme.inputDecorationTheme.enabledBorder?.borderSide,
+            ),
             child: const SvgIcon('res/explore_files.svg'),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

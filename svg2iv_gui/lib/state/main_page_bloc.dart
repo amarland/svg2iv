@@ -132,12 +132,13 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
   Stream<MainPageState> _onSourceSelectionDialogClosed(
     List<String>? paths,
   ) async* {
+    final hasPaths = paths != null && paths.isNotEmpty;
     yield state.copyWith(
-      isWorkInProgress: true,
+      isWorkInProgress: hasPaths,
       visibleSelectionDialog: () => null,
     );
     var isError = false;
-    if (paths != null && paths.isNotEmpty) {
+    if (hasPaths) {
       for (final path in paths) {
         if (!(await File(path).exists())) {
           isError = true;
