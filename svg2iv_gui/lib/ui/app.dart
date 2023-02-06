@@ -41,7 +41,7 @@ class App extends StatelessWidget {
                     ),
                   );
                 }
-                return const Center(child: CircularProgressIndicator());
+                return const SizedBox.expand();
               },
             );
           } else {
@@ -71,9 +71,7 @@ class App extends StatelessWidget {
       theme: _getTheme(lightColors),
       darkTheme: _getTheme(darkColors),
       themeMode: bloc.state.themeMode,
-      localizationsDelegates: const [
-        CustomMaterialLocalizations.delegate,
-      ],
+      localizationsDelegates: const [CustomMaterialLocalizations.delegate],
       debugShowCheckedModeBanner: false,
     );
   }

@@ -42,14 +42,13 @@ class _CheckerboardState extends State<Checkerboard> {
   @override
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
-    final isInLightMode = themeData.brightness == Brightness.light;
-    final onSurfaceColor = themeData.colorScheme.onSurface;
+    final colors = themeData.colorScheme;
     return CustomPaint(
       painter: _CheckerboardPainter(
         oddSquareColor: widget.oddSquareColor ??
-            onSurfaceColor.withOpacity(isInLightMode ? 0.38 : 0.54),
+            colors.onInverseSurface.withOpacity(0.5),
         evenSquareColor: widget.oddSquareColor ??
-            onSurfaceColor.withOpacity(isInLightMode ? 0.08 : 0.16),
+            colors.onSurfaceVariant.withOpacity(0.5),
       ),
       foregroundPainter: _cachedImage?.let(_ImagePainter.new),
     );

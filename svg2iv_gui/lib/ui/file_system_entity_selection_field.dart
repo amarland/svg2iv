@@ -62,23 +62,24 @@ class _State extends State<FileSystemEntitySelectionField> {
             style: TextStyle(color: theme.colorScheme.error),
           )
         : defaultLabelSpan;
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _textEditingController,
-              decoration: InputDecoration(
-                label: Text.rich(labelSpan, overflow: TextOverflow.ellipsis),
-                prefixIcon: SvgIcon(iconAssetName),
-                enabledBorder: inputBorder,
-              ),
-              readOnly: true,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _textEditingController,
+            decoration: InputDecoration(
+              label: Text.rich(labelSpan, overflow: TextOverflow.ellipsis),
+              prefixIcon: SvgIcon(iconAssetName),
+              enabledBorder: inputBorder,
             ),
+            readOnly: true,
           ),
-          const SizedBox(width: 8.0),
-          OutlinedButton(
+        ),
+        const SizedBox(width: 8.0),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 56.0, minHeight: 56.0),
+          child: OutlinedButton(
             onPressed: widget.onButtonPressed,
             style: OutlinedButton.styleFrom(
               shape: const RoundedRectangleBorder(
@@ -88,8 +89,8 @@ class _State extends State<FileSystemEntitySelectionField> {
             ),
             child: const SvgIcon('res/explore_files.svg'),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

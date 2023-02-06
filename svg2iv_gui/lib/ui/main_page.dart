@@ -293,7 +293,7 @@ class _MainPageState extends State<MainPage>
                       /* TODO */
                     },
                   ),
-                  const SizedBox(width: 8.0),
+                  const SizedBox(width: 6.0),
                   const Text('Generate all assets in a single file'),
                 ],
               ),
