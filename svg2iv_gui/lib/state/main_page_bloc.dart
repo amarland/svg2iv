@@ -53,7 +53,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       );
     } else if (event is AboutButtonPressed) {
       yield state.copyWith(isAboutDialogVisible: true);
-    } else if (event is AboutDialogCloseRequested) {
+    } else if (event is AboutDialogClosed) {
       yield state.copyWith(isAboutDialogVisible: false);
     } else if (event is SelectSourceButtonPressed) {
       yield state.copyWith(
@@ -115,7 +115,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
             'event.snackBarId',
           );
       }
-    } else if (event is ErrorMessagesDialogCloseRequested) {
+    } else if (event is ErrorMessagesDialogClosed) {
       yield state.copyWith(
         errorMessagesDialog: () => null,
       );

@@ -49,10 +49,17 @@ class _MainPageState extends State<MainPage>
       bindings: MainPageBloc.shortcutBindings
           .map((trigger, action) => MapEntry(trigger, () => action(bloc))),
       child: BlocBuilder<MainPageBloc, MainPageState>(
-        builder: (context, _) {
+        builder: (context, state) {
           return Focus(
             autofocus: true,
-            child: _buildScaffold(context),
+            child: Stack(
+              fit: StackFit.passthrough,
+              children: [
+                _buildScaffold(context),
+                // if (state.isWorkInProgress)
+                // TODO: CircularProgressIndicator()
+              ],
+            ),
           );
         },
       ),
@@ -176,11 +183,8 @@ class _MainPageState extends State<MainPage>
             currentState.errorMessagesDialog) {
           return true;
         }
-        if (!previousState.isAboutDialogVisible &&
-            currentState.isAboutDialogVisible) {
-          return true;
-        }
-        if (previousState.isWorkInProgress != currentState.isWorkInProgress) {
+        if (currentState.isAboutDialogVisible &&
+            !previousState.isAboutDialogVisible) {
           return true;
         }
         return false;
@@ -192,29 +196,15 @@ class _MainPageState extends State<MainPage>
         } else if (state.isAboutDialogVisible) {
           await showDialog<void>(
             context: context,
-            builder: (context) => AboutDialog(
-              applicationName: App.name,
-              applicationVersion: '0.1.0',
-              applicationIcon: SvgPicture.asset('res/logo.svg'),
-            ),
+            builder: (context) {
+              return AboutDialog(
+                applicationName: App.name,
+                applicationVersion: '0.1.0',
+                applicationIcon: SvgPicture.asset('res/logo.svg'),
+              );
+            },
           );
-          bloc.add(const AboutDialogCloseRequested());
-        } else {
-          if (state.isWorkInProgress) {
-            await showDialog<void>(
-              context: context,
-              builder: (context) => const Center(
-                child: SizedBox(
-                  width: 48.0,
-                  height: 48.0,
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-            );
-          } else {
-            // dismiss the error messages dialog
-            Navigator.pop(context);
-          }
+          bloc.add(const AboutDialogClosed());
         }
       },
       child: child,
@@ -224,11 +214,11 @@ class _MainPageState extends State<MainPage>
   static Future<void> showErrorMessagesDialog(
     BuildContext context,
     ErrorMessagesDialog errorMessagesDialog,
-  ) {
-    return showDialog<void>(
+  ) async {
+    final bloc = BlocProvider.of<MainPageBloc>(context);
+    final result = await showDialog<bool>(
       context: context,
       builder: (context) {
-        final bloc = BlocProvider.of<MainPageBloc>(context);
         return AlertDialog(
           content: DefaultTextStyle(
             style: const TextStyle(fontFamily: 'JetBrainsMono'),
@@ -243,15 +233,11 @@ class _MainPageState extends State<MainPage>
           actions: [
             if (errorMessagesDialog.isReadMoreButtonVisible)
               TextButton(
-                onPressed: () {
-                  bloc.add(const ReadMoreErrorMessagesActionClicked());
-                },
+                onPressed: () => Navigator.pop(context, true),
                 child: const Text('Read more'),
               ),
             TextButton(
-              onPressed: () {
-                bloc.add(const ErrorMessagesDialogCloseRequested());
-              },
+              onPressed: () => Navigator.pop(context, false),
               child: Text(MaterialLocalizations.of(context).closeButtonLabel),
             ),
           ],
@@ -260,6 +246,11 @@ class _MainPageState extends State<MainPage>
       },
       barrierDismissible: false,
       barrierColor: Colors.black.withOpacity(0.74),
+    );
+    bloc.add(
+      result == true
+          ? const ReadMoreErrorMessagesActionClicked()
+          : const ErrorMessagesDialogClosed(),
     );
   }
 
