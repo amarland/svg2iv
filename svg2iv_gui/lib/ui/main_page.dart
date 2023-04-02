@@ -9,7 +9,6 @@ import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
 import 'app.dart';
 import 'checkerboard.dart';
-import 'default_image_vectors.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
 import 'preview_selection_button.dart';
@@ -44,21 +43,20 @@ class _MainPageState extends State<MainPage>
 
   @override
   Widget build(BuildContext context) {
-    final bloc = BlocProvider.of<MainPageBloc>(context);
-    return CallbackShortcuts(
-      bindings: MainPageBloc.shortcutBindings
-          .map((trigger, action) => MapEntry(trigger, () => action(bloc))),
-      child: BlocBuilder<MainPageBloc, MainPageState>(
-        builder: (context, state) {
-          return Focus(
-            autofocus: true,
-            child: Stack(
-              fit: StackFit.passthrough,
-              children: [
-                _buildScaffold(context),
-                // if (state.isWorkInProgress)
-                // TODO: CircularProgressIndicator()
-              ],
+    return BlocProvider(
+      create: (context) => MainPageBloc(),
+      child: Builder(
+        builder: (context) {
+          return CallbackShortcuts(
+            bindings: MainPageBloc.shortcutBindings.map(
+              (trigger, action) => MapEntry(
+                trigger,
+                () => action(BlocProvider.of<MainPageBloc>(context)),
+              ),
+            ),
+            child: Focus(
+              autofocus: true,
+              child: _buildScaffold(context),
             ),
           );
         },
@@ -87,9 +85,9 @@ class _MainPageState extends State<MainPage>
         title: Text.rich(title),
         actions: [
           IconButton(
-            onPressed: () => bloc.add(
-              ToggleThemeButtonPressed(theme.brightness),
-            ),
+            onPressed: () {
+              // TODO
+            },
             icon: const SvgIcon('res/toggle_theme.svg'),
           ),
           IconButton(
@@ -101,11 +99,15 @@ class _MainPageState extends State<MainPage>
       ),
       body: _appDialogVisibilityChangeListener(
         context: context,
-        child: Row(
-          children: [
-            _buildLeftPanel(context),
-            _buildRightPanel(context),
-          ],
+        child: BlocBuilder<MainPageBloc, MainPageState>(
+          builder: (context, _) {
+            return Row(
+              children: [
+                _buildLeftPanel(context),
+                _buildRightPanel(context),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -257,8 +259,6 @@ class _MainPageState extends State<MainPage>
   static Widget _buildLeftPanel(BuildContext context) {
     final bloc = BlocProvider.of<MainPageBloc>(context);
     final state = bloc.state;
-    final areSelectionFieldButtonsEnabled =
-        state.visibleSelectionDialog == null;
     return Expanded(
       flex: 2,
       child: _visibleSelectionDialogChangeListener(
@@ -268,7 +268,7 @@ class _MainPageState extends State<MainPage>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               FileSystemEntitySelectionField(
-                onButtonPressed: areSelectionFieldButtonsEnabled
+                onButtonPressed: state.areSelectionButtonsEnabled
                     ? () => bloc.add(const SelectSourceButtonPressed())
                     : null,
                 selectionMode: FileSystemEntitySelectionMode.sourceFiles,
@@ -281,7 +281,7 @@ class _MainPageState extends State<MainPage>
                   Checkbox(
                     value: false,
                     onChanged: (value) {
-                      /* TODO */
+                      // TODO
                     },
                   ),
                   const SizedBox(width: 6.0),
@@ -290,7 +290,7 @@ class _MainPageState extends State<MainPage>
               ),
               const SizedBox(height: 8.0),
               FileSystemEntitySelectionField(
-                onButtonPressed: areSelectionFieldButtonsEnabled
+                onButtonPressed: state.areSelectionButtonsEnabled
                     ? () => bloc.add(const SelectDestinationButtonPressed())
                     : null,
                 selectionMode:
@@ -325,7 +325,7 @@ class _MainPageState extends State<MainPage>
             bottom: 16.0,
           ),
           child: Stack(
-            alignment: AlignmentDirectional.center,
+            alignment: Alignment.center,
             children: [
               FractionallySizedBox(
                 widthFactor: 0.65,
@@ -334,8 +334,7 @@ class _MainPageState extends State<MainPage>
                   child: LayoutBuilder(
                     builder: (_, constraints) {
                       return Checkerboard(
-                        foregroundImageVector:
-                            state.imageVector ?? CustomIcons.errorCircle,
+                        imageVector: state.imageVector,
                         size: constraints.biggest,
                       );
                     },
@@ -368,9 +367,11 @@ class _MainPageState extends State<MainPage>
                 // to affect the Y position of the floating SnackBar, the latter
                 // being sized so as not to overlap the button
                 child: FloatingActionButton.extended(
-                  onPressed: () {
-                    bloc.add(const ConvertButtonClicked());
-                  },
+                  onPressed: state.isConvertButtonEnabled
+                      ? () {
+                          bloc.add(const ConvertButtonClicked());
+                        }
+                      : null,
                   icon: const SvgIcon('res/convert_vector.svg'),
                   label: const Text(
                     'Convert',

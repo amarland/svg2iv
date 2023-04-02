@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/writer.dart';
 import 'package:svg2iv_gui/outer_world/log_file.dart';
+import 'package:svg2iv_gui/ui/default_image_vectors.dart';
 
-import '../outer_world/preferences.dart';
 import '../ui/snack_bar_info.dart';
 import '../util/file_parser.dart';
 import 'main_page_event.dart';
@@ -31,8 +31,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
     */
   };
 
-  MainPageBloc({required ThemeMode themeMode})
-      : super(MainPageState.initial(themeMode: themeMode)) {
+  MainPageBloc() : super(MainPageState.initial) {
     on<MainPageEvent>(
       (event, emit) async => await mapEventToState(event).forEach(emit),
     );
@@ -43,25 +42,23 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
 
   bool get _didErrorsOccur => _imageVectors.anyNull();
 
+  bool get _isConversionPossible =>
+      _imageVectors.isNotEmpty && _imageVectors.anyNotNull();
+
   Stream<MainPageState> mapEventToState(MainPageEvent event) async* {
-    if (event is ToggleThemeButtonPressed) {
-      final shouldDarkModeBeEnabled =
-          event.currentBrightness == Brightness.light;
-      await setDarkModeEnabled(shouldDarkModeBeEnabled);
-      yield state.copyWith(
-        themeMode: shouldDarkModeBeEnabled ? ThemeMode.dark : ThemeMode.light,
-      );
-    } else if (event is AboutButtonPressed) {
+    if (event is AboutButtonPressed) {
       yield state.copyWith(isAboutDialogVisible: true);
     } else if (event is AboutDialogClosed) {
       yield state.copyWith(isAboutDialogVisible: false);
     } else if (event is SelectSourceButtonPressed) {
       yield state.copyWith(
         visibleSelectionDialog: () => SelectionDialog.sourceSelection,
+        areSelectionButtonsEnabled: false,
       );
     } else if (event is SelectDestinationButtonPressed) {
       yield state.copyWith(
         visibleSelectionDialog: () => SelectionDialog.destinationSelection,
+        areSelectionButtonsEnabled: false,
       );
     } else if (event is SourceSelectionDialogClosed) {
       yield* _onSourceSelectionDialogClosed(event.paths);
@@ -89,13 +86,12 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         isNextPreviewButtonVisible: _previewIndex < _imageVectors.length - 1,
       );
     } else if (event is ConvertButtonClicked) {
-      yield state.copyWith(isWorkInProgress: true);
+      yield state.copyWith(isConvertButtonEnabled: false);
       await writeImageVectorsToFile(
         state.destinationSelectionTextFieldState.value,
         _imageVectors.whereNotNull().toNonGrowableList(),
         extensionReceiver: state.extensionReceiverTextFieldState.value,
       );
-      yield state.copyWith(isWorkInProgress: false);
     } else if (event is SnackBarActionButtonClicked) {
       switch (event.snackBarId) {
         case _previewErrorsSnackBarId:
@@ -134,8 +130,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
   ) async* {
     final hasPaths = paths != null && paths.isNotEmpty;
     yield state.copyWith(
-      isWorkInProgress: hasPaths,
       visibleSelectionDialog: () => null,
+      imageVector: () => null,
     );
     var isError = false;
     if (hasPaths) {
@@ -150,18 +146,19 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       _previewIndex = 0;
       // await Future<void>.delayed(const Duration(seconds: 3));
       yield state.copyWith(
-        isWorkInProgress: false,
         sourceSelectionTextFieldState: state.sourceSelectionTextFieldState
             .copyWith(isError: _didErrorsOccur),
+        areSelectionButtonsEnabled: true,
         extensionReceiverTextFieldState:
             state.extensionReceiverTextFieldState.copyWith(
           placeholder: _imageVectors.singleOrNull?.name,
         ),
         imageVector: () => _imageVectors.isNotEmpty
-            ? _imageVectors[_previewIndex]
-            : state.imageVector,
+            ? _imageVectors[_previewIndex] ?? CustomIcons.errorCircle
+            : MainPageState.initial.imageVector,
         isPreviousPreviewButtonVisible: false,
         isNextPreviewButtonVisible: _imageVectors.length > 1,
+        isConvertButtonEnabled: _isConversionPossible,
         snackBarInfo: () {
           return _didErrorsOccur
               ? const SnackBarInfo(
@@ -169,7 +166,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
                   message: 'Error(s) occurred while trying to'
                       ' display a preview of the source(s)',
                   actionLabel: 'View errors',
-                  duration: Duration(minutes: 1),
+                  duration: Duration(seconds: 30),
                 )
               : null;
         },

@@ -10,7 +10,7 @@ class Checkerboard extends StatefulWidget {
   const Checkerboard({
     super.key,
     required this.size,
-    required this.foregroundImageVector,
+    required this.imageVector,
     this.oddSquareColor,
     this.evenSquareColor,
   });
@@ -18,7 +18,7 @@ class Checkerboard extends StatefulWidget {
   final Size size;
   final Color? oddSquareColor;
   final Color? evenSquareColor;
-  final ImageVector foregroundImageVector;
+  final ImageVector? imageVector;
 
   @override
   State<StatefulWidget> createState() => _CheckerboardState();
@@ -29,14 +29,14 @@ class _CheckerboardState extends State<Checkerboard> {
 
   @override
   void initState() {
-    _updateState();
     super.initState();
+    _updateState();
   }
 
   @override
   void didUpdateWidget(Checkerboard oldWidget) {
-    _updateState(oldWidget);
     super.didUpdateWidget(oldWidget);
+    _updateState(oldWidget);
   }
 
   @override
@@ -45,12 +45,19 @@ class _CheckerboardState extends State<Checkerboard> {
     final colors = themeData.colorScheme;
     return CustomPaint(
       painter: _CheckerboardPainter(
-        oddSquareColor: widget.oddSquareColor ??
-            colors.onInverseSurface.withOpacity(0.5),
-        evenSquareColor: widget.oddSquareColor ??
-            colors.onSurfaceVariant.withOpacity(0.5),
+        oddSquareColor:
+            widget.oddSquareColor ?? colors.onInverseSurface.withOpacity(0.5),
+        evenSquareColor:
+            widget.oddSquareColor ?? colors.onSurfaceVariant.withOpacity(0.5),
       ),
       foregroundPainter: _cachedImage?.let(_ImagePainter.new),
+      child: widget.imageVector == null
+          ? const SizedBox(
+              width: 48.0,
+              height: 48.0,
+              child: CircularProgressIndicator(),
+            )
+          : null,
     );
   }
 
@@ -60,22 +67,25 @@ class _CheckerboardState extends State<Checkerboard> {
     super.dispose();
   }
 
-  // not awaited, but that's because it can't be from its call sites
-  Future<void> _updateState([Checkerboard? oldWidget]) async {
-    final size = widget.size;
-    final foregroundImageVector = widget.foregroundImageVector;
-    if (oldWidget == null ||
-        _cachedImage == null ||
-        foregroundImageVector != oldWidget.foregroundImageVector ||
-        size != oldWidget.size) {
-      final picture = foregroundImageVector.toPicture(size);
-      final image =
-          await picture.toImage(size.width.floor(), size.height.floor());
-      setState(() {
+  void _updateState([Checkerboard? oldWidget]) {
+    final imageVector = widget.imageVector;
+    if (imageVector != null) {
+      final size = widget.size;
+      if (oldWidget == null ||
+          _cachedImage == null ||
+          imageVector != oldWidget.imageVector ||
+          size != oldWidget.size) {
+        final picture = imageVector.toPicture(size);
+        final image = picture.toImageSync(
+          size.width.floor(),
+          size.height.floor(),
+        );
         picture.dispose();
         _cachedImage?.dispose();
-        _cachedImage = image;
-      });
+        setState(() {
+          _cachedImage = image;
+        });
+      }
     }
   }
 }

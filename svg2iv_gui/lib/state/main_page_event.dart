@@ -4,12 +4,6 @@ abstract class MainPageEvent {
   const MainPageEvent();
 }
 
-class ToggleThemeButtonPressed extends MainPageEvent {
-  const ToggleThemeButtonPressed(this.currentBrightness) : super();
-
-  final Brightness currentBrightness;
-}
-
 class AboutButtonPressed extends MainPageEvent {
   const AboutButtonPressed() : super();
 }

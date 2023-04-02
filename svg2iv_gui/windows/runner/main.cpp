@@ -30,7 +30,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(INT_MIN, INT_MIN);
   Win32Window::Size size(800, 350);
-  if (!window.CreateAndShow(L"svg2iv_gui", origin, size)) {
+  if (!window.Create(L"svg2iv_gui", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
