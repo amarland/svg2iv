@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_gui/state/theme_cubit.dart';
 
 import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
@@ -44,7 +45,7 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => MainPageBloc(),
+      create: (_) => MainPageBloc(),
       child: Builder(
         builder: (context) {
           return CallbackShortcuts(
@@ -86,7 +87,7 @@ class _MainPageState extends State<MainPage>
         actions: [
           IconButton(
             onPressed: () {
-              // TODO
+              BlocProvider.of<ThemeCubit>(context).toggleTheme();
             },
             icon: const SvgIcon('res/toggle_theme.svg'),
           ),
