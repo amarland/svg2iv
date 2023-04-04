@@ -12,29 +12,27 @@ class ThemeCubit extends Cubit<AppTheme?> {
   static const _androidGreen = Color(0xFF00DE7A);
   static const _androidBlue = Color(0xFF2196F3);
 
-  // TODO: stop hard-coding this
-  static const _useMaterial3 = true;
-
-  void toggleTheme() {
+  void toggleTheme() async {
     final currentTheme = state;
     if (currentTheme == null) {
       return;
     }
+    final isCurrentThemeLight = currentTheme.themeMode == ThemeMode.light;
     emit(
       currentTheme.copyWith(
-        themeMode: currentTheme.themeMode == ThemeMode.light
-            ? ThemeMode.dark
-            : ThemeMode.light,
+        themeMode: isCurrentThemeLight ? ThemeMode.dark : ThemeMode.light,
       ),
     );
+    await setDarkModeEnabled(isCurrentThemeLight);
   }
 
   void _loadTheme() async {
     final themeMode = await getThemeMode();
+    final useMaterial3 = await isMaterial3Enabled();
     final accentColor = await DynamicColorPlugin.getAccentColor();
     final ColorScheme lightColors;
     final ColorScheme darkColors;
-    if (_useMaterial3) {
+    if (useMaterial3) {
       lightColors = ColorScheme.fromSeed(
         seedColor: accentColor ?? _androidBlue,
       );
@@ -57,7 +55,7 @@ class ThemeCubit extends Cubit<AppTheme?> {
     await Future<void>.delayed(
       const Duration(milliseconds: 150),
     );
-    emit(AppTheme._(lightColors, darkColors, themeMode, _useMaterial3));
+    emit(AppTheme._(lightColors, darkColors, themeMode, useMaterial3));
   }
 }
 
