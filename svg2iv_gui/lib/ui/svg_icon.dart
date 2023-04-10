@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:svg2iv_common/extensions.dart';
 
 class SvgIcon extends StatelessWidget {
   const SvgIcon(this.assetName, {super.key});
@@ -16,7 +17,9 @@ class SvgIcon extends StatelessWidget {
       width: size,
       height: size,
       fit: BoxFit.scaleDown,
-      color: theme.color,
+      colorFilter: theme.color?.let(
+        (color) => ColorFilter.mode(color, BlendMode.srcIn),
+      ),
     );
   }
 }

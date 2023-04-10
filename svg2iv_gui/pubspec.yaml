@@ -14,7 +14,7 @@ dependencies:
   collection: ^1.17.0
   dynamic_color: ^1.6.2
   flutter_bloc: ^8.1.2
-  flutter_svg: ^1.1.6
+  flutter_svg: ^2.0.4
   path: ^1.8.2
   path_provider: ^2.0.12
   svg2iv_common:
@@ -23,8 +23,9 @@ dependencies:
   vector_math: ^2.1.4
 
 dev_dependencies:
-  # flutter_test:
-    # sdk: flutter
+  flutter_test:
+    sdk: flutter
+  file: ^6.1.4
   flutter_lints: ^2.0.1
 
 flutter:

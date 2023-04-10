@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 abstract class MainPageEvent {
   const MainPageEvent();
 }

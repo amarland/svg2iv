@@ -23,12 +23,12 @@ class ThemeCubit extends Cubit<AppTheme?> {
         themeMode: isCurrentThemeLight ? ThemeMode.dark : ThemeMode.light,
       ),
     );
-    await setDarkModeEnabled(isCurrentThemeLight);
+    await Preferences.setDarkModeEnabled(isCurrentThemeLight);
   }
 
   void _loadTheme() async {
-    final themeMode = await getThemeMode();
-    final useMaterial3 = await isMaterial3Enabled();
+    final themeMode = await Preferences.getThemeMode();
+    final useMaterial3 = await Preferences.isMaterial3Enabled();
     final accentColor = await DynamicColorPlugin.getAccentColor();
     final ColorScheme lightColors;
     final ColorScheme darkColors;
