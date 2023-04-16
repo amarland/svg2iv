@@ -43,7 +43,7 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
       .let(builder.tintColor);
   rootElement
       .getAndroidNSAttribute<String>('tintBlendMode')
-      ?.let(blendModeFromString)
+      ?.let(_blendModeFromString)
       ?.let(builder.tintBlendMode);
   for (final element in rootElement.childElements) {
     switch (element.name.local) {
@@ -202,4 +202,24 @@ VectorGroup? _parseClipPathElement(XmlElement clipPathElement) {
   return clipPathData.isNotEmpty
       ? VectorGroupBuilder().clipPathData(clipPathData).build()
       : null;
+}
+
+BlendMode? _blendModeFromString(String valueAsString) {
+  switch (valueAsString.toLowerCase()) {
+    case 'src_over':
+      return BlendMode.srcOver;
+    case 'src_in':
+      return BlendMode.srcIn;
+    case 'src_atop':
+      return BlendMode.srcAtop;
+    // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui/src/androidMain/kotlin/androidx/compose/ui/graphics/vector/compat/XmlVectorParser.android.kt;l=228
+    // "b/73224934 PorterDuff Multiply maps to Skia Modulate"
+    case 'multiply':
+      return BlendMode.modulate;
+    case 'screen':
+      return BlendMode.screen;
+    case 'add':
+      return BlendMode.plus;
+  }
+  return null;
 }

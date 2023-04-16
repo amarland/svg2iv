@@ -143,21 +143,3 @@ enum BlendMode {
   screen,
   plus,
 }
-
-BlendMode? blendModeFromString(String valueAsString) {
-  switch (valueAsString.toLowerCase()) {
-    case 'src_over':
-      return BlendMode.srcOver;
-    case 'src_in':
-      return BlendMode.srcIn;
-    case 'src_atop':
-      return BlendMode.srcAtop;
-    case 'multiply':
-      return BlendMode.modulate;
-    case 'screen':
-      return BlendMode.screen;
-    case 'add':
-      return BlendMode.plus;
-  }
-  return null;
-}

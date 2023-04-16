@@ -1,7 +1,9 @@
 import 'dart:io' show File, FileSystemException;
 
+import 'package:svg2iv_common/extensions.dart';
 import 'package:tuple/tuple.dart' show Tuple2;
 import 'package:xml/xml.dart';
+import 'package:xml/xml_events.dart';
 
 import 'converter/gd2iv.dart';
 import 'converter/svg2iv.dart';
@@ -34,36 +36,41 @@ Tuple2<ImageVector?, List<String>> _parseXmlSource(
     );
   }
   ImageVector? imageVector;
-  final errorMessages = List<String>.empty(growable: true);
+  final errorMessages = <String>[];
   try {
-    final rootElement = _parseXmlString(
-      isSourceAFile ? source.readAsStringSync() : source as String,
-    );
-    final rootElementName = rootElement.name.local;
+    final sourceAsString =
+        isSourceAFile ? source.readAsStringSync() : source as String;
+    final rootElementName = parseEvents(sourceAsString)
+        .whereType<XmlStartElementEvent>()
+        .firstOrNull
+        ?.name;
     switch (rootElementName) {
       case 'svg':
-        imageVector = parseSvgElement(rootElement);
+        imageVector = parseSvgElement(sourceAsString);
         break;
       case 'vector':
-        imageVector = parseVectorDrawableElement(rootElement);
+        imageVector = parseVectorDrawableElement(
+          _parseXmlString(sourceAsString),
+        );
         break;
       case 'shape':
-        imageVector = parseShapeDrawableElement(rootElement);
+        imageVector = parseShapeDrawableElement(
+          _parseXmlString(sourceAsString),
+        );
         break;
       default:
         if (isSourceDefinedExplicitly) {
-          final messageBuilder = StringBuffer();
-          if (isSourceAFile) {
-            messageBuilder.write("'${source.path}': ");
-          }
-          messageBuilder.write("Unsupported XML root: '$rootElementName'");
-          errorMessages.add(messageBuilder.toString());
+          errorMessages.add(
+            '${isSourceAFile ? "'${source.path}': " : ''}Unsupported format',
+          );
         }
         break;
     }
+  } on FileSystemException {
+    errorMessages.add('The file could not be read.');
   } on ParserException catch (e) {
     final messageBuilder = StringBuffer('An error occurred while parsing ')
-      ..write(source is File ? "'${source.path}'" : 'the input string')
+      ..write(isSourceAFile ? "'${source.path}'" : 'the input string')
       ..write(':');
     errorMessages
       ..add(messageBuilder.toString())
@@ -88,8 +95,6 @@ XmlElement _parseXmlString(String source) {
   final XmlDocument document;
   try {
     document = XmlDocument.parse(source);
-  } on FileSystemException {
-    throw ParserException('The file could not be read.');
   } on XmlParserException {
     throw ParserException('The contents of the file could not be parsed.');
   }

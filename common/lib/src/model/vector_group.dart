@@ -155,7 +155,7 @@ class VectorGroupBuilder
         _clipPathData = onlyChild.clipPathData;
       }
     }
-    final indicesOfGroupsToRemove = List<int>.empty(growable: true);
+    final indicesOfGroupsToRemove = <int>[];
     _nodes.forEachIndexed((index, node) {
       if (node is VectorGroup) {
         if (node.rotation == null &&
