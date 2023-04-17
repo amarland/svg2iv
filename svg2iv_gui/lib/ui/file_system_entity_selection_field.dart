@@ -43,11 +43,11 @@ class _State extends State<FileSystemEntitySelectionField> {
     final TextSpan defaultLabelSpan;
     switch (widget.selectionMode) {
       case FileSystemEntitySelectionMode.sourceFiles:
-        iconAssetName = 'res/source_files.svg';
+        iconAssetName = 'res/source_files';
         defaultLabelSpan = 'Source files'.asMnemonic();
         break;
       case FileSystemEntitySelectionMode.destinationDirectory:
-        iconAssetName = 'res/destination_directory.svg';
+        iconAssetName = 'res/destination_directory';
         defaultLabelSpan = 'Destination directory'.asMnemonic();
         break;
     }
@@ -87,7 +87,7 @@ class _State extends State<FileSystemEntitySelectionField> {
               ),
               side: theme.inputDecorationTheme.enabledBorder?.borderSide,
             ),
-            child: const SvgIcon('res/explore_files.svg'),
+            child: const SvgIcon('res/explore_files'),
           ),
         ),
       ],

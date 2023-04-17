@@ -14,12 +14,12 @@ dependencies:
   collection: ^1.17.0
   dynamic_color: ^1.6.2
   flutter_bloc: ^8.1.2
-  flutter_svg: ^2.0.4
   path: ^1.8.2
   path_provider: ^2.0.12
   svg2iv_common:
     path: ../common
   tuple: ^2.0.1
+  vector_graphics: ^1.1.5
   vector_math: ^2.1.4
 
 dev_dependencies:
@@ -31,12 +31,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - res/convert_vector.svg
-    - res/destination_directory.svg
-    - res/explore_files.svg
-    - res/logo.svg
-    - res/source_files.svg
-    - res/toggle_theme.svg
+    - res/convert_vector
+    - res/destination_directory
+    - res/explore_files
+    - res/logo
+    - res/source_files
+    - res/toggle_theme
   fonts:
     - family: JetBrainsMono
       fonts:
