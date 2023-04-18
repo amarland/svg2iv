@@ -234,7 +234,7 @@ void writeImageVector(
   );
   sink
     ..writelnIndent(indentationLevel, '.build()')
-    ..writelnIndent(indentationLevel - 2, '}')
+    ..writelnIndent(indentationLevel -= 2, '}')
     ..writelnIndent(indentationLevel, 'return $backingPropertyName!!')
     ..writelnIndent(--indentationLevel, '}');
 }

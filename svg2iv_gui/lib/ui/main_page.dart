@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_gui/state/theme_cubit.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
@@ -89,7 +89,7 @@ class _MainPageState extends State<MainPage>
             onPressed: () {
               BlocProvider.of<ThemeCubit>(context).toggleTheme();
             },
-            icon: const SvgIcon('res/toggle_theme.svg'),
+            icon: const SvgIcon('res/toggle_theme'),
           ),
           IconButton(
             onPressed: () => bloc.add(const AboutButtonPressed()),
@@ -200,10 +200,12 @@ class _MainPageState extends State<MainPage>
           await showDialog<void>(
             context: context,
             builder: (context) {
-              return AboutDialog(
+              return const AboutDialog(
                 applicationName: App.name,
                 applicationVersion: '0.1.0',
-                applicationIcon: SvgPicture.asset('res/logo.svg'),
+                applicationIcon: VectorGraphic(
+                  loader: AssetBytesLoader('res/logo'),
+                ),
               );
             },
           );
@@ -373,7 +375,7 @@ class _MainPageState extends State<MainPage>
                           bloc.add(const ConvertButtonClicked());
                         }
                       : null,
-                  icon: const SvgIcon('res/convert_vector.svg'),
+                  icon: const SvgIcon('res/convert_vector'),
                   label: const Text(
                     'Convert',
                     style: TextStyle(fontWeight: FontWeight.w600),
