@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
-import '../model/gradient.dart';
-import '../util/path_building_helpers.dart';
 import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
 
 import '../extensions.dart';
 import '../file_parser.dart';
+import '../model/brush.dart';
+import '../util/path_building_helpers.dart';
 
 const aaptNamespaceUri = 'http://schemas.android.com/aapt';
 const androidNamespaceUri = 'http://schemas.android.com/apk/res/android';
@@ -60,8 +60,8 @@ Dimensions expressed in units other than density-independent pixels (dp)"""
       return attributeValue.toInt() as T?;
     case String:
       return attributeValue as T;
-    case Gradient:
-      return Gradient.fromHexString(attributeValue) as T?;
+    case SolidColor:
+      return SolidColor.fromHexString(attributeValue) as T?;
   }
   throw ParserException(
     "Unexpected value for XML attribute '${attribute.name}': '$attributeValue'",

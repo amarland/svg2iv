@@ -2,16 +2,12 @@ abstract class MainPageEvent {
   const MainPageEvent();
 }
 
-class ToggleThemeButtonPressed extends MainPageEvent {
-  const ToggleThemeButtonPressed() : super();
-}
-
 class AboutButtonPressed extends MainPageEvent {
   const AboutButtonPressed() : super();
 }
 
-class AboutDialogCloseRequested extends MainPageEvent {
-  const AboutDialogCloseRequested() : super();
+class AboutDialogClosed extends MainPageEvent {
+  const AboutDialogClosed() : super();
 }
 
 class SelectSourceButtonPressed extends MainPageEvent {
@@ -52,8 +48,8 @@ class SnackBarActionButtonClicked extends MainPageEvent {
   final int snackBarId;
 }
 
-class ErrorMessagesDialogCloseRequested extends MainPageEvent {
-  const ErrorMessagesDialogCloseRequested() : super();
+class ErrorMessagesDialogClosed extends MainPageEvent {
+  const ErrorMessagesDialogClosed() : super();
 }
 
 class ReadMoreErrorMessagesActionClicked extends MainPageEvent {

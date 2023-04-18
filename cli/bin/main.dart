@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+// ignore: unnecessary_import
+import 'dart:typed_data' show BytesBuilder;
+
 import 'package:args/args.dart';
-import 'package:svg2iv/image_vector_json_adapter.dart';
+import 'package:svg2iv/image_vector_iterable_serializer.dart';
 import 'package:svg2iv_common/parser.dart';
 import 'package:svg2iv_common/utils.dart';
 import 'package:svg2iv_common/writer.dart';
@@ -12,7 +15,7 @@ const forceLottieFlagName = 'force-lottie';
 const helpFlagName = 'help';
 const quietFlagName = 'quiet';
 const receiverOptionName = 'receiver';
-const jsonFlagName = 'json'; // overrides '--output'
+const cborFlagName = 'cbor'; // overrides '--output'
 
 var _isInQuietMode = false;
 
@@ -43,7 +46,7 @@ If not set, the generated property will be declared as a top-level property.
 ​""",
       valueHelp: 'type',
     )
-    ..addFlag(jsonFlagName, negatable: false, hide: true)
+    ..addFlag(cborFlagName, negatable: false, hide: true)
     ..addFlag(
       quietFlagName,
       abbr: 'q',
@@ -66,8 +69,8 @@ If not set, the generated property will be declared as a top-level property.
   }
   final outputOptionValue = argResults[outputOptionName] as String?;
   final convertToLottie = argResults[forceLottieFlagName] as bool;
-  final isOutputJson = argResults[jsonFlagName] as bool && !convertToLottie;
-  final shouldWriteToStdOut = outputOptionValue == '-' || isOutputJson;
+  final isOutputCbor = argResults[cborFlagName] as bool && !convertToLottie;
+  final shouldWriteToStdOut = outputOptionValue == '-' || isOutputCbor;
   _isInQuietMode = shouldWriteToStdOut || argResults[quietFlagName] as bool;
   if (argResults[helpFlagName] as bool) {
     stdout
@@ -208,8 +211,8 @@ If not set, the generated property will be declared as a top-level property.
   }
   // `destination` is null if the actual destination
   // is the standard output stream
-  if (isOutputJson) {
-    stdout.write(imageVectors.toJson());
+  if (isOutputCbor) {
+    stdout.write(imageVectors.toCbor());
   } else {
     final nonNullImageVectors = imageVectors.whereNotNull().toNonGrowableList();
     if (nonNullImageVectors.isNotEmpty) {

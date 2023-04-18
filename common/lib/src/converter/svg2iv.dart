@@ -4,7 +4,7 @@ import 'package:xml/xml.dart';
 
 import '../extensions.dart';
 import '../file_parser.dart';
-import '../model/gradient.dart';
+import '../model/brush.dart';
 import '../model/image_vector.dart';
 import '../model/transformations.dart';
 import '../model/vector_group.dart';
@@ -506,7 +506,7 @@ B _fillPresentationAttributes<T extends VectorNode,
         break;
       case 'fill':
         if (attributeValue == 'none') {
-          builder.fill(Gradient.fromArgb(0));
+          builder.fill(SolidColor(0));
         } else {
           _parseBrush(attributeValue)?.let(builder.fill);
         }
@@ -543,11 +543,9 @@ Gradient? _parseGradient(XmlElement gradientElement) {
       .map((stopElement) {
         final opacity = stopElement.getAttribute('stop-opacity')?.toDouble();
         final colorAttributeValue = stopElement.getAttribute('stop-color');
-        final color = colorAttributeValue != null
-            // the result is a Gradient with a single value
-            ? _parseBrush(colorAttributeValue)?.colors.singleOrNull
-            : null;
-        if (color != null) {
+        final brush = colorAttributeValue?.let(_parseBrush);
+        if (brush != null) {
+          final color = (brush as SolidColor).colorInt;
           final currentOpacity = (opacity ?? 1) * ((color >> 24) / 0xFF);
           final newAlpha = (currentOpacity * 0xFF).round();
           return newAlpha << 24 | (color & 0x00FFFFFF);
@@ -618,36 +616,35 @@ double? _parsePercentage(String percentageAsString) {
   });
 }
 
-Gradient? _parseBrush(String brushAsString) {
-  Gradient? gradient;
-
+Brush? _parseBrush(String brushAsString) {
+  Brush? gradient;
   List<int> extractDefinitionValues(String value, int prefixLength) =>
       _extractDefinitionValues(
         value.substring(prefixLength + 1, value.length - 1),
       ).map((d) => d.truncate()).toNonGrowableList();
 
   if (brushAsString.startsWith('#')) {
-    gradient = Gradient.fromHexString(brushAsString);
+    gradient = SolidColor.fromHexString(brushAsString);
   } else if (brushAsString.startsWith('rgb(')) {
     final rgb = extractDefinitionValues(brushAsString, 4);
     if (rgb.isNotEmpty && rgb.length == 3) {
-      gradient = Gradient.fromArgbComponents(0xFF, rgb[0], rgb[1], rgb[2]);
+      gradient = SolidColor.fromArgbComponents(0xFF, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('rgba(')) {
     final rgba = extractDefinitionValues(brushAsString, 5);
     final rgb = rgba.slice(0, 4);
     final alpha = rgba.length == 4 ? rgba[3] * 0xFF ~/ 1 : null;
     if (alpha != null && rgb.isNotEmpty && rgb.length == 3) {
-      gradient = Gradient.fromArgbComponents(alpha, rgb[0], rgb[1], rgb[2]);
+      gradient = SolidColor.fromArgbComponents(alpha, rgb[0], rgb[1], rgb[2]);
     }
   } else if (brushAsString.startsWith('url(#')) {
     final id = extractIdFromUrlFunctionCall(brushAsString);
     final candidate = _definitions[id];
-    if (candidate is Gradient) {
+    if (candidate is Brush) {
       gradient = candidate;
     }
   } else {
-    gradient = getCssColorValue(brushAsString)?.let(Gradient.fromArgb);
+    gradient = getCssColorValue(brushAsString)?.let(SolidColor.new);
   }
   return gradient;
 }

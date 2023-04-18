@@ -96,8 +96,10 @@ Map<String, dynamic> _mapVectorPath(VectorPath path) {
 Map<String, dynamic> _mapPathFill(VectorPath path) {
   final Map<String, dynamic> fillShape;
   final pathFill = path.fill;
-  if (pathFill == null || pathFill.colors.length <= 1) {
-    final color = pathFill?.colors.singleOrNull ?? 0xFFFFFFFF;
+  if (pathFill is Gradient) {
+    fillShape = _mapGradient(pathFill)..['ty'] = 'gf';
+  } else {
+    final color = pathFill is SolidColor ? pathFill.colorInt : 0xFFFFFFFF;
     fillShape = {
       'ty': 'fl',
       'o': _getOpacityForColorInt(
@@ -107,8 +109,6 @@ Map<String, dynamic> _mapPathFill(VectorPath path) {
       'c': colorIntToRgbFractions(color).toNonAnimatedProperty(),
       'r': path.pathFillType == PathFillType.evenOdd ? 2 : 1,
     };
-  } else {
-    fillShape = _mapGradient(pathFill)..['ty'] = 'gf';
   }
   return fillShape;
 }
@@ -169,8 +169,8 @@ Map<String, dynamic>? _mapPathStroke(VectorPath path) {
     'ml': path.strokeLineMiter,
     'w': path.strokeLineWidth.toNonAnimatedProperty(),
   };
-  if (pathStroke.colors.length == 1) {
-    final color = pathStroke.colors[0];
+  if (pathStroke is SolidColor) {
+    final color = pathStroke.colorInt;
     strokeShape['o'] = _getOpacityForColorInt(
       color,
       path.strokeAlpha,
@@ -178,7 +178,7 @@ Map<String, dynamic>? _mapPathStroke(VectorPath path) {
     strokeShape['c'] = colorIntToRgbFractions(color).toNonAnimatedProperty();
   } else {
     strokeShape
-      ..addAll(_mapGradient(pathStroke))
+      ..addAll(_mapGradient(pathStroke as Gradient))
       ..['ty'] = 'gs';
   }
   return strokeShape..removeWhereValueIsNull();

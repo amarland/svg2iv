@@ -82,9 +82,9 @@ void _inlineUseElements(XmlElement svgElement) {
           (attr) => nonInheritedAttributeNames.contains(attr.name.local),
         );
         for (final useElementAttribute in inheritableAttributes) {
-          final useElementAttributeName = useElementAttribute.name;
+          final useElementAttributeName = useElementAttribute.name.qualified;
           final referencedElementAttribute = referencedElement.attributes
-              .where((attr) => attr.name == useElementAttributeName)
+              .where((attr) => attr.name.qualified == useElementAttributeName)
               .singleOrNull;
           if (referencedElementAttribute == null) {
             referencedElement.attributes.add(
@@ -133,7 +133,7 @@ void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
     final parentElement = clipPathElement.parentElement!;
     parentElement.children.remove(clipPathElement);
 
-    XmlElement _nestReferencedClipPathElementIfAny(XmlElement clipPathElement) {
+    XmlElement nestReferencedClipPathElementIfAny(XmlElement clipPathElement) {
       final childElement = clipPathElement.firstElementChild;
       final childClipPathAttribute = childElement?.attributes
           .singleWhereOrNull((attr) => attr.name.local == 'clip-path');
@@ -148,7 +148,7 @@ void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
           return id != null && id == referencedElementId;
         }).singleOrNull;
         if (referencedElement != null) {
-          return _nestReferencedClipPathElementIfAny(
+          return nestReferencedClipPathElementIfAny(
             referencedElement.copy()
               ..removeAttribute('id')
               ..children.add(clipPathElement),
@@ -159,7 +159,7 @@ void _reorderClipPathElementsIfNeeded(XmlElement svgElement) {
     }
 
     defsElement.children.add(
-      _nestReferencedClipPathElementIfAny(clipPathElement)
+      nestReferencedClipPathElementIfAny(clipPathElement)
         ..setAttribute('id', clipPathElementId),
     );
   }

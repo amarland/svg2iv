@@ -24,7 +24,7 @@ void main() {
 
     test('with only a solid fill color', () {
       final path = VectorPathBuilder(_pathData)
-          .fill(LinearGradient([0x11223344]))
+          .fill(SolidColor(0x11223344))
           .build();
       final expected = (StringBuffer('''
 path(

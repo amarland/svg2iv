@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart' show ListEquality;
-import '../extensions.dart';
 
-import 'gradient.dart';
+import '../extensions.dart';
+import 'brush.dart';
 import 'vector_node.dart';
 
 class VectorPath extends VectorNode {
-  static final defaultFill = Gradient.fromArgb(0xFF000000);
+  static final defaultFill = const SolidColor(0xFF000000);
   static const defaultFillAlpha = 1.0;
   static const defaultStrokeAlpha = 1.0;
   static const defaultStrokeLineWidth = 1.0;
@@ -35,9 +35,9 @@ class VectorPath extends VectorNode {
   }) : super(id);
 
   final List<PathNode> pathData;
-  final Gradient? fill;
+  final Brush? fill;
   final double? fillAlpha;
-  final Gradient? stroke;
+  final Brush? stroke;
   final double? strokeAlpha;
   final double? strokeLineWidth;
   final StrokeCap? strokeLineCap;
@@ -67,9 +67,9 @@ class VectorPath extends VectorNode {
   VectorPath copyWith({
     List<PathNode>? pathData,
     String? id,
-    Gradient? fill,
+    Brush? fill,
     double? fillAlpha,
-    Gradient? stroke,
+    Brush? stroke,
     double? strokeAlpha,
     double? strokeLineWidth,
     StrokeCap? strokeLineCap,

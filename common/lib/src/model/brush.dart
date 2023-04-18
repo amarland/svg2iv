@@ -1,27 +1,21 @@
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
-abstract class Gradient {
-  Gradient(
-    this.colors,
-    List<double>? stops,
-    this.tileMode,
-  ) : stops = stops ?? List.empty() {
-    if (this.stops.isNotEmpty && colors.length != this.stops.length) {
-      throw StateError('If `stops` is provided,'
-          ' it must be the same length as `colors`.');
-    }
-  }
+abstract class Brush {
+  const Brush();
+}
+
+class SolidColor extends Brush {
+  const SolidColor(this.colorInt);
+
+  final int colorInt;
 
   @factory
-  static Gradient fromArgb(int color) => LinearGradient([color]);
+  static SolidColor fromArgbComponents(int a, int r, int g, int b) =>
+      SolidColor((a << 24) | (r << 16) | (g << 8) | b);
 
   @factory
-  static Gradient fromArgbComponents(int alpha, int red, int green, int blue) =>
-      LinearGradient([(alpha << 24) | (red << 16) | (green << 8) | blue]);
-
-  @factory
-  static Gradient? fromHexString(String hexString) {
+  static SolidColor? fromHexString(String hexString) {
     const alphaMask = 0xFF000000;
     final colorAsString = hexString.substring(1);
     final color = int.tryParse(colorAsString, radix: 16);
@@ -51,7 +45,30 @@ abstract class Gradient {
       default:
         return null;
     }
-    return LinearGradient([temp]);
+    return SolidColor(temp);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SolidColor &&
+          runtimeType == other.runtimeType &&
+          colorInt == other.colorInt;
+
+  @override
+  int get hashCode => colorInt.hashCode;
+}
+
+abstract class Gradient extends Brush {
+  Gradient(
+    this.colors,
+    List<double>? stops,
+    this.tileMode,
+  ) : stops = stops ?? List.empty() {
+    if (this.stops.isNotEmpty && colors.length != this.stops.length) {
+      throw StateError('If `stops` is provided,'
+          ' it must be the same length as `colors`.');
+    }
   }
 
   final List<int> colors;

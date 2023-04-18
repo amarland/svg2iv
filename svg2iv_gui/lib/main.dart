@@ -1,20 +1,13 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:svg2iv_gui/state/main_page_bloc.dart';
-import 'package:svg2iv_gui/outer_world/preferences.dart';
-import 'package:svg2iv_gui/ui/main_page.dart';
+
+import '../ui/app.dart';
 
 void main() async {
-  final bloc = MainPageBloc(isThemeDark: await isDarkModeEnabled());
-  runApp(App(bloc));
+  runApp(const App());
   doWhenWindowReady(() {
-    const initialSize = Size(800, 350);
-    final window = appWindow;
-    window
-      ..minSize = initialSize
-      ..size = initialSize
+    appWindow
       ..alignment = Alignment.center
-      ..title = 'svg2iv_gui';
-    window.show();
+      ..show();
   });
 }

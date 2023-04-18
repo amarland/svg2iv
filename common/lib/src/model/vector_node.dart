@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
-import '../extensions.dart';
 
-import 'gradient.dart';
+import '../extensions.dart';
+import 'brush.dart';
 
 abstract class VectorNode {
   const VectorNode(this.id);
@@ -16,10 +16,10 @@ abstract class VectorNodeBuilder<T extends VectorNode,
   @protected
   String? get id_ => _id;
 
-  Gradient? _fill;
+  Brush? _fill;
 
   @protected
-  Gradient? get fill_ => _fill;
+  Brush? get fill_ => _fill;
 
   double? _alpha;
 
@@ -31,10 +31,10 @@ abstract class VectorNodeBuilder<T extends VectorNode,
   @protected
   double? get fillAlpha_ => _fillAlpha;
 
-  Gradient? _stroke;
+  Brush? _stroke;
 
   @protected
-  Gradient? get stroke_ => _stroke;
+  Brush? get stroke_ => _stroke;
 
   double? _strokeAlpha;
 
@@ -92,7 +92,7 @@ abstract class VectorNodeBuilder<T extends VectorNode,
     return this as B;
   }
 
-  B fill(Gradient fill) {
+  B fill(Brush fill) {
     _fill = fill;
     return this as B;
   }
@@ -107,7 +107,7 @@ abstract class VectorNodeBuilder<T extends VectorNode,
     return this as B;
   }
 
-  B stroke(Gradient stroke) {
+  B stroke(Brush stroke) {
     _stroke = stroke;
     return this as B;
   }
@@ -171,7 +171,7 @@ StrokeCap? strokeCapFromString(String valueAsString) {
   return null;
 }
 
-enum StrokeJoin { miter, round, bevel }
+enum StrokeJoin { bevel, miter, round }
 
 StrokeJoin? strokeJoinFromString(String valueAsString) {
   switch (valueAsString) {

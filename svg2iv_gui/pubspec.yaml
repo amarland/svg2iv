@@ -10,36 +10,37 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  bitsdojo_window: ^0.1.2
-  collection: ^1.16.0
-  bloc: ^8.0.3
-  flutter_bloc: ^8.0.1
-  flutter_svg: ^1.1.0
-  path: ^1.8.1
-  path_provider: ^2.0.11
+  bitsdojo_window: ^0.1.5
+  collection: ^1.17.0
+  dynamic_color: ^1.6.2
+  flutter_bloc: ^8.1.2
+  path: ^1.8.2
+  path_provider: ^2.0.12
   svg2iv_common:
     path: ../common
-  tuple: ^2.0.0
-  vector_math: ^2.1.2
+  tuple: ^2.0.1
+  vector_graphics: ^1.1.5
+  vector_math: ^2.1.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  file: ^6.1.4
   flutter_lints: ^2.0.1
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/convert_vector.svg
-    - assets/destination_directory.svg
-    - assets/explore_files.svg
-    - assets/logo.svg
-    - assets/source_files.svg
-    - assets/toggle_theme.svg
+    - res/convert_vector
+    - res/destination_directory
+    - res/explore_files
+    - res/logo
+    - res/source_files
+    - res/toggle_theme
   fonts:
     - family: JetBrainsMono
       fonts:
-        - asset: assets/fonts/jetbrains_mono_regular.ttf
+        - asset: res/font/jetbrains_mono_regular.ttf
     - family: WorkSans
       fonts:
-        - asset: assets/fonts/work_sans_variable.ttf
+        - asset: res/font/work_sans_variable.ttf

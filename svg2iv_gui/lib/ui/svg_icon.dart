@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:svg2iv_common/utils.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 class SvgIcon extends StatelessWidget {
-  const SvgIcon(this.assetName, {Key? key}) : super(key: key);
+  const SvgIcon(this.assetName, {super.key});
 
   final String assetName;
 
@@ -10,13 +11,14 @@ class SvgIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = IconTheme.of(context);
     final size = theme.size;
-    return SvgPicture.asset(
-      assetName,
-      key: key,
+    return VectorGraphic(
+      loader: AssetBytesLoader(assetName),
       width: size,
       height: size,
       fit: BoxFit.scaleDown,
-      color: theme.color,
+      colorFilter: theme.color?.let(
+        (color) => ColorFilter.mode(color, BlendMode.srcIn),
+      ),
     );
   }
 }

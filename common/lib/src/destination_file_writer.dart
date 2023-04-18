@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 
 import 'extensions.dart';
-import 'model/gradient.dart';
+import 'model/brush.dart';
 import 'model/image_vector.dart';
 import 'model/vector_group.dart';
 import 'model/vector_node.dart';
@@ -122,19 +122,19 @@ void writeImports(
     }
 
     for (final vectorPath in filterPaths(imageVector.nodes)) {
-      bool doesGradientNeedOffsetClassToBeExpressed(Gradient gradient) {
-        if (gradient.colors.length < 2) {
+      bool doesGradientNeedOffsetClassToBeExpressed(Brush paint) {
+        if (paint is SolidColor) {
           return false;
         }
-        if (gradient is LinearGradient) {
-          return gradient.startX != LinearGradient.defaultStartX ||
-              gradient.endX != LinearGradient.defaultEndX ||
-              gradient.startY != LinearGradient.defaultStartY ||
-              gradient.endY != LinearGradient.defaultEndY;
+        if (paint is LinearGradient) {
+          return paint.startX != LinearGradient.defaultStartX ||
+              paint.endX != LinearGradient.defaultEndX ||
+              paint.startY != LinearGradient.defaultStartY ||
+              paint.endY != LinearGradient.defaultEndY;
         } else {
-          gradient as RadialGradient;
-          return gradient.centerX != RadialGradient.defaultCenterX ||
-              gradient.centerY != RadialGradient.defaultCenterY;
+          paint as RadialGradient;
+          return paint.centerX != RadialGradient.defaultCenterX ||
+              paint.centerY != RadialGradient.defaultCenterY;
         }
       }
 
@@ -234,7 +234,7 @@ void writeImageVector(
   );
   sink
     ..writelnIndent(indentationLevel, '.build()')
-    ..writelnIndent(indentationLevel - 2, '}')
+    ..writelnIndent(indentationLevel -= 2, '}')
     ..writelnIndent(indentationLevel, 'return $backingPropertyName!!')
     ..writelnIndent(--indentationLevel, '}');
 }
@@ -479,44 +479,44 @@ void _writePathNodes(
 String _colorToString(int color) =>
     'Color(0x${color.toRadixString(16).toUpperCase()})';
 
-String _gradientToBrushAsString(Gradient gradient, int indentationLevel) {
+String _paintToBrushAsString(Brush paint, int indentationLevel) {
   final buffer = StringBuffer();
-  final colors = gradient.colors;
-  if (colors.length == 1 || colors.every((c) => c == colors[0])) {
-    buffer.write('SolidColor(${_colorToString(colors[0])})');
+  if (paint is SolidColor) {
+    buffer.write('SolidColor(${_colorToString(paint.colorInt)})');
   } else {
-    final isGradientLinear = gradient is LinearGradient;
+    paint as Gradient;
+    final isGradientLinear = paint is LinearGradient;
     buffer
       ..write('Brush.')
       ..write(isGradientLinear ? 'linearGradient' : 'radialGradient')
       ..writeln('(');
     indentationLevel++;
-    if (gradient.stops.isEmpty) {
+    if (paint.stops.isEmpty) {
       buffer.writelnIndent(indentationLevel, 'listOf(');
       indentationLevel++;
-      for (final color in colors.map(_colorToString)) {
+      for (final color in paint.colors.map(_colorToString)) {
         buffer
           ..writeIndent(indentationLevel, color)
           ..writeln(',');
       }
       buffer.writelnIndent(--indentationLevel, '),');
     } else {
-      for (var i = 0; i < gradient.stops.length; i++) {
+      for (var i = 0; i < paint.stops.length; i++) {
         buffer
           ..writeIndent(
             indentationLevel,
-            numToKotlinFloatAsString(gradient.stops[i]),
+            numToKotlinFloatAsString(paint.stops[i]),
           )
           ..write(' to ')
-          ..write(_colorToString(colors[i]))
+          ..write(_colorToString(paint.colors[i]))
           ..writeln(',');
       }
     }
     if (isGradientLinear) {
-      final startX = gradient.startX;
-      final startY = gradient.startY;
-      final endX = gradient.endX;
-      final endY = gradient.endY;
+      final startX = paint.startX;
+      final startY = paint.startY;
+      final endX = paint.endX;
+      final endY = paint.endY;
       buffer
         ..writeArgumentIfNotNull(
           indentationLevel,
@@ -531,17 +531,17 @@ String _gradientToBrushAsString(Gradient gradient, int indentationLevel) {
               : null,
         );
     } else {
-      gradient as RadialGradient;
+      paint as RadialGradient;
       buffer
         ..writeArgumentIfNotNull(
           indentationLevel,
           'center',
-          Tuple2(gradient.centerX, gradient.centerY),
+          Tuple2(paint.centerX, paint.centerY),
         )
-        ..writeArgumentIfNotNull(indentationLevel, 'radius', gradient.radius);
+        ..writeArgumentIfNotNull(indentationLevel, 'radius', paint.radius);
     }
     buffer
-      ..writeArgumentIfNotNull(indentationLevel, 'tileMode', gradient.tileMode)
+      ..writeArgumentIfNotNull(indentationLevel, 'tileMode', paint.tileMode)
       ..writeIndent(--indentationLevel, ')');
   }
   return buffer.toString();
@@ -591,8 +591,8 @@ extension _StringSinkWriting on StringSink {
       final enumAsString = argument.toString();
       argumentAsString =
           enumAsString.capitalizeCharAt(enumAsString.indexOf('.') + 1);
-    } else if (argument is Gradient) {
-      argumentAsString = _gradientToBrushAsString(argument, indentationLevel);
+    } else if (argument is Brush) {
+      argumentAsString = _paintToBrushAsString(argument, indentationLevel);
     } else if (argument is Tuple2<double, double>) {
       final x = numToKotlinFloatAsString(argument.item1);
       final y = numToKotlinFloatAsString(argument.item2);

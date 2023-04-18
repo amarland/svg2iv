@@ -1,11 +1,12 @@
-import 'package:svg2iv_common/models.dart';
+import 'package:cbor/cbor.dart';
 import 'package:svg2iv_common/utils.dart';
+import 'package:svg2iv_common/models.dart';
 
-extension ImageVectorIterableToJsonConversion on Iterable<ImageVector?> {
-  String toJson() {
-    return CustomJsonEncoder().convert(
-      map((imageVector) => imageVector?.let(_mapImageVector)),
-    );
+extension ImageVectorIterableToCborSerialization on Iterable<ImageVector?> {
+  List<int> toCbor() {
+    final imageVectors = map((imageVector) =>
+    imageVector != null ? _mapImageVector(imageVector) : null);
+    return CborSimpleEncoder().convert(imageVectors);
   }
 }
 
@@ -16,8 +17,8 @@ Map<String, dynamic> _mapImageVector(ImageVector imageVector) {
     'viewportHeight': imageVector.viewportHeight,
     'width': imageVector.width,
     'height': imageVector.height,
-    'tintColor': imageVector.tintColor?.let(colorIntToArgb),
-    'tintBlendMode': imageVector.tintBlendMode?.name,
+    'tintColor': imageVector.tintColor,
+    'tintBlendMode': imageVector.tintBlendMode?.index,
     'nodes': _mapVectorNodes(imageVector.nodes),
   }..removeWhereValueIsNull();
 }
@@ -53,10 +54,10 @@ Map<String, dynamic> _mapVectorPath(VectorPath path) {
     'stroke': _mapGradient(path.stroke),
     'strokeAlpha': path.strokeAlpha,
     'strokeLineWidth': path.strokeLineWidth,
-    'strokeLineCap': strokeLineCap?.name,
-    'strokeLineJoin': strokeLineJoin?.name,
+    'strokeLineCap': strokeLineCap?.index,
+    'strokeLineJoin': strokeLineJoin?.index,
     'strokeLineMiter': path.strokeLineMiter,
-    'fillType': pathFillType?.name,
+    'fillType': pathFillType?.index,
     'trimPathStart': path.trimPathStart,
     'trimPathEnd': path.trimPathEnd,
     'trimPathOffset': path.trimPathOffset,
@@ -66,41 +67,47 @@ Map<String, dynamic> _mapVectorPath(VectorPath path) {
 
 Map<String, dynamic> _mapPathNode(PathNode pathNode) {
   return {
-    'command': pathNode.command.name,
-    'arguments': pathNode.arguments,
+    'command': pathNode.command.index,
+    'arguments': pathNode.arguments.map<double>((value) {
+      if (value is double) return value;
+      if (value is bool) return value ? 1.0 : 0.0;
+      throw 'Argument $value for path node $pathNode'
+          ' is neither a double nor a boolean.';
+    }),
   };
 }
 
-// returns either a Map<String, dynamic> (gradient)
-// or an array of RGB values (solid color)
-dynamic _mapGradient(Gradient? gradient) {
-  if (gradient == null) return null;
-
-  if (gradient.colors.length == 1) {
-    return colorIntToArgb(gradient.colors[0]);
+// returns either a Map<String, dynamic> (gradient) or a color int (solid color)
+dynamic _mapGradient(Brush? paint) {
+  if (paint == null) {
+    return null;
   }
-  final Map<String, dynamic> typeSpecificAttributes;
-  final isLinear = gradient is LinearGradient;
+  if (paint is SolidColor) {
+    return paint.colorInt;
+  }
+  paint as Gradient;
+  final Map<String, double> typeSpecificAttributes;
+  final isLinear = paint is LinearGradient;
   if (isLinear) {
     typeSpecificAttributes = {
-      'startX': gradient.startX,
-      'startY': gradient.startY,
-      'endX': gradient.endX,
-      'endY': gradient.endY,
+      'startX': paint.startX,
+      'startY': paint.startY,
+      'endX': paint.endX,
+      'endY': paint.endY,
     };
   } else {
-    gradient as RadialGradient;
+    paint as RadialGradient;
     typeSpecificAttributes = {
-      'centerX': gradient.centerX,
-      'centerY': gradient.centerY,
-      'radius': gradient.radius,
+      'centerX': paint.centerX,
+      'centerY': paint.centerY,
+      'radius': paint.radius,
     };
   }
   return {
-    'type': isLinear ? 'linear' : 'radial',
-    'colors': gradient.colors.map(colorIntToArgb),
-    'stops': gradient.stops,
+    'isLinear': isLinear,
+    'colors': paint.colors,
+    'stops': paint.stops,
     ...typeSpecificAttributes,
-    'tileMode': gradient.tileMode?.name,
+    'tileMode': paint.tileMode?.index,
   }..removeWhereValueIsNull();
 }

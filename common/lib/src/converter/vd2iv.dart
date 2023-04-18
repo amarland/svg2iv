@@ -3,16 +3,16 @@
 import 'package:collection/collection.dart';
 import 'package:xml/xml.dart';
 
-import '../util/android_resources.dart';
 import '../extensions.dart';
 import '../file_parser.dart';
-import '../model/gradient.dart';
+import '../model/brush.dart';
 import '../model/image_vector.dart';
 import '../model/transformations.dart';
 import '../model/vector_group.dart';
 import '../model/vector_node.dart';
 import '../model/vector_path.dart';
 import '../path_data_parser.dart';
+import '../util/android_resources.dart';
 
 ImageVector parseVectorDrawableElement(
   XmlElement rootElement, {
@@ -41,10 +41,9 @@ ImageVector parseVectorDrawableElement(
       .height((parsedRequiredAttributes['height'] as Dimension).value);
   rootElement.getAndroidNSAttribute<String>('name')?.let(builder.name);
   rootElement
-      .getAndroidNSAttribute<Gradient>('tintColor')
-      ?.colors
-      .singleOrNull
-      ?.let(builder.tintColor);
+      .getAndroidNSAttribute<SolidColor>('tintColor')
+      ?.colorInt
+      .let(builder.tintColor);
   rootElement
       .getAndroidNSAttribute<String>('tintBlendMode')
       ?.let(blendModeFromString)
@@ -136,13 +135,13 @@ VectorPath? _parsePathElement(
         parseAndroidResourceValue<String>(attribute)?.let(builder.id);
         break;
       case 'fillColor':
-        parseAndroidResourceValue<Gradient>(attribute)?.let(builder.fill);
+        parseAndroidResourceValue<SolidColor>(attribute)?.let(builder.fill);
         break;
       case 'fillAlpha':
         parseAndroidResourceValue<double>(attribute)?.let(builder.fillAlpha);
         break;
       case 'strokeColor':
-        parseAndroidResourceValue<Gradient>(attribute)?.let(builder.stroke);
+        parseAndroidResourceValue<SolidColor>(attribute)?.let(builder.stroke);
         break;
       case 'strokeAlpha':
         parseAndroidResourceValue<double>(attribute)?.let(builder.strokeAlpha);

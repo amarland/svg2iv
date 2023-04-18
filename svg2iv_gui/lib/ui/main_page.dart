@@ -1,82 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:svg2iv_common/utils.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 
 import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
-import '../util/custom_material_localizations.dart';
+import '../state/theme_cubit.dart';
+import 'app.dart';
 import 'checkerboard.dart';
-import 'default_image_vectors.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
 import 'preview_selection_button.dart';
 import 'svg_icon.dart';
 
-const _androidGreen = Color(0xFF00DE7A);
-const _androidBlue = Color(0xFF2196F3);
-
-const _applicationName = 'svg2iv';
-
-class App extends StatelessWidget {
-  // ignore: use_key_in_widget_constructors
-  const App(this.bloc);
-
-  final MainPageBloc bloc;
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => bloc,
-      child: BlocBuilder<MainPageBloc, MainPageState>(
-        bloc: bloc,
-        builder: (context, _) {
-          final textTheme = Typography.material2018()
-              .englishLike
-              .apply(fontFamily: 'WorkSans');
-          const inputDecorationTheme =
-              InputDecorationTheme(border: OutlineInputBorder());
-          return MaterialApp(
-            home: const _MainPage(),
-            title: 'svg2iv',
-            theme: ThemeData.from(
-              colorScheme: const ColorScheme.light(
-                primary: _androidBlue,
-                secondary: _androidGreen,
-              ),
-              textTheme: textTheme,
-            ).copyWith(inputDecorationTheme: inputDecorationTheme),
-            darkTheme: ThemeData.from(
-              colorScheme: const ColorScheme.dark(
-                primary: _androidGreen,
-                secondary: _androidBlue,
-              ),
-              textTheme: textTheme,
-            ).copyWith(inputDecorationTheme: inputDecorationTheme),
-            themeMode:
-                bloc.state.isThemeDark ? ThemeMode.dark : ThemeMode.light,
-            localizationsDelegates: const [
-              CustomMaterialLocalizations.delegate,
-            ],
-            debugShowCheckedModeBanner: false,
-          );
-        },
-      ),
-    );
-  }
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPage extends StatefulWidget {
-  const _MainPage({Key? key}) : super(key: key);
-
-  @override
-  _MainPageState createState() => _MainPageState();
-}
-
-class _MainPageState extends State<_MainPage>
-    with SingleTickerProviderStateMixin<_MainPage> {
+class _MainPageState extends State<MainPage>
+    with SingleTickerProviderStateMixin<MainPage> {
   /*
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -97,15 +44,21 @@ class _MainPageState extends State<_MainPage>
 
   @override
   Widget build(BuildContext context) {
-    final bloc = BlocProvider.of<MainPageBloc>(context);
-    return CallbackShortcuts(
-      bindings: MainPageBloc.shortcutBindings
-          .map((trigger, action) => MapEntry(trigger, () => action(bloc))),
-      child: BlocBuilder<MainPageBloc, MainPageState>(
-        builder: (context, _) {
-          return Focus(
-            autofocus: true,
-            child: _buildScaffold(context),
+    return BlocProvider(
+      create: (_) => MainPageBloc(),
+      child: Builder(
+        builder: (context) {
+          return CallbackShortcuts(
+            bindings: MainPageBloc.shortcutBindings.map(
+              (trigger, action) => MapEntry(
+                trigger,
+                () => action(BlocProvider.of<MainPageBloc>(context)),
+              ),
+            ),
+            child: Focus(
+              autofocus: true,
+              child: _buildScaffold(context),
+            ),
           );
         },
       ),
@@ -114,12 +67,17 @@ class _MainPageState extends State<_MainPage>
 
   static Widget _buildScaffold(BuildContext context) {
     final bloc = BlocProvider.of<MainPageBloc>(context);
+    final theme = Theme.of(context);
     final title = TextSpan(
-      text: '$_applicationName | ',
+      text: '${App.name} | ',
       children: [
         TextSpan(
           text: 'SVG to ImageVector conversion tool',
-          style: Theme.of(context).textTheme.bodyText2,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.useMaterial3 || theme.brightness == Brightness.dark
+                ? theme.colorScheme.onSurface
+                : theme.colorScheme.onPrimary,
+          ),
         ),
       ],
     );
@@ -128,22 +86,29 @@ class _MainPageState extends State<_MainPage>
         title: Text.rich(title),
         actions: [
           IconButton(
-            onPressed: () => bloc.add(const ToggleThemeButtonPressed()),
-            icon: const SvgIcon('assets/toggle_theme.svg'),
+            onPressed: () {
+              BlocProvider.of<ThemeCubit>(context).toggleTheme();
+            },
+            icon: const SvgIcon('res/toggle_theme'),
           ),
           IconButton(
             onPressed: () => bloc.add(const AboutButtonPressed()),
             icon: const Icon(Icons.info_outlined),
           ),
+          const SizedBox(width: 8.0),
         ],
       ),
       body: _appDialogVisibilityChangeListener(
         context: context,
-        child: Row(
-          children: [
-            _buildLeftPanel(context),
-            _buildRightPanel(context),
-          ],
+        child: BlocBuilder<MainPageBloc, MainPageState>(
+          builder: (context, _) {
+            return Row(
+              children: [
+                _buildLeftPanel(context),
+                _buildRightPanel(context),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -221,11 +186,8 @@ class _MainPageState extends State<_MainPage>
             currentState.errorMessagesDialog) {
           return true;
         }
-        if (!previousState.isAboutDialogVisible &&
-            currentState.isAboutDialogVisible) {
-          return true;
-        }
-        if (previousState.isWorkInProgress != currentState.isWorkInProgress) {
+        if (currentState.isAboutDialogVisible &&
+            !previousState.isAboutDialogVisible) {
           return true;
         }
         return false;
@@ -237,29 +199,17 @@ class _MainPageState extends State<_MainPage>
         } else if (state.isAboutDialogVisible) {
           await showDialog<void>(
             context: context,
-            builder: (context) => AboutDialog(
-              applicationName: _applicationName,
-              applicationVersion: '0.1.0',
-              applicationIcon: SvgPicture.asset('assets/logo.svg'),
-            ),
-          );
-          bloc.add(const AboutDialogCloseRequested());
-        } else {
-          if (state.isWorkInProgress) {
-            await showDialog<void>(
-              context: context,
-              builder: (context) => const Center(
-                child: SizedBox(
-                  width: 48.0,
-                  height: 48.0,
-                  child: CircularProgressIndicator(),
+            builder: (context) {
+              return const AboutDialog(
+                applicationName: App.name,
+                applicationVersion: '0.1.0',
+                applicationIcon: VectorGraphic(
+                  loader: AssetBytesLoader('res/logo'),
                 ),
-              ),
-            );
-          } else {
-            // dismiss the error messages dialog
-            Navigator.pop(context);
-          }
+              );
+            },
+          );
+          bloc.add(const AboutDialogClosed());
         }
       },
       child: child,
@@ -269,11 +219,11 @@ class _MainPageState extends State<_MainPage>
   static Future<void> showErrorMessagesDialog(
     BuildContext context,
     ErrorMessagesDialog errorMessagesDialog,
-  ) {
-    return showDialog<void>(
+  ) async {
+    final bloc = BlocProvider.of<MainPageBloc>(context);
+    final result = await showDialog<bool>(
       context: context,
       builder: (context) {
-        final bloc = BlocProvider.of<MainPageBloc>(context);
         return AlertDialog(
           content: DefaultTextStyle(
             style: const TextStyle(fontFamily: 'JetBrainsMono'),
@@ -288,15 +238,11 @@ class _MainPageState extends State<_MainPage>
           actions: [
             if (errorMessagesDialog.isReadMoreButtonVisible)
               TextButton(
-                onPressed: () {
-                  bloc.add(const ReadMoreErrorMessagesActionClicked());
-                },
+                onPressed: () => Navigator.pop(context, true),
                 child: const Text('Read more'),
               ),
             TextButton(
-              onPressed: () {
-                bloc.add(const ErrorMessagesDialogCloseRequested());
-              },
+              onPressed: () => Navigator.pop(context, false),
               child: Text(MaterialLocalizations.of(context).closeButtonLabel),
             ),
           ],
@@ -306,43 +252,48 @@ class _MainPageState extends State<_MainPage>
       barrierDismissible: false,
       barrierColor: Colors.black.withOpacity(0.74),
     );
+    bloc.add(
+      result == true
+          ? const ReadMoreErrorMessagesActionClicked()
+          : const ErrorMessagesDialogClosed(),
+    );
   }
 
   static Widget _buildLeftPanel(BuildContext context) {
     final bloc = BlocProvider.of<MainPageBloc>(context);
     final state = bloc.state;
-    final areSelectionFieldButtonsEnabled =
-        state.visibleSelectionDialog == null;
     return Expanded(
       flex: 2,
       child: _visibleSelectionDialogChangeListener(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               FileSystemEntitySelectionField(
-                onButtonPressed: areSelectionFieldButtonsEnabled
+                onButtonPressed: state.areSelectionButtonsEnabled
                     ? () => bloc.add(const SelectSourceButtonPressed())
                     : null,
                 selectionMode: FileSystemEntitySelectionMode.sourceFiles,
                 value: state.sourceSelectionTextFieldState.value,
                 isError: state.sourceSelectionTextFieldState.isError,
               ),
+              const SizedBox(height: 8.0),
               Row(
                 children: [
                   Checkbox(
                     value: false,
                     onChanged: (value) {
-                      /* TODO */
+                      // TODO
                     },
                   ),
-                  const SizedBox(width: 8.0),
+                  const SizedBox(width: 6.0),
                   const Text('Generate all assets in a single file'),
                 ],
               ),
+              const SizedBox(height: 8.0),
               FileSystemEntitySelectionField(
-                onButtonPressed: areSelectionFieldButtonsEnabled
+                onButtonPressed: state.areSelectionButtonsEnabled
                     ? () => bloc.add(const SelectDestinationButtonPressed())
                     : null,
                 selectionMode:
@@ -350,7 +301,7 @@ class _MainPageState extends State<_MainPage>
                 value: state.destinationSelectionTextFieldState.value,
                 isError: state.destinationSelectionTextFieldState.isError,
               ),
-              const SizedBox(height: 8.0),
+              const SizedBox(height: 12.0),
               TextField(
                 decoration: InputDecoration(
                   labelText: 'Extension receiver (optional)',
@@ -377,7 +328,7 @@ class _MainPageState extends State<_MainPage>
             bottom: 16.0,
           ),
           child: Stack(
-            alignment: AlignmentDirectional.center,
+            alignment: Alignment.center,
             children: [
               FractionallySizedBox(
                 widthFactor: 0.65,
@@ -386,8 +337,7 @@ class _MainPageState extends State<_MainPage>
                   child: LayoutBuilder(
                     builder: (_, constraints) {
                       return Checkerboard(
-                        foregroundImageVector:
-                            state.imageVector ?? CustomIcons.errorCircle,
+                        imageVector: state.imageVector,
                         size: constraints.biggest,
                       );
                     },
@@ -420,10 +370,12 @@ class _MainPageState extends State<_MainPage>
                 // to affect the Y position of the floating SnackBar, the latter
                 // being sized so as not to overlap the button
                 child: FloatingActionButton.extended(
-                  onPressed: () {
-                    bloc.add(const ConvertButtonClicked());
-                  },
-                  icon: const SvgIcon('assets/convert_vector.svg'),
+                  onPressed: state.isConvertButtonEnabled
+                      ? () {
+                          bloc.add(const ConvertButtonClicked());
+                        }
+                      : null,
+                  icon: const SvgIcon('res/convert_vector'),
                   label: const Text(
                     'Convert',
                     style: TextStyle(fontWeight: FontWeight.w600),

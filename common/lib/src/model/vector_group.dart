@@ -167,11 +167,14 @@ class VectorGroupBuilder
         }
       }
     });
+    var insertedNodeCount = 0;
     for (final index in indicesOfGroupsToRemove) {
-      final group = _nodes[index] as VectorGroup;
+      final revisedIndex = index + insertedNodeCount;
+      final group = _nodes[revisedIndex] as VectorGroup;
       _nodes = _nodes.toList()
         ..removeAt(index)
         ..insertAll(index, group.nodes);
+      insertedNodeCount += group.nodes.length - 1;
       group.id?.let((id) => this.id(id));
     }
     return VectorGroup._init(
