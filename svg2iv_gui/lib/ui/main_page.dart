@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_gui/state/theme_cubit.dart';
 import 'package:vector_graphics/vector_graphics.dart';
 
 import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
+import '../state/theme_cubit.dart';
 import 'app.dart';
 import 'checkerboard.dart';
 import 'file_system_entity_selection_field.dart';

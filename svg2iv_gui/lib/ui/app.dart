@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:svg2iv_gui/state/theme_cubit.dart';
 
+import '../state/theme_cubit.dart';
 import '../ui/main_page.dart';
 import '../util/custom_material_localizations.dart';
 
