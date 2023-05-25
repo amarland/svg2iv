@@ -371,7 +371,7 @@ VectorNode? _parseEllipseElement(XmlElement ellipseElement) {
     rx = mappedAttributes['rx'] ?? double.nan;
     ry = mappedAttributes['ry'] ?? double.nan;
   }
-  if (rx == double.nan || ry == double.nan) return null;
+  if (rx.isNaN || ry.isNaN) return null;
   return _buildVectorNodeFromPathData(
     ellipseElement,
     obtainPathNodesForEllipse(cx: cx, cy: cy, rx: rx, ry: ry),

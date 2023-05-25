@@ -197,7 +197,7 @@ void _convertCssStylesheetToSvgPresentationAttributes(XmlElement svgElement) {
       svgElement.getElement('defs')?.let(findSingleStyleElement);
   if (styleElement != null) {
     styleElement.parentElement!.children.remove(styleElement);
-    final declarationBlocks = styleElement.text
+    final declarationBlocks = styleElement.innerText
         .replaceAll(RegExp(r'\s'), '')
         .split('}')
       ..removeWhere((block) => block.isEmpty)
