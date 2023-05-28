@@ -6,9 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/writer.dart';
-import 'package:svg2iv_gui/outer_world/log_file.dart';
-import 'package:svg2iv_gui/ui/default_image_vectors.dart';
 
+import '../outer_world/log_file.dart';
+import '../ui/default_image_vectors.dart';
 import '../ui/snack_bar_info.dart';
 import '../util/file_parser.dart';
 import 'main_page_event.dart';

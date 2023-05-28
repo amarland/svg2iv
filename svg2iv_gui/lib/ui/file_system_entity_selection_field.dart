@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:svg2iv_gui/ui/svg_icon.dart';
 
 import '../ui/file_system_entity_selection_mode.dart';
+import '../ui/svg_icon.dart';
 import '../util/mnemonic_text_spans.dart';
 
 class FileSystemEntitySelectionField extends StatefulWidget {
