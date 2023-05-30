@@ -69,13 +69,13 @@ path(
           .transformations(transformations)
           .clipPathData(
             const [
-              PathNode(PathDataCommand.horizontalLineTo, [12.0])
+              PathNode(PathDataCommand.lineTo, [12.0, 0.0])
             ],
           )
           .addNode(
             VectorPathBuilder(
               const [
-                PathNode(PathDataCommand.horizontalLineTo, [24.0])
+                PathNode(PathDataCommand.lineTo, [24.0, 0.0])
               ],
             ).build(),
           )
@@ -87,7 +87,7 @@ path(
                 .addNode(
                   VectorPathBuilder(
                     const [
-                      PathNode(PathDataCommand.verticalLineTo, [6.0])
+                      PathNode(PathDataCommand.lineTo, [0.0, 6.0])
                     ],
                   ).build(),
                 )
@@ -232,7 +232,7 @@ group(
 
 const _pathData = [
   PathNode(PathDataCommand.moveTo, [9.72, 10.93]),
-  PathNode(PathDataCommand.verticalLineTo, [2.59]),
+  PathNode(PathDataCommand.lineTo, [0.0, 2.59]),
   PathNode(
     PathDataCommand.arcTo,
     [1.65, 1.65, 0.0, false, false, 8.0, 1.0],
@@ -241,9 +241,9 @@ const _pathData = [
     PathDataCommand.arcTo,
     [1.650, 1.6500, 0.0, false, false, 6.28, 2.59],
   ),
-  PathNode(PathDataCommand.verticalLineTo, [11.0]),
+  PathNode(PathDataCommand.lineTo, [0.0, 11.0]),
   PathNode(
-    PathDataCommand.relativeArcTo,
+    PathDataCommand.arcTo,
     [2.11, 2.11, 0.0, false, false, -0.83, 1.65],
   ),
   PathNode(
@@ -251,7 +251,7 @@ const _pathData = [
     [2.48, 2.48, 0.0, false, false, 8.0, 15.0],
   ),
   PathNode(
-    PathDataCommand.relativeArcTo,
+    PathDataCommand.arcTo,
     [2.44, 2.44, 0.0, false, false, 2.55, -2.35],
   ),
   PathNode(

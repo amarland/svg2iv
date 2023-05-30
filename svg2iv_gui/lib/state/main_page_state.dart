@@ -26,7 +26,7 @@ class MainPageState {
     destinationSelectionTextFieldState: TextFieldState.initial,
     areSelectionButtonsEnabled: true,
     extensionReceiverTextFieldState: TextFieldState.initial,
-    imageVector: CustomIcons.faceIcon,
+    imageVector: CustomIcons.home,
     isPreviousPreviewButtonVisible: false,
     isNextPreviewButtonVisible: false,
     isConvertButtonEnabled: false,

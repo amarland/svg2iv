@@ -1,18 +1,14 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
 import 'package:collection/collection.dart';
+import 'package:vector_graphics_compiler/vector_graphics_compiler.dart' as vgc;
 import 'package:xml/xml.dart';
 
+import '../../models.dart';
 import '../extensions.dart';
 import '../file_parser.dart';
-import '../model/brush.dart';
-import '../model/image_vector.dart';
-import '../model/transformations.dart';
-import '../model/vector_group.dart';
-import '../model/vector_node.dart';
-import '../model/vector_path.dart';
-import '../path_data_parser.dart';
 import '../util/android_resources.dart';
+import '../util/path_command_mapper.dart';
 
 ImageVector parseVectorDrawableElement(XmlElement rootElement) {
   final parsedRequiredAttributes = <String, dynamic>{
@@ -110,9 +106,7 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
 }
 
 VectorPath? _parsePathElement(XmlElement pathElement) {
-  final pathData = parsePathData(
-    pathElement.getAndroidNSAttribute<String>('pathData'),
-  );
+  final pathData = _parsePathDataAttribute(pathElement);
   if (pathData.isEmpty) return null;
   final builder = VectorPathBuilder(pathData);
   for (final attribute in pathElement.androidNSAttributes) {
@@ -197,8 +191,7 @@ VectorPath? _parsePathElement(XmlElement pathElement) {
 }
 
 VectorGroup? _parseClipPathElement(XmlElement clipPathElement) {
-  final clipPathData =
-      parsePathData(clipPathElement.getAndroidNSAttribute<String>('pathData'));
+  final clipPathData = _parsePathDataAttribute(clipPathElement);
   return clipPathData.isNotEmpty
       ? VectorGroupBuilder().clipPathData(clipPathData).build()
       : null;
@@ -222,4 +215,11 @@ BlendMode? _blendModeFromString(String valueAsString) {
       return BlendMode.plus;
   }
   return null;
+}
+
+List<PathNode> _parsePathDataAttribute(XmlElement pathElement) {
+  final pathDataAsString =
+      pathElement.getAndroidNSAttribute<String>('pathData');
+  if (pathDataAsString.isNullOrEmpty) return List.empty();
+  return mapPathCommands(vgc.parseSvgPathData(pathDataAsString!));
 }

@@ -1,10 +1,12 @@
 import 'dart:collection';
 
-import 'package:svg2iv_common/extensions.dart';
-import 'package:svg2iv_common/models.dart';
-import 'package:svg2iv_common/src/file_parser.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart' as vgc;
+
+import '../../models.dart';
+import '../extensions.dart';
+import '../file_parser.dart';
+import '../util/path_command_mapper.dart';
 
 ImageVector parseSvgElement(String xml) {
   final vgc.VectorInstructions instructions;
@@ -39,7 +41,7 @@ Iterable<VectorNode> _mapInstructions(vgc.VectorInstructions instructions) {
         }
         break;
       case vgc.DrawCommandType.clip:
-        final pathNodes = _mapPathCommands(
+        final pathNodes = mapPathCommands(
           instructions.paths[command.objectId!],
         );
         groupBuilderStack.addLast(
@@ -62,7 +64,7 @@ Iterable<VectorNode> _mapInstructions(vgc.VectorInstructions instructions) {
 }
 
 VectorPath _mapPath(vgc.Path path, vgc.Paint? paint) {
-  final pathBuilder = VectorPathBuilder(_mapPathCommands(path))
+  final pathBuilder = VectorPathBuilder(mapPathCommands(path))
       .pathFillType(_mapPathFillType(path.fillType));
   if (paint != null) {
     final fill = paint.fill?.let(_mapFill);
@@ -85,38 +87,6 @@ VectorPath _mapPath(vgc.Path path, vgc.Paint? paint) {
     }
   }
   return pathBuilder.build();
-}
-
-List<PathNode> _mapPathCommands(vgc.Path path) {
-  return path.commands.map((command) {
-    switch (command.type) {
-      case vgc.PathCommandType.move:
-        final moveToCommand = command as vgc.MoveToCommand;
-        return PathNode(
-          PathDataCommand.moveTo,
-          [moveToCommand.x, moveToCommand.y],
-        );
-      case vgc.PathCommandType.line:
-        final lineToCommand = command as vgc.LineToCommand;
-        return PathNode(
-          PathDataCommand.lineTo,
-          [lineToCommand.x, lineToCommand.y],
-        );
-      case vgc.PathCommandType.cubic:
-        final cubicToCommand = command as vgc.CubicToCommand;
-        return PathNode(
-          PathDataCommand.curveTo,
-          [
-            cubicToCommand.controlPoint1.x,
-            cubicToCommand.controlPoint1.y,
-            cubicToCommand.controlPoint2.x,
-            cubicToCommand.controlPoint2.y
-          ],
-        );
-      case vgc.PathCommandType.close:
-        return PathNode(PathDataCommand.close, List.empty());
-    }
-  }).toNonGrowableList();
 }
 
 PathFillType _mapPathFillType(vgc.PathFillType type) =>

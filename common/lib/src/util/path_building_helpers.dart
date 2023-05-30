@@ -31,9 +31,9 @@ List<PathNode> obtainPathNodesForRectangle({
   if (radii == null || radii.isEmpty || radii.every((it) => it == 0.0)) {
     return [
       PathNode(PathDataCommand.moveTo, [bounds.left, bounds.top]),
-      PathNode(PathDataCommand.relativeHorizontalLineTo, [bounds.width]),
-      PathNode(PathDataCommand.relativeVerticalLineTo, [bounds.height]),
-      PathNode(PathDataCommand.relativeHorizontalLineTo, [-bounds.width]),
+      PathNode(PathDataCommand.lineTo, [bounds.right, bounds.top]),
+      PathNode(PathDataCommand.lineTo, [bounds.right, bounds.bottom]),
+      PathNode(PathDataCommand.lineTo, [bounds.left, bounds.bottom]),
       PathNode(PathDataCommand.close, List.empty()),
     ];
   } else {
@@ -127,16 +127,17 @@ List<PathNode> obtainPathNodesForEllipse({
   required double ry,
 }) {
   final isShapeACircle = rx == ry;
+  final x = cx - rx;
   final diameter = 2 * rx;
   return [
-    PathNode(PathDataCommand.moveTo, [cx - rx, cy]),
+    PathNode(PathDataCommand.moveTo, [x, cy]),
     PathNode(
-      PathDataCommand.relativeArcTo,
-      [rx, ry, 0.0, true, isShapeACircle, diameter, 0.0],
+      PathDataCommand.arcTo,
+      [rx, ry, 0.0, true, isShapeACircle, x + diameter, cy],
     ),
     PathNode(
-      PathDataCommand.relativeArcTo,
-      [rx, ry, 0.0, true, isShapeACircle, -diameter, 0.0],
+      PathDataCommand.arcTo,
+      [rx, ry, 0.0, true, isShapeACircle, x, cy],
     ),
     if (isShapeACircle) PathNode(PathDataCommand.close, List.empty()),
   ];

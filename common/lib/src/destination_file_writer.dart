@@ -11,35 +11,6 @@ import 'model/vector_group.dart';
 import 'model/vector_node.dart';
 import 'model/vector_path.dart';
 
-const _commandsToFunctionAndClassNames = {
-  PathDataCommand.close: Tuple2('close', 'Close'),
-  PathDataCommand.moveTo: Tuple2('moveTo', 'MoveTo'),
-  PathDataCommand.relativeMoveTo: Tuple2('moveToRelative', 'RelativeMoveTo'),
-  PathDataCommand.lineTo: Tuple2('lineTo', 'LineTo'),
-  PathDataCommand.relativeLineTo: Tuple2('lineToRelative', 'RelativeLineTo'),
-  PathDataCommand.horizontalLineTo: Tuple2('horizontalLineTo', 'HorizontalTo'),
-  PathDataCommand.relativeHorizontalLineTo:
-      Tuple2('horizontalLineToRelative', 'RelativeHorizontalTo'),
-  PathDataCommand.verticalLineTo: Tuple2('verticalLineTo', 'VerticalTo'),
-  PathDataCommand.relativeVerticalLineTo:
-      Tuple2('verticalLineToRelative', 'RelativeVerticalTo'),
-  PathDataCommand.curveTo: Tuple2('curveTo', 'CurveTo'),
-  PathDataCommand.relativeCurveTo: Tuple2('curveToRelative', 'RelativeCurveTo'),
-  PathDataCommand.smoothCurveTo:
-      Tuple2('reflectiveCurveTo', 'ReflectiveCurveTo'),
-  PathDataCommand.relativeSmoothCurveTo:
-      Tuple2('reflectiveCurveToRelative', 'RelativeReflectiveCurveTo'),
-  PathDataCommand.quadraticBezierCurveTo: Tuple2('quadTo', 'QuadTo'),
-  PathDataCommand.relativeQuadraticBezierCurveTo:
-      Tuple2('quadToRelative', 'RelativeQuadTo'),
-  PathDataCommand.smoothQuadraticBezierCurveTo:
-      Tuple2('reflectiveQuadTo', 'ReflectiveQuadTo'),
-  PathDataCommand.relativeSmoothQuadraticBezierCurveTo:
-      Tuple2('reflectiveQuadToRelative', 'RelativeReflectiveQuadTo'),
-  PathDataCommand.arcTo: Tuple2('arcTo', 'ArcTo'),
-  PathDataCommand.relativeArcTo: Tuple2('arcToRelative', 'RelativeArcTo'),
-};
-
 Future<void> writeImageVectorsToFile(
   String destinationPath,
   List<ImageVector> imageVectors, {
@@ -450,29 +421,27 @@ void _writePathNodes(
   bool asClassConstructorCall = false,
 }) {
   for (final node in nodes) {
-    _commandsToFunctionAndClassNames[node.command]?.let(
-      (pair) {
-        final name =
-            asClassConstructorCall ? 'PathNode.${pair.item2}' : pair.item1;
-        if (node.command == PathDataCommand.close && asClassConstructorCall) {
-          sink.writeIndent(indentationLevel, '$name,');
-        } else {
-          sink
-            ..writeIndent(indentationLevel, '$name(')
-            ..writeAll(
-              node.arguments.map(
-                (argument) => argument is double
-                    ? numToKotlinFloatAsString(argument)
-                    : argument,
-              ),
-              ', ',
-            )
-            ..write(')');
-          if (asClassConstructorCall) sink.write(',');
-        }
-        sink.writeln();
-      },
-    );
+    final commandName = node.command.name;
+    final functionName = asClassConstructorCall
+        ? 'PathNode.${commandName.capitalizeCharAt(0)}'
+        : commandName;
+    if (node.command == PathDataCommand.close && asClassConstructorCall) {
+      sink.writeIndent(indentationLevel, '$functionName,');
+    } else {
+      sink
+        ..writeIndent(indentationLevel, '$functionName(')
+        ..writeAll(
+          node.arguments.map(
+            (argument) => argument is double
+                ? numToKotlinFloatAsString(argument)
+                : argument,
+          ),
+          ', ',
+        )
+        ..write(')');
+      if (asClassConstructorCall) sink.write(',');
+    }
+    sink.writeln();
   }
 }
 

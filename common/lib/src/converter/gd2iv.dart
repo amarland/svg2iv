@@ -4,10 +4,7 @@ import 'package:xml/xml.dart';
 
 import '../extensions.dart';
 import '../file_parser.dart';
-import '../model/brush.dart';
-import '../model/image_vector.dart';
-import '../model/vector_node.dart';
-import '../model/vector_path.dart';
+import '../../models.dart';
 import '../util/android_resources.dart';
 import '../util/path_building_helpers.dart';
 
@@ -100,7 +97,7 @@ VectorPathBuilder _buildLinePathGeometry(
 ) {
   return VectorPathBuilder([
     PathNode(PathDataCommand.moveTo, [0.0, bounds.height / 2.0]),
-    PathNode(PathDataCommand.horizontalLineTo, [bounds.right]),
+    PathNode(PathDataCommand.lineTo, [bounds.right, 0.0]),
   ]);
 }
 
