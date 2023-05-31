@@ -69,13 +69,13 @@ path(
           .transformations(transformations)
           .clipPathData(
             const [
-              PathNode(PathDataCommand.lineTo, [12.0, 0.0])
+              PathNode(PathDataCommand.lineTo, [12.0, 6.0])
             ],
           )
           .addNode(
             VectorPathBuilder(
               const [
-                PathNode(PathDataCommand.lineTo, [24.0, 0.0])
+                PathNode(PathDataCommand.lineTo, [24.0, 12.0])
               ],
             ).build(),
           )
@@ -87,7 +87,7 @@ path(
                 .addNode(
                   VectorPathBuilder(
                     const [
-                      PathNode(PathDataCommand.lineTo, [0.0, 6.0])
+                      PathNode(PathDataCommand.lineTo, [3.0, 6.0])
                     ],
                   ).build(),
                 )
@@ -105,17 +105,17 @@ group(
     translationX = ${numToKotlinFloatAsString(transformations.translation!.x)},
     translationY = ${numToKotlinFloatAsString(transformations.translation!.y)},
     clipPathData = listOf(
-        PathNode.HorizontalTo(12F),
+        PathNode.LineTo(12F, 6F),
     ),
 ) {
     path {
-        horizontalLineTo(24F)
+        lineTo(24F, 12F)
     }
     group(
         translationX = 2.5F,
     ) {
         path {
-            verticalLineTo(6F)
+            lineTo(3F, 6F)
         }
     }
 }
@@ -232,7 +232,7 @@ group(
 
 const _pathData = [
   PathNode(PathDataCommand.moveTo, [9.72, 10.93]),
-  PathNode(PathDataCommand.lineTo, [0.0, 2.59]),
+  PathNode(PathDataCommand.lineTo, [9.72, 2.59]),
   PathNode(
     PathDataCommand.arcTo,
     [1.65, 1.65, 0.0, false, false, 8.0, 1.0],
@@ -241,7 +241,7 @@ const _pathData = [
     PathDataCommand.arcTo,
     [1.650, 1.6500, 0.0, false, false, 6.28, 2.59],
   ),
-  PathNode(PathDataCommand.lineTo, [0.0, 11.0]),
+  PathNode(PathDataCommand.lineTo, [6.28, 11.0]),
   PathNode(
     PathDataCommand.arcTo,
     [2.11, 2.11, 0.0, false, false, -0.83, 1.65],
@@ -263,26 +263,26 @@ const _pathData = [
 
 const _pathDataAsString = '''
     moveTo(9.72F, 10.93F)
-    verticalLineTo(2.59F)
+    lineTo(9.72F, 2.59F)
     arcTo(1.65F, 1.65F, 0F, false, false, 8F, 1F)
     arcTo(1.65F, 1.65F, 0F, false, false, 6.28F, 2.59F)
-    verticalLineTo(11F)
-    arcToRelative(2.11F, 2.11F, 0F, false, false, -0.83F, 1.65F)
+    lineTo(6.28F, 11F)
+    arcTo(2.11F, 2.11F, 0F, false, false, -0.83F, 1.65F)
     arcTo(2.48F, 2.48F, 0F, false, false, 8F, 15F)
-    arcToRelative(2.44F, 2.44F, 0F, false, false, 2.55F, -2.35F)
+    arcTo(2.44F, 2.44F, 0F, false, false, 2.55F, -2.35F)
     arcTo(2.34F, 2.34F, 0F, false, false, 9.72F, 10.93F)
     close()''';
 
 String _pathDataAsNonDslString({required int indentationLevel}) => '''
 listOf(
     PathNode.MoveTo(9.72F, 10.93F),
-    PathNode.VerticalTo(2.59F),
+    PathNode.LineTo(9.72F, 2.59F),
     PathNode.ArcTo(1.65F, 1.65F, 0F, false, false, 8F, 1F),
     PathNode.ArcTo(1.65F, 1.65F, 0F, false, false, 6.28F, 2.59F),
-    PathNode.VerticalTo(11F),
-    PathNode.RelativeArcTo(2.11F, 2.11F, 0F, false, false, -0.83F, 1.65F),
+    PathNode.LineTo(6.28F, 11F),
+    PathNode.ArcTo(2.11F, 2.11F, 0F, false, false, -0.83F, 1.65F),
     PathNode.ArcTo(2.48F, 2.48F, 0F, false, false, 8F, 15F),
-    PathNode.RelativeArcTo(2.44F, 2.44F, 0F, false, false, 2.55F, -2.35F),
+    PathNode.ArcTo(2.44F, 2.44F, 0F, false, false, 2.55F, -2.35F),
     PathNode.ArcTo(2.34F, 2.34F, 0F, false, false, 9.72F, 10.93F),
     PathNode.Close,
 )'''

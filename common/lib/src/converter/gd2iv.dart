@@ -2,9 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
 
+import '../../models.dart';
 import '../extensions.dart';
 import '../file_parser.dart';
-import '../../models.dart';
 import '../util/android_resources.dart';
 import '../util/path_building_helpers.dart';
 
@@ -87,7 +87,12 @@ VectorPathBuilder _buildOvalPathGeometry(
   final rx = bounds.width / 2.0;
   final ry = bounds.height / 2.0;
   return VectorPathBuilder(
-    obtainPathNodesForEllipse(cx: rx, cy: ry, rx: rx, ry: ry),
+    obtainPathNodesForEllipse(
+      cx: bounds.left + rx,
+      cy: bounds.top + ry,
+      rx: rx,
+      ry: ry,
+    ),
   );
 }
 
@@ -96,8 +101,8 @@ VectorPathBuilder _buildLinePathGeometry(
   Rect bounds,
 ) {
   return VectorPathBuilder([
-    PathNode(PathDataCommand.moveTo, [0.0, bounds.height / 2.0]),
-    PathNode(PathDataCommand.lineTo, [bounds.right, 0.0]),
+    PathNode(PathDataCommand.moveTo, [bounds.left, bounds.top]),
+    PathNode(PathDataCommand.lineTo, [bounds.right, bounds.bottom]),
   ]);
 }
 
@@ -115,16 +120,16 @@ VectorPathBuilder _buildRingPathGeometry(
   final thickness =
       rootElement.getAndroidNSAttribute<Dimension>('thickness')?.value ??
           bounds.width / thicknessRatio;
-  final cx = bounds.width / 2.0;
-  final cy = bounds.height / 2.0;
+  final rx = bounds.width / 2.0;
+  final ry = bounds.height / 2.0;
+  final cx = bounds.left + rx;
+  final cy = bounds.top + ry;
   final innerBounds = Rect.fromRect(bounds);
   innerBounds.inset(cx - innerRadius, cy - innerRadius);
   final irx = innerBounds.width / 2.0;
   final iry = innerBounds.height / 2.0;
   bounds = Rect.fromRect(innerBounds);
   bounds.inset(-thickness, -thickness);
-  final rx = bounds.width / 2.0;
-  final ry = bounds.height / 2.0;
   final pathData = obtainPathNodesForEllipse(cx: cx, cy: cy, rx: rx, ry: ry) +
       obtainPathNodesForEllipse(cx: cx, cy: cy, rx: irx, ry: iry);
   return VectorPathBuilder(pathData).pathFillType(PathFillType.evenOdd);

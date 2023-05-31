@@ -23,10 +23,12 @@ List<PathNode> mapPathCommands(vgc.Path path) {
         return PathNode(
           PathDataCommand.curveTo,
           [
-            cubicToCommand.controlPoint1.x,
-            cubicToCommand.controlPoint1.y,
-            cubicToCommand.controlPoint2.x,
-            cubicToCommand.controlPoint2.y
+            cubicToCommand.x1,
+            cubicToCommand.y1,
+            cubicToCommand.x2,
+            cubicToCommand.y2,
+            cubicToCommand.x3,
+            cubicToCommand.y3
           ],
         );
       case vgc.PathCommandType.close:
