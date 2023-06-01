@@ -210,10 +210,10 @@ group(
           .build();
       final dependencyAnnotations = '''
 @file:Repository("https://maven.pkg.jetbrains.space/public/p/compose/dev/")
-@file:DependsOn("org.jetbrains.compose.ui:ui-desktop:1.0.0-alpha3")
-@file:DependsOn("org.jetbrains.compose.ui:ui-geometry-desktop:1.0.0-alpha3")
-@file:DependsOn("org.jetbrains.compose.ui:ui-graphics-desktop:1.0.0-alpha3")
-@file:DependsOn("org.jetbrains.compose.ui:ui-unit-desktop:1.0.0-alpha3")
+@file:DependsOn("org.jetbrains.compose.ui:ui-desktop:1.4.0")
+@file:DependsOn("org.jetbrains.compose.ui:ui-geometry-desktop:1.4.0")
+@file:DependsOn("org.jetbrains.compose.ui:ui-graphics-desktop:1.4.0")
+@file:DependsOn("org.jetbrains.compose.ui:ui-unit-desktop:1.4.0")
 
 ''';
       final generatedSourceBuffer = StringBuffer(dependencyAnnotations);
