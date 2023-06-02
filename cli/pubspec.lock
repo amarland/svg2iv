@@ -21,10 +21,10 @@ packages:
     dependency: "direct main"
     description:
       name: cbor
-      sha256: a44a7e6e40d0b196b04af30282661ffc5d6b8b2bcb1d5200f422194c6e0f58fb
+      sha256: f5d604ca0da54d7c50b7f39bd65bc1f002ac5573f5aeff5dbef1026efe864ec7
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.2"
+    version: "6.0.0"
   collection:
     dependency: transitive
     description:
@@ -61,10 +61,10 @@ packages:
     dependency: "direct dev"
     description:
       name: lints
-      sha256: "6b0206b0bf4f04961fc5438198ccb3a885685cd67d4d4a32cc20ad7f8adbe015"
+      sha256: "0a217c6c989d21039f1498c3ed9f3ed71b354e69873f13a8dfc3c9fe76f1b452"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   meta:
     dependency: transitive
     description:
