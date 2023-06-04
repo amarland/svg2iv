@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
 
 import '../extensions.dart';
+import 'path_node.dart';
 import 'transformations.dart';
 import 'vector_node.dart';
-import 'vector_path.dart';
 
 class VectorGroup extends VectorNode {
   static const defaultScaleX = 1.0;
@@ -13,7 +13,7 @@ class VectorGroup extends VectorNode {
   static const defaultTranslationX = 0.0;
   static const defaultTranslationY = 0.0;
 
-  const VectorGroup._init(
+  const VectorGroup._(
     this.nodes, {
     String? id,
     this.rotation,
@@ -41,7 +41,7 @@ class VectorGroup extends VectorNode {
     Translation? translation,
     List<PathNode>? clipPathData,
   }) {
-    return VectorGroup._init(
+    return VectorGroup._(
       nodes ?? this.nodes,
       rotation: rotation ?? this.rotation,
       scale: scale ?? this.scale,
@@ -82,10 +82,6 @@ class VectorGroupBuilder
   List<PathNode>? _clipPathData;
 
   VectorGroupBuilder addNode(VectorNode node) {
-    if (node is VectorGroup) {
-      final group = node;
-      node = group.copyWith(nodes: _mergePresentationAttributes(group.nodes));
-    }
     _nodes.add(node);
     return this;
   }
@@ -102,44 +98,8 @@ class VectorGroupBuilder
     return this;
   }
 
-  List<VectorNode> _mergePresentationAttributes(List<VectorNode> nodes) {
-    // "merge" presentation attributes, even when non-applicable
-    return nodes.map(
-      (node) {
-        if (node is VectorPath) {
-          final newFill = node.fill ?? fill_;
-          final newStroke = node.stroke ?? stroke_;
-          return node.copyWith(
-            fill: newFill,
-            fillAlpha: multiplyAlphas(
-              multiplyAlphas(node.fillAlpha, fillAlpha_),
-              alpha_?.takeIf((_) => newFill != null),
-            ),
-            stroke: newStroke,
-            strokeAlpha: multiplyAlphas(
-              multiplyAlphas(node.strokeAlpha, strokeAlpha_),
-              alpha_?.takeIf((_) => newStroke != null),
-            ),
-            strokeLineWidth: node.strokeLineWidth ?? strokeLineWidth_,
-            strokeLineCap: node.strokeLineCap ?? strokeLineCap_,
-            strokeLineJoin: node.strokeLineJoin ?? strokeLineJoin_,
-            strokeLineMiter: node.strokeLineMiter ?? strokeLineMiter_,
-            pathFillType: node.pathFillType ?? pathFillType_,
-          );
-        } else {
-          return (node as VectorGroup).copyWith(
-            nodes: _mergePresentationAttributes(node.nodes),
-          );
-        }
-      },
-    ).toList();
-  }
-
   @override
   VectorGroup build() {
-    if (hasAttributes_) {
-      _nodes = _mergePresentationAttributes(_nodes);
-    }
     if (_rotation == null &&
         _scale == null &&
         _translation == null &&
@@ -158,10 +118,7 @@ class VectorGroupBuilder
     final indicesOfGroupsToRemove = <int>[];
     _nodes.forEachIndexed((index, node) {
       if (node is VectorGroup) {
-        if (node.rotation == null &&
-            node.scale == null &&
-            node.translation == null &&
-            node.clipPathData.isNullOrEmpty) {
+        if (!node.definesTransformations) {
           // the child is useless, merge it with its parent (the current group)
           indicesOfGroupsToRemove.add(index);
         }
@@ -177,7 +134,7 @@ class VectorGroupBuilder
       insertedNodeCount += group.nodes.length - 1;
       group.id?.let((id) => this.id(id));
     }
-    return VectorGroup._init(
+    return VectorGroup._(
       _nodes.toNonGrowableList(),
       id: id_,
       rotation: _rotation,

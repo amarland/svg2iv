@@ -23,9 +23,8 @@ void main() {
     });
 
     test('with only a solid fill color', () {
-      final path = VectorPathBuilder(_pathData)
-          .fill(SolidColor(0x11223344))
-          .build();
+      final path =
+          VectorPathBuilder(_pathData).fill(SolidColor(0x11223344)).build();
       final expected = (StringBuffer('''
 path(
     fill = SolidColor(Color(0x11223344)),
@@ -67,17 +66,9 @@ path(
       final group = VectorGroupBuilder()
           .id('test_group')
           .transformations(transformations)
-          .clipPathData(
-            const [
-              PathNode(PathDataCommand.lineTo, [12.0, 6.0])
-            ],
-          )
+          .clipPathData(const [LineToNode(12.0, 6.0)])
           .addNode(
-            VectorPathBuilder(
-              const [
-                PathNode(PathDataCommand.lineTo, [24.0, 12.0])
-              ],
-            ).build(),
+            VectorPathBuilder(const [LineToNode(24.0, 12.0)]).build(),
           )
           .addNode(
             VectorGroupBuilder()
@@ -85,25 +76,20 @@ path(
                   TransformationsBuilder().translate(x: 2.5).build()!,
                 )
                 .addNode(
-                  VectorPathBuilder(
-                    const [
-                      PathNode(PathDataCommand.lineTo, [3.0, 6.0])
-                    ],
-                  ).build(),
+                  VectorPathBuilder(const [LineToNode(3.0, 6.0)]).build(),
                 )
                 .build(),
           )
           .build();
-      // `pivotX` and `pivotY` are omitted because "absorbed" by
-      // the translation; refer to `transformations.dart`
       final expected = '''
 group(
     name = "test_group",
     rotate = ${numToKotlinFloatAsString(transformations.rotation!.angle)},
+    pivotX = ${numToKotlinFloatAsString(transformations.rotation!.pivotX!)},
+    pivotY = ${numToKotlinFloatAsString(transformations.rotation!.pivotY!)},
     scaleX = ${numToKotlinFloatAsString(transformations.scale!.x)},
     scaleY = ${numToKotlinFloatAsString(transformations.scale!.y!)},
     translationX = ${numToKotlinFloatAsString(transformations.translation!.x)},
-    translationY = ${numToKotlinFloatAsString(transformations.translation!.y)},
     clipPathData = listOf(
         PathNode.LineTo(12F, 6F),
     ),
@@ -179,13 +165,14 @@ group(
       actualTest(
         description,
         ImageVectorBuilder(24.0, 24.0)
-            .addNode(VectorGroupBuilder()
-                .transformations(
-                  TransformationsBuilder().scale(x: 0.5, y: 0.5).build()!,
-                )
-                .fillAlpha(0.3)
-                .addNode(vectorPath)
-                .build())
+            .addNode(
+              VectorGroupBuilder()
+                  .transformations(
+                    TransformationsBuilder().scale(x: 0.5, y: 0.5).build()!,
+                  )
+                  .addNode(vectorPath)
+                  .build(),
+            )
             .addNode(VectorPathBuilder(_pathData).build())
             .build(),
         intersection,
@@ -231,34 +218,64 @@ group(
 }
 
 const _pathData = [
-  PathNode(PathDataCommand.moveTo, [9.72, 10.93]),
-  PathNode(PathDataCommand.lineTo, [9.72, 2.59]),
-  PathNode(
-    PathDataCommand.arcTo,
-    [1.65, 1.65, 0.0, false, false, 8.0, 1.0],
+  MoveToNode(9.72, 10.93),
+  LineToNode(9.72, 2.59),
+  ArcToNode(
+    rx: 1.65,
+    ry: 1.65,
+    angle: 0.0,
+    largeArc: false,
+    sweep: false,
+    x: 8.0,
+    y: 1.0,
   ),
-  PathNode(
-    PathDataCommand.arcTo,
-    [1.650, 1.6500, 0.0, false, false, 6.28, 2.59],
+  ArcToNode(
+    rx: 1.650,
+    ry: 1.6500,
+    angle: 0.0,
+    largeArc: false,
+    sweep: false,
+    x: 6.28,
+    y: 2.59,
   ),
-  PathNode(PathDataCommand.lineTo, [6.28, 11.0]),
-  PathNode(
-    PathDataCommand.arcTo,
-    [2.11, 2.11, 0.0, false, false, -0.83, 1.65],
+  LineToNode(6.28, 11.0),
+  ArcToNode(
+    rx: 2.11,
+    ry: 2.11,
+    angle: 0.0,
+    largeArc: false,
+    sweep: false,
+    x: -0.83,
+    y: 1.65,
   ),
-  PathNode(
-    PathDataCommand.arcTo,
-    [2.48, 2.48, 0.0, false, false, 8.0, 15.0],
+  ArcToNode(
+    rx: 2.48,
+    ry: 2.48,
+    angle: 0.0,
+    largeArc: false,
+    sweep: false,
+    x: 8.0,
+    y: 15.0,
   ),
-  PathNode(
-    PathDataCommand.arcTo,
-    [2.44, 2.44, 0.0, false, false, 2.55, -2.35],
+  ArcToNode(
+    rx: 2.44,
+    ry: 2.44,
+    angle: 0.0,
+    largeArc: false,
+    sweep: false,
+    x: 2.55,
+    y: -2.35,
   ),
-  PathNode(
-    PathDataCommand.arcTo,
-    [2.34, 2.34, 0.0, false, false, 9.72, 10.93],
+  ArcToNode(
+    rx: 2.34,
+    ry: 2.34,
+    angle: 0.0,
+    largeArc: false,
+    sweep: false,
+    x: 9.72,
+    y: 10.93,
   ),
-  PathNode(PathDataCommand.close, []),
+  CloseNode(),
 ];
 
 const _pathDataAsString = '''

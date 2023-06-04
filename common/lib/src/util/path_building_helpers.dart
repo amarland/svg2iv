@@ -1,4 +1,4 @@
-import '../model/vector_path.dart';
+import '../model/path_node.dart';
 
 class Rect {
   Rect(this.left, this.top, this.right, this.bottom);
@@ -30,11 +30,11 @@ List<PathNode> obtainPathNodesForRectangle({
 }) {
   if (radii == null || radii.isEmpty || radii.every((it) => it == 0.0)) {
     return [
-      PathNode(PathDataCommand.moveTo, [bounds.left, bounds.top]),
-      PathNode(PathDataCommand.lineTo, [bounds.right, bounds.top]),
-      PathNode(PathDataCommand.lineTo, [bounds.right, bounds.bottom]),
-      PathNode(PathDataCommand.lineTo, [bounds.left, bounds.bottom]),
-      PathNode(PathDataCommand.close, List.empty()),
+      MoveToNode(bounds.left, bounds.top),
+      LineToNode(bounds.right, bounds.top),
+      LineToNode(bounds.right, bounds.bottom),
+      LineToNode(bounds.left, bounds.bottom),
+      const CloseNode(),
     ];
   } else {
     final halfWidth = bounds.width / 2;
@@ -48,73 +48,46 @@ List<PathNode> obtainPathNodesForRectangle({
     final bottomLeftX = radii[6] > halfWidth ? halfWidth : radii[6];
     final bottomLeftY = radii[7] > halfHeight ? halfHeight : radii[7];
     return [
-      PathNode(
-        PathDataCommand.moveTo,
-        [bounds.left + topLeftX, bounds.top],
+      MoveToNode(bounds.left + topLeftX, bounds.top),
+      LineToNode(bounds.right - topRightX, bounds.top),
+      ArcToNode(
+        rx: topRightX,
+        ry: topRightY,
+        angle: 0.0,
+        largeArc: false,
+        sweep: true,
+        x: bounds.right,
+        y: bounds.top + topRightY,
       ),
-      PathNode(
-        PathDataCommand.lineTo,
-        [bounds.right - topRightX, bounds.top],
+      LineToNode(bounds.right, bounds.bottom - bottomRightY),
+      ArcToNode(
+        rx: bottomRightX,
+        ry: bottomRightY,
+        angle: 0.0,
+        largeArc: false,
+        sweep: true,
+        x: bounds.right - bottomRightX,
+        y: bounds.bottom,
       ),
-      PathNode(
-        PathDataCommand.arcTo,
-        [
-          topRightX,
-          topRightY,
-          0.0,
-          false,
-          true,
-          bounds.right,
-          bounds.top + topRightY
-        ],
+      LineToNode(bounds.left + bottomLeftX, bounds.bottom),
+      ArcToNode(
+        rx: bottomLeftX,
+        ry: bottomLeftY,
+        angle: 0.0,
+        largeArc: false,
+        sweep: true,
+        x: bounds.left,
+        y: bounds.bottom - bottomLeftY,
       ),
-      PathNode(
-        PathDataCommand.lineTo,
-        [bounds.right, bounds.bottom - bottomRightY],
-      ),
-      PathNode(
-        PathDataCommand.arcTo,
-        [
-          bottomRightX,
-          bottomRightY,
-          0.0,
-          false,
-          true,
-          bounds.right - bottomRightX,
-          bounds.bottom
-        ],
-      ),
-      PathNode(
-        PathDataCommand.lineTo,
-        [bounds.left + bottomLeftX, bounds.bottom],
-      ),
-      PathNode(
-        PathDataCommand.arcTo,
-        [
-          bottomLeftX,
-          bottomLeftY,
-          0.0,
-          false,
-          true,
-          bounds.left,
-          bounds.bottom - bottomLeftY
-        ],
-      ),
-      PathNode(
-        PathDataCommand.lineTo,
-        [bounds.left, bounds.top + topLeftY],
-      ),
-      PathNode(
-        PathDataCommand.arcTo,
-        [
-          topLeftX,
-          topLeftY,
-          0.0,
-          false,
-          true,
-          bounds.left + topLeftX,
-          bounds.top
-        ],
+      LineToNode(bounds.left, bounds.top + topLeftY),
+      ArcToNode(
+        rx: topLeftX,
+        ry: topLeftY,
+        angle: 0.0,
+        largeArc: false,
+        sweep: true,
+        x: bounds.left + topLeftX,
+        y: bounds.top,
       ),
     ];
   }
@@ -130,15 +103,25 @@ List<PathNode> obtainPathNodesForEllipse({
   final x = cx - rx;
   final diameter = 2 * rx;
   return [
-    PathNode(PathDataCommand.moveTo, [x, cy]),
-    PathNode(
-      PathDataCommand.arcTo,
-      [rx, ry, 0.0, true, isShapeACircle, x + diameter, cy],
+    MoveToNode(x, cy),
+    ArcToNode(
+      rx: rx,
+      ry: ry,
+      angle: 0.0,
+      largeArc: true,
+      sweep: isShapeACircle,
+      x: x + diameter,
+      y: cy,
     ),
-    PathNode(
-      PathDataCommand.arcTo,
-      [rx, ry, 0.0, true, isShapeACircle, x, cy],
+    ArcToNode(
+      rx: rx,
+      ry: ry,
+      angle: 0.0,
+      largeArc: true,
+      sweep: isShapeACircle,
+      x: x,
+      y: cy,
     ),
-    if (isShapeACircle) PathNode(PathDataCommand.close, List.empty()),
+    if (isShapeACircle) const CloseNode(),
   ];
 }

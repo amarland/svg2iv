@@ -90,24 +90,3 @@ extension BrushToPaintMapping on Brush {
     return paint;
   }
 }
-
-extension PathNodesToSvgPathDataStringMapping on List<PathNode> {
-  String toSvgPathDataString() {
-    return map((segment) {
-      final letter = switch (segment.command) {
-        PathDataCommand.moveTo => 'M',
-        PathDataCommand.lineTo => 'L',
-        PathDataCommand.curveTo => 'C',
-        PathDataCommand.arcTo => 'A',
-        PathDataCommand.close => 'Z',
-      };
-      return letter +
-          (segment.command != PathDataCommand.close ? ' ' : '') +
-          segment.arguments
-              .map((value) => value is bool
-                  ? (value ? '1' : '0')
-                  : (value as double).toStringWithMaxDecimals(5))
-              .join(' ');
-    }).join(' ');
-  }
-}

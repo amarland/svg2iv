@@ -15,9 +15,11 @@ ImageVector parseSvgElement(String xml) {
   } on StateError catch (e) {
     throw ParserException(e.message);
   }
-  return ImageVectorBuilder(instructions.width, instructions.height)
-      .addNodes(_mapInstructions(instructions))
-      .build();
+  final builder = ImageVectorBuilder(instructions.width, instructions.height);
+  for (final vectorNode in _mapInstructions(instructions)) {
+    builder.addNode(vectorNode);
+  }
+  return builder.build();
 }
 
 Iterable<VectorNode> _mapInstructions(vgc.VectorInstructions instructions) {

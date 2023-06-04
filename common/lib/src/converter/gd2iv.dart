@@ -101,8 +101,8 @@ VectorPathBuilder _buildLinePathGeometry(
   Rect bounds,
 ) {
   return VectorPathBuilder([
-    PathNode(PathDataCommand.moveTo, [bounds.left, bounds.top]),
-    PathNode(PathDataCommand.lineTo, [bounds.right, bounds.bottom]),
+    MoveToNode(bounds.left, bounds.top),
+    LineToNode(bounds.right, bounds.bottom),
   ]);
 }
 

@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
+import 'package:svg2iv_common/models.dart';
 
 import '../extensions.dart';
-import 'vector_node.dart';
 
 class ImageVector {
   static const defaultTintBlendMode = BlendMode.srcIn;
 
-  ImageVector._init(
+  ImageVector._(
     this.nodes,
     this.viewportWidth,
     this.viewportHeight,
@@ -34,7 +34,7 @@ class ImageVector {
     int? tintColor,
     BlendMode? tintBlendMode,
   }) {
-    return ImageVector._init(
+    return ImageVector._(
       nodes ?? this.nodes,
       viewportWidth ?? this.viewportWidth,
       viewportHeight ?? this.viewportHeight,
@@ -112,17 +112,16 @@ class ImageVectorBuilder {
   }
 
   ImageVectorBuilder addNode(VectorNode node) {
-    _nodes.add(node);
-    return this;
-  }
-
-  ImageVectorBuilder addNodes(Iterable<VectorNode> nodes) {
-    _nodes.addAll(nodes);
+    if (node is VectorGroup && !node.definesTransformations) {
+      _nodes.addAll(node.nodes);
+    } else {
+      _nodes.add(node);
+    }
     return this;
   }
 
   ImageVector build() {
-    return ImageVector._init(
+    return ImageVector._(
       _nodes,
       _viewportWidth,
       _viewportHeight,

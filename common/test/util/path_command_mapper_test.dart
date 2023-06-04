@@ -9,11 +9,11 @@ void main() {
       test('absolute', () {
         final pathData = 'M5,5 H95 V95 H5 L5,5';
         final expectedPathNodes = const [
-          PathNode(PathDataCommand.moveTo, [5.0, 5.0]),
-          PathNode(PathDataCommand.lineTo, [95.0, 5.0]),
-          PathNode(PathDataCommand.lineTo, [95.0, 95.0]),
-          PathNode(PathDataCommand.lineTo, [5.0, 95.0]),
-          PathNode(PathDataCommand.lineTo, [5.0, 5.0]),
+          MoveToNode(5.0, 5.0),
+          LineToNode(95.0, 5.0),
+          LineToNode(95.0, 95.0),
+          LineToNode(5.0, 95.0),
+          LineToNode(5.0, 5.0),
         ];
         final actualPathNodes = mapPathCommands(
           vgc.parseSvgPathData(pathData),
@@ -24,10 +24,10 @@ void main() {
     test('with close', () {
       final pathData = 'M150,0 L75,200 L225,200 Z';
       final expectedPathNodes = const [
-        PathNode(PathDataCommand.moveTo, [150.0, 0.0]),
-        PathNode(PathDataCommand.lineTo, [75.0, 200.0]),
-        PathNode(PathDataCommand.lineTo, [225.0, 200.0]),
-        PathNode(PathDataCommand.close, []),
+        MoveToNode(150.0, 0.0),
+        LineToNode(75.0, 200.0),
+        LineToNode(225.0, 200.0),
+        CloseNode(),
       ];
       final actualPathNodes = mapPathCommands(
         vgc.parseSvgPathData(pathData),
@@ -38,11 +38,8 @@ void main() {
       test('absolute', () {
         final pathData = 'M10,80 C40,10,65,10,95,80';
         final expectedPathNodes = const [
-          PathNode(PathDataCommand.moveTo, [10.0, 80.0]),
-          PathNode(
-            PathDataCommand.curveTo,
-            [40.0, 10.0, 65.0, 10.0, 95.0, 80.0],
-          ),
+          MoveToNode(10.0, 80.0),
+          CurveToNode(40.0, 10.0, 65.0, 10.0, 95.0, 80.0),
         ];
         final actualPathNodes = mapPathCommands(
           vgc.parseSvgPathData(pathData),

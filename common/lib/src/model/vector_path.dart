@@ -2,6 +2,7 @@ import 'package:collection/collection.dart' show ListEquality;
 
 import '../extensions.dart';
 import 'brush.dart';
+import 'path_node.dart';
 import 'vector_node.dart';
 
 class VectorPath extends VectorNode {
@@ -17,7 +18,7 @@ class VectorPath extends VectorNode {
   static const defaultTrimPathEnd = 1.0;
   static const defaultTrimPathOffset = 0.0;
 
-  const VectorPath._init(
+  const VectorPath._(
     this.pathData, {
     String? id,
     this.fill,
@@ -44,9 +45,7 @@ class VectorPath extends VectorNode {
   final StrokeJoin? strokeLineJoin;
   final double? strokeLineMiter;
   final PathFillType? pathFillType;
-  final double? trimPathStart;
-  final double? trimPathEnd;
-  final double? trimPathOffset;
+  final double? trimPathStart, trimPathEnd, trimPathOffset;
 
   bool get hasAttributes => [
         id,
@@ -80,7 +79,7 @@ class VectorPath extends VectorNode {
     double? trimPathEnd,
     double? trimPathOffset,
   }) {
-    return VectorPath._init(
+    return VectorPath._(
       pathData ?? this.pathData,
       id: id ?? this.id,
       fill: fill ?? this.fill,
@@ -139,9 +138,61 @@ class VectorPathBuilder
   VectorPathBuilder(this._pathData);
 
   final List<PathNode> _pathData;
-  double? _trimPathStart;
-  double? _trimPathEnd;
-  double? _trimPathOffset;
+  Brush? _fill;
+  double? _fillAlpha;
+  Brush? _stroke;
+  double? _strokeAlpha;
+  double? _strokeLineWidth;
+  StrokeCap? _strokeLineCap;
+  StrokeJoin? _strokeLineJoin;
+  double? _strokeLineMiter;
+  PathFillType? _pathFillType;
+  double? _trimPathStart, _trimPathEnd, _trimPathOffset;
+
+  VectorPathBuilder fill(Brush fill) {
+    _fill = fill;
+    return this;
+  }
+
+  VectorPathBuilder fillAlpha(double fillAlpha) {
+    _fillAlpha = fillAlpha;
+    return this;
+  }
+
+  VectorPathBuilder stroke(Brush stroke) {
+    _stroke = stroke;
+    return this;
+  }
+
+  VectorPathBuilder strokeAlpha(double strokeAlpha) {
+    _strokeAlpha = strokeAlpha;
+    return this;
+  }
+
+  VectorPathBuilder strokeLineWidth(double strokeLineWidth) {
+    _strokeLineWidth = strokeLineWidth;
+    return this;
+  }
+
+  VectorPathBuilder strokeLineCap(StrokeCap strokeLineCap) {
+    _strokeLineCap = strokeLineCap;
+    return this;
+  }
+
+  VectorPathBuilder strokeLineJoin(StrokeJoin strokeLineJoin) {
+    _strokeLineJoin = strokeLineJoin;
+    return this;
+  }
+
+  VectorPathBuilder strokeLineMiter(double strokeLineMiter) {
+    _strokeLineMiter = strokeLineMiter;
+    return this;
+  }
+
+  VectorPathBuilder pathFillType(PathFillType pathFillType) {
+    _pathFillType = pathFillType;
+    return this;
+  }
 
   VectorPathBuilder trimPathStart(double trimPathStart) {
     _trimPathStart = trimPathStart;
@@ -160,49 +211,21 @@ class VectorPathBuilder
 
   @override
   VectorPath build() {
-    return VectorPath._init(
+    return VectorPath._(
       _pathData,
       id: id_,
-      fill: fill_,
-      fillAlpha: multiplyAlphas(fillAlpha_, alpha_),
-      stroke: stroke_,
-      strokeAlpha: multiplyAlphas(strokeAlpha_, alpha_),
-      strokeLineWidth: strokeLineWidth_,
-      strokeLineCap: strokeLineCap_,
-      strokeLineJoin: strokeLineJoin_,
-      strokeLineMiter: strokeLineMiter_,
-      pathFillType: pathFillType_,
+      fill: _fill,
+      fillAlpha: _fillAlpha,
+      stroke: _stroke,
+      strokeAlpha: _strokeAlpha,
+      strokeLineWidth: _strokeLineWidth,
+      strokeLineCap: _strokeLineCap,
+      strokeLineJoin: _strokeLineJoin,
+      strokeLineMiter: _strokeLineMiter,
+      pathFillType: _pathFillType,
       trimPathStart: _trimPathStart,
       trimPathEnd: _trimPathEnd,
       trimPathOffset: _trimPathOffset,
     );
   }
-}
-
-enum PathDataCommand {
-  close,
-  moveTo,
-  lineTo,
-  curveTo,
-  arcTo,
-}
-
-class PathNode {
-  // TODO: add named constructors for each command?
-  const PathNode(this.command, this.arguments);
-
-  final PathDataCommand command;
-  final List<dynamic> arguments;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PathNode &&
-          runtimeType == other.runtimeType &&
-          command == other.command &&
-          const ListEquality<dynamic>().equals(arguments, other.arguments);
-
-  @override
-  int get hashCode =>
-      command.hashCode ^ const ListEquality<dynamic>().hash(arguments);
 }

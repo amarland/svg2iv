@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings
-
 import 'package:collection/collection.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart' as vgc;
 import 'package:xml/xml.dart';
@@ -19,13 +17,11 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
     'height': rootElement.getAndroidNSAttribute<Dimension>('height'),
   };
   if (parsedRequiredAttributes.values.anyNull()) {
-    throw ParserException(
-      'Missing required attribute(s): ' +
-          parsedRequiredAttributes.entries
-              .where((entry) => entry.value == null)
-              .map((entry) => entry.key)
-              .join(', '),
-    );
+    final missingAttributes = parsedRequiredAttributes.entries
+        .where((entry) => entry.value == null)
+        .map((entry) => entry.key)
+        .join(', ');
+    throw ParserException('Missing required attribute(s): $missingAttributes');
   }
   final viewportWidth = parsedRequiredAttributes['viewportWidth'] as double;
   final viewportHeight = parsedRequiredAttributes['viewportHeight'] as double;
@@ -44,7 +40,7 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
   for (final element in rootElement.childElements) {
     switch (element.name.local) {
       case 'group':
-        builder.addNodes(_parseGroupElement(element));
+        builder.addNode(_parseGroupElement(element));
         break;
       case 'path':
         _parsePathElement(element)?.let(builder.addNode);
@@ -57,8 +53,7 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
   return builder.build();
 }
 
-// can be a single group or the list of its nodes if it's considered "redundant"
-Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
+VectorGroup _parseGroupElement(XmlElement groupElement) {
   final attributes = groupElement.androidNSAttributes
       .associate((attr) => attr.name.local, (attr) => attr);
   final groupBuilder = VectorGroupBuilder();
@@ -90,19 +85,13 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
   final translationY = attributes['translateY']
       ?.let((v) => parseAndroidResourceValue<double>(v));
   if (translationX != null || translationY != null) {
-    transformationsBuilder.translate(
-      x: translationX ?? 0.0,
-      y: translationY ?? 0.0,
-    );
+    transformationsBuilder.translate(x: translationX, y: translationY);
   }
   final transformations = transformationsBuilder.build();
   if (transformations != null) {
     groupBuilder.transformations(transformations);
   }
-  final group = groupBuilder.build();
-  return group.id != null || group.definesTransformations
-      ? [group]
-      : group.nodes;
+  return groupBuilder.build();
 }
 
 VectorPath? _parsePathElement(XmlElement pathElement) {
