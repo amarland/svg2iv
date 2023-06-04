@@ -5,6 +5,8 @@ import 'dart:io';
 import 'dart:typed_data' show BytesBuilder;
 
 import 'package:args/args.dart';
+import 'package:io/ansi.dart';
+import 'package:io/io.dart';
 import 'package:svg2iv/image_vector_iterable_serializer.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/parser.dart';
@@ -63,7 +65,7 @@ If not set, the generated property will be declared as a top-level property.
     argResults = argParser.parse(args);
   } on ArgParserException catch (e) {
     _logError(e.message);
-    exit(2);
+    exit(ExitCode.usage.code);
   }
   final outputOptionValue = argResults[outputOptionName] as String?;
   final isOutputCbor = argResults[cborFlagName] as bool;
@@ -93,7 +95,7 @@ If not set, the generated property will be declared as a top-level property.
             } else {
               _logError("'$path' does not exist!");
               if (argResults.rest.length == 1) {
-                exit(2);
+                exit(ExitCode.noInput.code);
               }
             }
           },
@@ -121,7 +123,7 @@ If not set, the generated property will be declared as a top-level property.
           'No SVG/XML files were found in the current working directory.'
           ' Exiting.',
         );
-        exit(2);
+        exit(ExitCode.noInput.code);
       }
     }
   }
@@ -167,7 +169,7 @@ If not set, the generated property will be declared as a top-level property.
           _logError(
             'Destination directory could not be created. Exiting.',
           );
-          exit(2);
+          exit(ExitCode.cantCreate.code);
         }
       }
     }
@@ -199,7 +201,7 @@ If not set, the generated property will be declared as a top-level property.
     }
   }
   if (errorMessages.isNotEmpty) {
-    exitCode = 1;
+    exitCode = ExitCode.software.code;
     errorMessages.forEach(_logError);
   }
   // `destination` is null if the actual destination
@@ -250,10 +252,7 @@ void _log(String message) {
 }
 
 void _logError(String message) {
-  if (stderr.supportsAnsiEscapes) {
-    message = '\u001B[31m$message\u001B[39m';
-  }
-  stderr.writeln(message);
+  stderr.writeln(red.wrap(message));
 }
 
 Iterable<File> _listSvgFilesRecursivelySync(Directory directory) sync* {
