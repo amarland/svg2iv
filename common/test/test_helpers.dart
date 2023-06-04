@@ -1,8 +1,6 @@
 import 'dart:io';
 
-import 'package:tuple/tuple.dart';
-
-Tuple2<String, String> executeKotlinScript(String source) {
+(String, String) executeKotlinScript(String source) {
   final tempDirectoryPath = Directory.systemTemp.path.replaceAll('\\', '/');
   final scriptSourceFile = File('$tempDirectoryPath/test_script.main.kts')
     ..createSync()
@@ -20,7 +18,7 @@ Tuple2<String, String> executeKotlinScript(String source) {
       isPlatformWindows ? 'powershell' : executableName,
       arguments,
     );
-    return Tuple2(result.stdout as String, result.stderr as String);
+    return (result.stdout as String, result.stderr as String);
   } finally {
     scriptSourceFile.deleteSync();
   }

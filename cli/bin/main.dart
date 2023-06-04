@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 // ignore: unnecessary_import
 import 'dart:typed_data' show BytesBuilder;
 
@@ -79,16 +80,16 @@ If not set, the generated property will be declared as a top-level property.
       ..writeln(argParser.usage);
     return;
   }
-  List<Tuple2<File, SourceDefinitionType>> sourceFiles = argResults.rest
+  List<ParseSource> sources = argResults.rest
       .expand(
         (rest) => rest.split(RegExp(',+')).where((s) => s.isNotEmpty).expand(
           (path) sync* {
             if (FileSystemEntity.isDirectorySync(path)) {
               yield* _listSvgFilesRecursivelySync(Directory(path)).map(
-                (file) => Tuple2(file, SourceDefinitionType.implicit),
+                (file) => (file, SourceDefinitionType.implicit),
               );
             } else if (FileSystemEntity.isFileSync(path)) {
-              yield Tuple2(File(path), SourceDefinitionType.explicit);
+              yield (File(path), SourceDefinitionType.explicit);
             } else {
               _logError("'$path' does not exist!");
               if (argResults.rest.length == 1) {
@@ -100,7 +101,7 @@ If not set, the generated property will be declared as a top-level property.
       )
       .toNonGrowableList();
   String? sourceString;
-  if (sourceFiles.isEmpty) {
+  if (sources.isEmpty) {
     final inBytes = BytesBuilder();
     await for (final bytes in stdin) {
       inBytes.add(bytes);
@@ -112,10 +113,10 @@ If not set, the generated property will be declared as a top-level property.
         'No source file(s) specified;'
         ' defaulting to files in the current working directory.',
       );
-      sourceFiles = _listSvgFilesRecursivelySync(Directory.current)
-          .map((file) => Tuple2(file, SourceDefinitionType.implicit))
+      sources = _listSvgFilesRecursivelySync(Directory.current)
+          .map((file) => (file, SourceDefinitionType.implicit))
           .toNonGrowableList();
-      if (sourceFiles.isEmpty) {
+      if (sources.isEmpty) {
         _logError(
           'No SVG/XML files were found in the current working directory.'
           ' Exiting.',
@@ -128,8 +129,8 @@ If not set, the generated property will be declared as a top-level property.
   if (!shouldWriteToStdOut) {
     if (outputOptionValue.isNullOrEmpty) {
       final String location;
-      final directoryPaths = sourceFiles.map((pair) {
-        final file = pair.item1;
+      final directoryPaths = sources.map((source) {
+        final (file, _) = source;
         final pathSegments = file.uri.pathSegments;
         return pathSegments.isNotEmpty
             ? pathSegments
@@ -174,8 +175,7 @@ If not set, the generated property will be declared as a top-level property.
   final imageVectors = List<ImageVector?>.empty(growable: true);
   final errorMessages = List<String>.empty(growable: true);
   if (sourceString != null) {
-    final parseResult = parseXmlString(sourceString);
-    final imageVector = parseResult.item1;
+    final (imageVector, errorMessages) = parseXmlString(sourceString);
     imageVectors.add(
       imageVector?.name != null
           ? imageVector
@@ -185,17 +185,17 @@ If not set, the generated property will be declared as a top-level property.
                   : null,
             ),
     );
-    errorMessages.addAll(parseResult.item2);
+    errorMessages.addAll(errorMessages);
   } else {
-    for (final file in sourceFiles) {
-      final parseResult = parseXmlFile(file);
-      final imageVector = parseResult.item1;
+    for (final source in sources) {
+      final (imageVector, errorMessages) = parseXmlFile(source);
+      final (sourceFile, _) = source;
       imageVectors.add(
         imageVector?.name != null
             ? imageVector
-            : imageVector?.copyWith(name: file.item1.getNameWithoutExtension()),
+            : imageVector?.copyWith(name: sourceFile.getNameWithoutExtension()),
       );
-      errorMessages.addAll(parseResult.item2);
+      errorMessages.addAll(errorMessages);
     }
   }
   if (errorMessages.isNotEmpty) {

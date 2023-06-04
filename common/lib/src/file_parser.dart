@@ -1,6 +1,5 @@
 import 'dart:io' show File, FileSystemException;
 
-import 'package:tuple/tuple.dart' show Tuple2;
 import 'package:xml/xml.dart';
 
 import 'converter/gd2iv.dart';
@@ -8,22 +7,23 @@ import 'converter/svg2iv.dart';
 import 'converter/vd2iv.dart';
 import 'model/image_vector.dart';
 
+typedef ParseResult = (ImageVector?, List<String> errorMessages);
+typedef ParseSource = (File, SourceDefinitionType);
+
 enum SourceDefinitionType { explicit, implicit }
 
-Tuple2<ImageVector?, List<String>> parseXmlFile(
-  Tuple2<File, SourceDefinitionType> file,
-) {
-  final result = _parseXmlSource(
-    file.item1,
-    isSourceDefinedExplicitly: file.item2 == SourceDefinitionType.explicit,
+ParseResult parseXmlFile((File, SourceDefinitionType) source) {
+  final (file, definitionType) = source;
+  return _parseXmlSource(
+    file,
+    isSourceDefinedExplicitly: definitionType == SourceDefinitionType.explicit,
   );
-  return Tuple2(result.item1, result.item2);
 }
 
-Tuple2<ImageVector?, List<String>> parseXmlString(String source) =>
+ParseResult parseXmlString(String source) =>
     _parseXmlSource(source, isSourceDefinedExplicitly: true);
 
-Tuple2<ImageVector?, List<String>> _parseXmlSource(
+ParseResult _parseXmlSource(
   dynamic source, {
   required bool isSourceDefinedExplicitly,
 }) {
@@ -81,7 +81,7 @@ Tuple2<ImageVector?, List<String>> _parseXmlSource(
       errorMessages.add(e.message);
     }
   }
-  return Tuple2(imageVector, errorMessages);
+  return (imageVector, errorMessages);
 }
 
 XmlElement _parseXmlString(String source) {

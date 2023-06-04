@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/writer.dart';
 import 'package:test/test.dart';
-import 'package:tuple/tuple.dart';
 
 import 'test_helpers.dart';
 
@@ -23,9 +22,8 @@ void main() {
     });
 
     test('with only a solid fill color', () {
-      final path = VectorPathBuilder(_pathData)
-          .fill(SolidColor(0x11223344))
-          .build();
+      final path =
+          VectorPathBuilder(_pathData).fill(SolidColor(0x11223344)).build();
       final expected = (StringBuffer('''
 path(
     fill = SolidColor(Color(0x11223344)),
@@ -147,14 +145,14 @@ group(
       });
     }
 
-    for (final pair in [
-      Tuple3(
+    for (final (description, vectorPath, intersection) in [
+      (
         'with no gradient',
         VectorPathBuilder(_pathData).build(),
         <String>{},
       ),
       //
-      Tuple3(
+      (
         'with a gradient but without requiring `Offset`',
         VectorPathBuilder(_pathData)
             .fill(LinearGradient(const [0x11223344, 0x55667788]))
@@ -162,7 +160,7 @@ group(
         {'import androidx.compose.ui.graphics.*'},
       ),
       //
-      Tuple3(
+      (
         'with a gradient and requiring `Offset`',
         VectorPathBuilder(_pathData)
             .fill(LinearGradient(const [0x11223344, 0x55667788], endX: 20.0))
@@ -173,9 +171,6 @@ group(
         },
       ),
     ]) {
-      final description = pair.item1;
-      final vectorPath = pair.item2;
-      final intersection = pair.item3;
       actualTest(
         description,
         ImageVectorBuilder(24.0, 24.0)
@@ -219,11 +214,9 @@ group(
       final generatedSourceBuffer = StringBuffer(dependencyAnnotations);
       writeFileContents(generatedSourceBuffer, [imageVector]);
       generatedSourceBuffer.writeln('\nprint(TestVector.name)');
-      final executionResult = executeKotlinScript(
+      final (resultString, errorString) = executeKotlinScript(
         generatedSourceBuffer.toString(),
       );
-      final resultString = executionResult.item1;
-      final errorString = executionResult.item2;
       expect(errorString.isEmpty, true, reason: errorString);
       expect(resultString, 'TestVector');
     });

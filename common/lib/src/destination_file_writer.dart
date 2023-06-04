@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:tuple/tuple.dart';
 
 import 'extensions.dart';
 import 'model/brush.dart';
@@ -12,32 +11,43 @@ import 'model/vector_node.dart';
 import 'model/vector_path.dart';
 
 const _commandsToFunctionAndClassNames = {
-  PathDataCommand.close: Tuple2('close', 'Close'),
-  PathDataCommand.moveTo: Tuple2('moveTo', 'MoveTo'),
-  PathDataCommand.relativeMoveTo: Tuple2('moveToRelative', 'RelativeMoveTo'),
-  PathDataCommand.lineTo: Tuple2('lineTo', 'LineTo'),
-  PathDataCommand.relativeLineTo: Tuple2('lineToRelative', 'RelativeLineTo'),
-  PathDataCommand.horizontalLineTo: Tuple2('horizontalLineTo', 'HorizontalTo'),
-  PathDataCommand.relativeHorizontalLineTo:
-      Tuple2('horizontalLineToRelative', 'RelativeHorizontalTo'),
-  PathDataCommand.verticalLineTo: Tuple2('verticalLineTo', 'VerticalTo'),
-  PathDataCommand.relativeVerticalLineTo:
-      Tuple2('verticalLineToRelative', 'RelativeVerticalTo'),
-  PathDataCommand.curveTo: Tuple2('curveTo', 'CurveTo'),
-  PathDataCommand.relativeCurveTo: Tuple2('curveToRelative', 'RelativeCurveTo'),
-  PathDataCommand.smoothCurveTo:
-      Tuple2('reflectiveCurveTo', 'ReflectiveCurveTo'),
-  PathDataCommand.relativeSmoothCurveTo:
-      Tuple2('reflectiveCurveToRelative', 'RelativeReflectiveCurveTo'),
-  PathDataCommand.quadraticBezierCurveTo: Tuple2('quadTo', 'QuadTo'),
-  PathDataCommand.relativeQuadraticBezierCurveTo:
-      Tuple2('quadToRelative', 'RelativeQuadTo'),
-  PathDataCommand.smoothQuadraticBezierCurveTo:
-      Tuple2('reflectiveQuadTo', 'ReflectiveQuadTo'),
-  PathDataCommand.relativeSmoothQuadraticBezierCurveTo:
-      Tuple2('reflectiveQuadToRelative', 'RelativeReflectiveQuadTo'),
-  PathDataCommand.arcTo: Tuple2('arcTo', 'ArcTo'),
-  PathDataCommand.relativeArcTo: Tuple2('arcToRelative', 'RelativeArcTo'),
+  PathDataCommand.close: ('close', 'Close'),
+  PathDataCommand.moveTo: ('moveTo', 'MoveTo'),
+  PathDataCommand.relativeMoveTo: ('moveToRelative', 'RelativeMoveTo'),
+  PathDataCommand.lineTo: ('lineTo', 'LineTo'),
+  PathDataCommand.relativeLineTo: ('lineToRelative', 'RelativeLineTo'),
+  PathDataCommand.horizontalLineTo: ('horizontalLineTo', 'HorizontalTo'),
+  PathDataCommand.relativeHorizontalLineTo: (
+    'horizontalLineToRelative',
+    'RelativeHorizontalTo',
+  ),
+  PathDataCommand.verticalLineTo: ('verticalLineTo', 'VerticalTo'),
+  PathDataCommand.relativeVerticalLineTo: (
+    'verticalLineToRelative',
+    'RelativeVerticalTo',
+  ),
+  PathDataCommand.curveTo: ('curveTo', 'CurveTo'),
+  PathDataCommand.relativeCurveTo: ('curveToRelative', 'RelativeCurveTo'),
+  PathDataCommand.smoothCurveTo: ('reflectiveCurveTo', 'ReflectiveCurveTo'),
+  PathDataCommand.relativeSmoothCurveTo: (
+    'reflectiveCurveToRelative',
+    'RelativeReflectiveCurveTo',
+  ),
+  PathDataCommand.quadraticBezierCurveTo: ('quadTo', 'QuadTo'),
+  PathDataCommand.relativeQuadraticBezierCurveTo: (
+    'quadToRelative',
+    'RelativeQuadTo',
+  ),
+  PathDataCommand.smoothQuadraticBezierCurveTo: (
+    'reflectiveQuadTo',
+    'ReflectiveQuadTo',
+  ),
+  PathDataCommand.relativeSmoothQuadraticBezierCurveTo: (
+    'reflectiveQuadToRelative',
+    'RelativeReflectiveQuadTo',
+  ),
+  PathDataCommand.arcTo: ('arcTo', 'ArcTo'),
+  PathDataCommand.relativeArcTo: ('arcToRelative', 'RelativeArcTo'),
 };
 
 Future<void> writeImageVectorsToFile(
@@ -451,9 +461,10 @@ void _writePathNodes(
 }) {
   for (final node in nodes) {
     _commandsToFunctionAndClassNames[node.command]?.let(
-      (pair) {
+      (names) {
+        final (className, builderMethodName) = names;
         final name =
-            asClassConstructorCall ? 'PathNode.${pair.item2}' : pair.item1;
+            asClassConstructorCall ? 'PathNode.$className' : builderMethodName;
         if (node.command == PathDataCommand.close && asClassConstructorCall) {
           sink.writeIndent(indentationLevel, '$name,');
         } else {
@@ -521,13 +532,13 @@ String _paintToBrushAsString(Brush paint, int indentationLevel) {
         ..writeArgumentIfNotNull(
           indentationLevel,
           'start',
-          startX != 0.0 || startY != 0.0 ? Tuple2(startX, startY) : null,
+          startX != 0.0 || startY != 0.0 ? (startX, startY) : null,
         )
         ..writeArgumentIfNotNull(
           indentationLevel,
           'end',
           endX != double.infinity || endY != double.infinity
-              ? Tuple2(endX, endY)
+              ? (endX, endY)
               : null,
         );
     } else {
@@ -536,7 +547,7 @@ String _paintToBrushAsString(Brush paint, int indentationLevel) {
         ..writeArgumentIfNotNull(
           indentationLevel,
           'center',
-          Tuple2(paint.centerX, paint.centerY),
+          (paint.centerX, paint.centerY),
         )
         ..writeArgumentIfNotNull(indentationLevel, 'radius', paint.radius);
     }
@@ -593,10 +604,10 @@ extension _StringSinkWriting on StringSink {
           enumAsString.capitalizeCharAt(enumAsString.indexOf('.') + 1);
     } else if (argument is Brush) {
       argumentAsString = _paintToBrushAsString(argument, indentationLevel);
-    } else if (argument is Tuple2<double, double>) {
-      final x = numToKotlinFloatAsString(argument.item1);
-      final y = numToKotlinFloatAsString(argument.item2);
-      argumentAsString = 'Offset($x, $y)';
+    } else if (argument case (double x, double y)) {
+      final formattedX = numToKotlinFloatAsString(x);
+      final formattedY = numToKotlinFloatAsString(y);
+      argumentAsString = 'Offset($formattedX, $formattedY)';
     } else if (argument is String) {
       if (argument.startsWith('Color(')) {
         argumentAsString = argument;

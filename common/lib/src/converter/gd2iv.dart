@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
 
 import '../extensions.dart';
@@ -46,8 +45,9 @@ ImageVector parseShapeDrawableElement(XmlElement rootElement) {
   }
   _parseFill(rootElement, bounds)?.let(vectorPathBuilder.fill);
   _parseStroke(rootElement)?.let((stroke) {
-    vectorPathBuilder.stroke(stroke.item1);
-    vectorPathBuilder.strokeLineWidth(stroke.item2);
+    final (brush, width) = stroke;
+    vectorPathBuilder.stroke(brush);
+    vectorPathBuilder.strokeLineWidth(width);
   });
   return imageVectorBuilder.addNode(vectorPathBuilder.build()).build();
 }
@@ -149,12 +149,12 @@ Brush? _parseFill(XmlElement rootElement, Rect bounds) {
   return gradientElement?.let((element) => parseGradient(element, bounds));
 }
 
-Tuple2<Brush, double>? _parseStroke(XmlElement rootElement) {
+(Brush, double)? _parseStroke(XmlElement rootElement) {
   final strokeElement = rootElement.getElement('stroke');
   final color = strokeElement?.getAndroidNSAttribute<SolidColor>('color');
   final width = strokeElement?.getAndroidNSAttribute<Dimension>('width')?.value;
   if (color != null && width != null) {
-    return Tuple2(color, width);
+    return (color, width);
   }
   return null;
 }

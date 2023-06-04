@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:svg2iv_common/extensions.dart';
 import 'package:test/test.dart';
-import 'package:tuple/tuple.dart';
 
 void main() {
   group('Iterable item selection', () {
@@ -51,16 +50,16 @@ void main() {
     // TODO: when `fillValue` is not set
     test('associate returns a Map with the selected keys and values', () {
       final sourceIterable = [
-        Tuple2(1, 'a'),
-        Tuple2(2, 'b'),
-        Tuple2(3, 'c'),
-        Tuple2(4, 'd'),
-        Tuple2(5, 'e'),
-        Tuple2(6, 'f'),
+        (1, 'a'),
+        (2, 'b'),
+        (3, 'c'),
+        (4, 'd'),
+        (5, 'e'),
+        (6, 'f'),
       ];
       final actualIterable = sourceIterable.associate(
-        (t) => t.item1,
-        (t) => t.item2,
+        (t) => t.$1,
+        (t) => t.$2,
       );
       expect(actualIterable, {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'});
     });
