@@ -9,6 +9,7 @@ dependencies:
   args: ^2.4.1
   async: ^2.11.0
   cbor: ^6.0.0
+  io: ^1.0.4
   svg2iv_common:
     path: ../common
 

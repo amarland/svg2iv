@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:tuple/tuple.dart';
 import 'package:xml/xml.dart';
 
 import '../extensions.dart';
@@ -73,8 +72,12 @@ Gradient? parseGradient(XmlElement gradientElement, [Rect? bounds]) {
   // TODO: support sweep gradients
   if (gradientType == null || gradientType == 'sweep') return null;
   final colorStops = _parseGradientColorStops(gradientElement);
-  final colors = colorStops.map((colorStop) => colorStop.item2).toList();
-  final stops = colorStops.map((colorStop) => colorStop.item1).toList();
+  final colors = <int>[];
+  final stops = <double>[];
+  for (final (stop, color) in colorStops) {
+    stops.add(stop);
+    colors.add(color);
+  }
   final tileMode = gradientElement
       .getAndroidNSAttribute<String>('tileMode')
       ?.let(tileModeFromString);
@@ -172,7 +175,7 @@ Gradient? parseGradient(XmlElement gradientElement, [Rect? bounds]) {
   }
 }
 
-Iterable<Tuple2<double, int>> _parseGradientColorStops(
+Iterable<(double, int)> _parseGradientColorStops(
   XmlElement gradientElement,
 ) {
   final childElements = gradientElement.findElements('item');
@@ -183,7 +186,7 @@ Iterable<Tuple2<double, int>> _parseGradientColorStops(
           index / (lastIndex > 0 ? lastIndex : 1);
       final color =
           item.getAndroidNSAttribute<Gradient>('color')?.colors.singleOrNull;
-      return color != null ? Tuple2(offset, color) : null;
+      return color != null ? (offset, color) : null;
     }).whereNotNull();
   } else {
     return gradientElement.androidNSAttributes
@@ -206,7 +209,7 @@ Iterable<Tuple2<double, int>> _parseGradientColorStops(
         default:
           return null;
       }
-      return Tuple2(offset, colorInt);
+      return (offset, colorInt);
     }).whereNotNull();
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:tuple/tuple.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart' as vgc;
 
 import '../../models.dart';
@@ -71,13 +70,15 @@ VectorPath _mapPath(vgc.Path path, vgc.Paint? paint) {
   if (paint != null) {
     final fill = paint.fill?.let(_mapFill);
     if (fill != null) {
-      pathBuilder.fill(fill.item1);
-      pathBuilder.fillAlpha(fill.item2);
+      final (brush, alpha) = fill;
+      pathBuilder.fill(brush);
+      pathBuilder.fillAlpha(alpha);
     }
     final stroke = paint.stroke?.let(_mapStroke);
     if (stroke != null) {
-      pathBuilder.stroke(stroke.item1);
-      pathBuilder.strokeAlpha(stroke.item2);
+      final (brush, alpha) = stroke;
+      pathBuilder.stroke(brush);
+      pathBuilder.strokeAlpha(alpha);
       paint.stroke!.cap?.let((strokeCap) {
         pathBuilder.strokeLineCap(_mapStrokeCap(strokeCap));
       });
@@ -96,13 +97,13 @@ PathFillType _mapPathFillType(vgc.PathFillType type) =>
         ? PathFillType.nonZero
         : PathFillType.evenOdd;
 
-Tuple2<Brush, double> _mapFill(vgc.Fill fill) =>
+(Brush, double) _mapFill(vgc.Fill fill) =>
     _mapGradient(fill.shader, fill.color);
 
-Tuple2<Brush, double> _mapStroke(vgc.Stroke stroke) =>
+(Brush, double) _mapStroke(vgc.Stroke stroke) =>
     _mapGradient(stroke.shader, stroke.color);
 
-Tuple2<Brush, double> _mapGradient(vgc.Gradient? shader, vgc.Color color) {
+(Brush, double) _mapGradient(vgc.Gradient? shader, vgc.Color color) {
   final Brush brush;
   if (shader != null && !shader.colors.isNullOrEmpty) {
     if (shader is vgc.RadialGradient) {
@@ -130,7 +131,7 @@ Tuple2<Brush, double> _mapGradient(vgc.Gradient? shader, vgc.Color color) {
     // opacity is handled separately
     brush = SolidColor((color.value << 8) >> 8);
   }
-  return Tuple2(brush, color.a / 0xFF);
+  return (brush, color.a / 0xFF);
 }
 
 TileMode? _mapTileMode(vgc.TileMode? mode) {

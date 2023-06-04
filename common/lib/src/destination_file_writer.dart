@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:tuple/tuple.dart';
 
 import '../models.dart';
 import 'extensions.dart';
@@ -480,13 +479,13 @@ String _paintToBrushAsString(Brush paint, int indentationLevel) {
         ..writeArgumentIfNotNull(
           indentationLevel,
           'start',
-          startX != 0.0 || startY != 0.0 ? Tuple2(startX, startY) : null,
+          startX != 0.0 || startY != 0.0 ? (startX, startY) : null,
         )
         ..writeArgumentIfNotNull(
           indentationLevel,
           'end',
           endX != double.infinity || endY != double.infinity
-              ? Tuple2(endX, endY)
+              ? (endX, endY)
               : null,
         );
     } else {
@@ -495,7 +494,7 @@ String _paintToBrushAsString(Brush paint, int indentationLevel) {
         ..writeArgumentIfNotNull(
           indentationLevel,
           'center',
-          Tuple2(paint.centerX, paint.centerY),
+          (paint.centerX, paint.centerY),
         )
         ..writeArgumentIfNotNull(indentationLevel, 'radius', paint.radius);
     }
@@ -552,10 +551,10 @@ extension _StringSinkWriting on StringSink {
           enumAsString.capitalizeCharAt(enumAsString.indexOf('.') + 1);
     } else if (argument is Brush) {
       argumentAsString = _paintToBrushAsString(argument, indentationLevel);
-    } else if (argument is Tuple2<double, double>) {
-      final x = numToKotlinFloatAsString(argument.item1);
-      final y = numToKotlinFloatAsString(argument.item2);
-      argumentAsString = 'Offset($x, $y)';
+    } else if (argument case (double x, double y)) {
+      final formattedX = numToKotlinFloatAsString(x);
+      final formattedY = numToKotlinFloatAsString(y);
+      argumentAsString = 'Offset($formattedX, $formattedY)';
     } else if (argument is String) {
       if (argument.startsWith('Color(')) {
         argumentAsString = argument;
