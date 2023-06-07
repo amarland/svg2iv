@@ -462,7 +462,7 @@ void _writePathNodes(
   for (final node in nodes) {
     _commandsToFunctionAndClassNames[node.command]?.let(
       (names) {
-        final (className, builderMethodName) = names;
+        final (builderMethodName, className) = names;
         final name =
             asClassConstructorCall ? 'PathNode.$className' : builderMethodName;
         if (node.command == PathDataCommand.close && asClassConstructorCall) {
