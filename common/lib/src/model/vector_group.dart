@@ -36,6 +36,7 @@ class VectorGroup extends VectorNode {
 
   VectorGroup copyWith({
     List<VectorNode>? nodes,
+    String? id,
     Rotation? rotation,
     Scale? scale,
     Translation? translation,
@@ -43,6 +44,7 @@ class VectorGroup extends VectorNode {
   }) {
     return VectorGroup._init(
       nodes ?? this.nodes,
+      id: id ?? this.id,
       rotation: rotation ?? this.rotation,
       scale: scale ?? this.scale,
       translation: translation ?? this.translation,

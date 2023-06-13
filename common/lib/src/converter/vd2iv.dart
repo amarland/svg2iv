@@ -14,6 +14,8 @@ import '../model/vector_path.dart';
 import '../path_data_parser.dart';
 import '../util/android_resources.dart';
 
+final _elementsToIgnore = <XmlElement>{};
+
 ImageVector parseVectorDrawableElement(XmlElement rootElement) {
   final parsedRequiredAttributes = <String, dynamic>{
     'viewportWidth': rootElement.getAndroidNSAttribute<double>('viewportWidth'),
@@ -45,24 +47,35 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
       .getAndroidNSAttribute<String>('tintBlendMode')
       ?.let(blendModeFromString)
       ?.let(builder.tintBlendMode);
-  for (final element in rootElement.childElements) {
-    switch (element.name.local) {
-      case 'group':
-        builder.addNodes(_parseGroupElement(element));
-        break;
-      case 'path':
-        _parsePathElement(element)?.let(builder.addNode);
-        break;
-      case 'clip-path':
-        _parseClipPathElement(element)?.let(builder.addNode);
-        break;
-    }
+  for (final node in _parseElements(rootElement.childElements)) {
+    builder.addNode(node);
   }
+  _elementsToIgnore.clear();
   return builder.build();
 }
 
-// can be a single group or the list of its nodes if it's considered "redundant"
-Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
+Iterable<VectorNode> _parseElements(Iterable<XmlElement> elements) sync* {
+  for (final element in elements) {
+    final node = _parseElement(element);
+    if (node != null) yield node;
+  }
+}
+
+VectorNode? _parseElement(XmlElement element) {
+  if (!_elementsToIgnore.contains(element)) {
+    switch (element.name.local) {
+      case 'group':
+        return _parseGroupElement(element);
+      case 'path':
+        return _parsePathElement(element);
+      case 'clip-path':
+        return _parseClipPathElement(element);
+    }
+  }
+  return null;
+}
+
+VectorGroup _parseGroupElement(XmlElement groupElement) {
   final attributes = groupElement.androidNSAttributes
       .associate((attr) => attr.name.local, (attr) => attr);
   final groupBuilder = VectorGroupBuilder();
@@ -103,10 +116,10 @@ Iterable<VectorNode> _parseGroupElement(XmlElement groupElement) {
   if (transformations != null) {
     groupBuilder.transformations(transformations);
   }
-  final group = groupBuilder.build();
-  return group.id != null || group.definesTransformations
-      ? [group]
-      : group.nodes;
+  for (final node in _parseElements(groupElement.childElements)) {
+    groupBuilder.addNode(node);
+  }
+  return groupBuilder.build();
 }
 
 VectorPath? _parsePathElement(XmlElement pathElement) {
@@ -197,9 +210,22 @@ VectorPath? _parsePathElement(XmlElement pathElement) {
 }
 
 VectorGroup? _parseClipPathElement(XmlElement clipPathElement) {
-  final clipPathData =
-      parsePathData(clipPathElement.getAndroidNSAttribute<String>('pathData'));
-  return clipPathData.isNotEmpty
-      ? VectorGroupBuilder().clipPathData(clipPathData).build()
-      : null;
+  final clipPathData = parsePathData(
+    clipPathElement.getAndroidNSAttribute<String>('pathData'),
+  );
+  if (clipPathData.isEmpty) return null;
+  final groupBuilder = VectorGroupBuilder().clipPathData(clipPathData);
+  clipPathElement
+      .getAndroidNSAttribute<String>('name')
+      ?.let((n) => groupBuilder.id(n));
+  final allSiblings = clipPathElement.parent!.children;
+  final index = allSiblings.indexOf(clipPathElement);
+  final followingSiblings =
+      allSiblings.sublist(index + 1).whereType<XmlElement>();
+  for (final element in followingSiblings) {
+    final node = _parseElement(element);
+    if (node != null) groupBuilder.addNode(node);
+    _elementsToIgnore.add(element);
+  }
+  return groupBuilder.build();
 }

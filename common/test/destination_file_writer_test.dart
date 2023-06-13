@@ -188,8 +188,10 @@ group(
     }
   });
 
-  group('writeFileContents() generates code that can be compiled', () {
-    test('the embedded Kotlin compiler reports no errors', () {
+  test(
+    'writeFileContents() generates code that can be compiled;'
+    ' the embedded Kotlin compiler reports no errors',
+    () {
       final imageVector = ImageVectorBuilder(24.0, 24.0)
           .name('test_vector')
           .tintColor(0x11223344)
@@ -219,8 +221,9 @@ group(
       );
       expect(errorString.isEmpty, true, reason: errorString);
       expect(resultString, 'TestVector');
-    });
-  });
+    },
+    tags: ['include-windows'],
+  );
 }
 
 const _pathData = [

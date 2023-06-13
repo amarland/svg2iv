@@ -34,7 +34,11 @@ jobs:
           version: 1.8.0
       - id: install
         name: Install dependencies
-        run: dart pub get -C ./common/
-      - name: Run tests
+        run: dart pub get -C common
+      - id: test-all
+        name: Run all tests
         run: cd ./common/ && dart test
-        if: steps.install.outcome == 'success'
+        if: steps.install.outcome == 'success' && matrix.os == 'ubuntu-latest'
+      - name: Run tests tagged with `include-windows`
+        run: cd ./common/ && dart test -t include-windows
+        if: steps.install.outcome == 'success' && matrix.os == 'windows-latest'
