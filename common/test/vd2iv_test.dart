@@ -1,7 +1,6 @@
 import 'package:svg2iv_common/parser.dart';
 import 'package:svg2iv_common/src/converter/vd2iv.dart';
-import 'package:test/expect.dart';
-import 'package:test/scaffolding.dart';
+import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 
 void main() {
