@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:collection/collection.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart' as vgc;
 import 'package:xml/xml.dart';
@@ -7,6 +9,8 @@ import '../extensions.dart';
 import '../file_parser.dart';
 import '../util/android_resources.dart';
 import '../util/path_command_mapper.dart';
+
+final _elementsToIgnore = HashSet<XmlElement>();
 
 ImageVector parseVectorDrawableElement(XmlElement rootElement) {
   final parsedRequiredAttributes = <String, dynamic>{
@@ -37,20 +41,32 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
       .getAndroidNSAttribute<String>('tintBlendMode')
       ?.let(_blendModeFromString)
       ?.let(builder.tintBlendMode);
-  for (final element in rootElement.childElements) {
+  for (final node in _parseElements(rootElement.childElements)) {
+    builder.addNode(node);
+  }
+  _elementsToIgnore.clear();
+  return builder.build();
+}
+
+Iterable<VectorNode> _parseElements(Iterable<XmlElement> elements) sync* {
+  for (final element in elements) {
+    final node = _parseElement(element);
+    if (node != null) yield node;
+  }
+}
+
+VectorNode? _parseElement(XmlElement element) {
+  if (!_elementsToIgnore.contains(element)) {
     switch (element.name.local) {
       case 'group':
-        builder.addNode(_parseGroupElement(element));
-        break;
+        return _parseGroupElement(element);
       case 'path':
-        _parsePathElement(element)?.let(builder.addNode);
-        break;
+        return _parsePathElement(element);
       case 'clip-path':
-        _parseClipPathElement(element)?.let(builder.addNode);
-        break;
+        return _parseClipPathElement(element);
     }
   }
-  return builder.build();
+  return null;
 }
 
 VectorGroup _parseGroupElement(XmlElement groupElement) {
@@ -90,6 +106,9 @@ VectorGroup _parseGroupElement(XmlElement groupElement) {
   final transformations = transformationsBuilder.build();
   if (transformations != null) {
     groupBuilder.transformations(transformations);
+  }
+  for (final node in _parseElements(groupElement.childElements)) {
+    groupBuilder.addNode(node);
   }
   return groupBuilder.build();
 }
@@ -181,9 +200,21 @@ VectorPath? _parsePathElement(XmlElement pathElement) {
 
 VectorGroup? _parseClipPathElement(XmlElement clipPathElement) {
   final clipPathData = _parsePathDataAttribute(clipPathElement);
-  return clipPathData.isNotEmpty
-      ? VectorGroupBuilder().clipPathData(clipPathData).build()
-      : null;
+  if (clipPathData.isEmpty) return null;
+  final groupBuilder = VectorGroupBuilder().clipPathData(clipPathData);
+  clipPathElement
+      .getAndroidNSAttribute<String>('name')
+      ?.let((n) => groupBuilder.id(n));
+  final allSiblings = clipPathElement.parent!.children;
+  final index = allSiblings.indexOf(clipPathElement);
+  final followingSiblings =
+      allSiblings.sublist(index + 1).whereType<XmlElement>();
+  for (final element in followingSiblings) {
+    final node = _parseElement(element);
+    if (node != null) groupBuilder.addNode(node);
+    _elementsToIgnore.add(element);
+  }
+  return groupBuilder.build();
 }
 
 BlendMode? _blendModeFromString(String valueAsString) {

@@ -211,17 +211,20 @@ class VectorPathBuilder
 
   @override
   VectorPath build() {
+    final strokeLineWidth = _strokeLineWidth;
+    final isStroked =
+        _stroke != null && strokeLineWidth != null && strokeLineWidth > 0.0;
     return VectorPath._(
       _pathData,
       id: id_,
       fill: _fill,
-      fillAlpha: _fillAlpha,
+      fillAlpha: _fill != null ? _fillAlpha : null,
       stroke: _stroke,
-      strokeAlpha: _strokeAlpha,
-      strokeLineWidth: _strokeLineWidth,
-      strokeLineCap: _strokeLineCap,
-      strokeLineJoin: _strokeLineJoin,
-      strokeLineMiter: _strokeLineMiter,
+      strokeAlpha: isStroked ? _strokeAlpha : null,
+      strokeLineWidth: isStroked ? _strokeLineWidth : null,
+      strokeLineCap: isStroked ? _strokeLineCap : null,
+      strokeLineJoin: isStroked ? _strokeLineJoin : null,
+      strokeLineMiter: isStroked ? _strokeLineMiter : null,
       pathFillType: _pathFillType,
       trimPathStart: _trimPathStart,
       trimPathEnd: _trimPathEnd,
