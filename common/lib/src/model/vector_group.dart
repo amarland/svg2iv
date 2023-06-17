@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 
 import '../extensions.dart';
 import 'transformations.dart';
 import 'vector_node.dart';
 import 'vector_path.dart';
 
-class VectorGroup extends VectorNode {
+class VectorGroup extends VectorNode with EquatableMixin {
   static const defaultScaleX = 1.0;
   static const defaultScaleY = 1.0;
   static const defaultPivotX = 0.0;
@@ -53,24 +54,16 @@ class VectorGroup extends VectorNode {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VectorGroup &&
-          runtimeType == other.runtimeType &&
-          const ListEquality<VectorNode>().equals(nodes, other.nodes) &&
-          rotation == other.rotation &&
-          scale == other.scale &&
-          translation == other.translation &&
-          const ListEquality<PathNode>()
-              .equals(clipPathData, other.clipPathData);
-
-  @override
-  int get hashCode =>
-      const ListEquality<VectorNode>().hash(nodes) ^
-      rotation.hashCode ^
-      scale.hashCode ^
-      translation.hashCode ^
-      const ListEquality<PathNode>().hash(clipPathData);
+  List<Object?> get props {
+    return super.props
+      ..addAll([
+        nodes,
+        rotation,
+        scale,
+        translation,
+        clipPathData,
+      ]);
+  }
 }
 
 class VectorGroupBuilder

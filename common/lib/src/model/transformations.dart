@@ -1,26 +1,31 @@
+import 'package:equatable/equatable.dart';
 import 'package:vector_math/vector_math.dart';
 
 import 'vector_group.dart';
 
-abstract class Transformation {}
-
-class Rotation implements Transformation {
+class Rotation extends Equatable {
   const Rotation(this.angle, {double? pivotX, double? pivotY})
       : pivotX = pivotX ?? 0.0,
         pivotY = pivotY ?? 0.0;
 
   final double angle;
   final double? pivotX, pivotY;
+
+  @override
+  List<Object?> get props => [angle, pivotX, pivotY];
 }
 
-class Scale implements Transformation {
+class Scale extends Equatable {
   const Scale(this.x, [double? y]) : y = y ?? x;
 
   final double x;
   final double? y;
+
+  @override
+  List<Object?> get props => [x, y];
 }
 
-class Translation implements Transformation {
+class Translation extends Equatable {
   const Translation(this.x, [double? y]) : y = y ?? 0.0;
 
   final double x;
@@ -28,6 +33,9 @@ class Translation implements Transformation {
 
   Translation operator +(Translation other) =>
       Translation(x + other.x, y + other.y);
+
+  @override
+  List<Object?> get props => [x, y];
 }
 
 class Transformations {

@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart' show ListEquality;
+import 'package:equatable/equatable.dart';
 
 import '../extensions.dart';
 import 'brush.dart';
@@ -48,21 +48,23 @@ class VectorPath extends VectorNode {
   final double? trimPathEnd;
   final double? trimPathOffset;
 
-  bool get hasAttributes => [
-        id,
-        fill,
-        fillAlpha,
-        stroke,
-        strokeAlpha,
-        strokeLineWidth,
-        strokeLineCap,
-        strokeLineJoin,
-        strokeLineMiter,
-        pathFillType,
-        trimPathStart,
-        trimPathEnd,
-        trimPathOffset,
-      ].anyNotNull();
+  bool get hasAttributes {
+    return [
+      id,
+      fill,
+      fillAlpha,
+      stroke,
+      strokeAlpha,
+      strokeLineWidth,
+      strokeLineCap,
+      strokeLineJoin,
+      strokeLineMiter,
+      pathFillType,
+      trimPathStart,
+      trimPathEnd,
+      trimPathOffset,
+    ].anyNotNull();
+  }
 
   VectorPath copyWith({
     List<PathNode>? pathData,
@@ -99,39 +101,24 @@ class VectorPath extends VectorNode {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VectorPath &&
-          runtimeType == other.runtimeType &&
-          const ListEquality<PathNode>().equals(pathData, other.pathData) &&
-          fill == other.fill &&
-          fillAlpha == other.fillAlpha &&
-          stroke == other.stroke &&
-          strokeAlpha == other.strokeAlpha &&
-          strokeLineWidth == other.strokeLineWidth &&
-          strokeLineCap == other.strokeLineCap &&
-          strokeLineJoin == other.strokeLineJoin &&
-          strokeLineMiter == other.strokeLineMiter &&
-          pathFillType == other.pathFillType &&
-          trimPathStart == other.trimPathStart &&
-          trimPathEnd == other.trimPathEnd &&
-          trimPathOffset == other.trimPathOffset;
-
-  @override
-  int get hashCode =>
-      const ListEquality<PathNode>().hash(pathData) ^
-      fill.hashCode ^
-      fillAlpha.hashCode ^
-      stroke.hashCode ^
-      strokeAlpha.hashCode ^
-      strokeLineWidth.hashCode ^
-      strokeLineCap.hashCode ^
-      strokeLineJoin.hashCode ^
-      strokeLineMiter.hashCode ^
-      pathFillType.hashCode ^
-      trimPathStart.hashCode ^
-      trimPathEnd.hashCode ^
-      trimPathOffset.hashCode;
+  List<Object?> get props {
+    return super.props
+      ..addAll([
+        pathData,
+        fill,
+        fillAlpha,
+        stroke,
+        strokeAlpha,
+        strokeLineWidth,
+        strokeLineCap,
+        strokeLineJoin,
+        strokeLineMiter,
+        pathFillType,
+        trimPathStart,
+        trimPathEnd,
+        trimPathOffset,
+      ]);
+  }
 }
 
 class VectorPathBuilder
@@ -204,7 +191,7 @@ enum PathDataCommand {
   relativeArcTo,
 }
 
-class PathNode {
+class PathNode extends Equatable {
   // TODO: add named constructors for each command?
   const PathNode(this.command, this.arguments);
 
@@ -212,14 +199,5 @@ class PathNode {
   final List<dynamic> arguments;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PathNode &&
-          runtimeType == other.runtimeType &&
-          command == other.command &&
-          const ListEquality<dynamic>().equals(arguments, other.arguments);
-
-  @override
-  int get hashCode =>
-      command.hashCode ^ const ListEquality<dynamic>().hash(arguments);
+  List<Object?> get props => [command, arguments];
 }

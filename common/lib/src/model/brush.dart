@@ -1,7 +1,7 @@
-import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-abstract class Brush {
+abstract class Brush extends Equatable {
   const Brush();
 }
 
@@ -49,14 +49,7 @@ class SolidColor extends Brush {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SolidColor &&
-          runtimeType == other.runtimeType &&
-          colorInt == other.colorInt;
-
-  @override
-  int get hashCode => colorInt.hashCode;
+  List<Object?> get props => [colorInt];
 }
 
 abstract class Gradient extends Brush {
@@ -76,23 +69,7 @@ abstract class Gradient extends Brush {
   final TileMode? tileMode;
 
   @override
-  bool operator ==(Object other) {
-    const listEquality = ListEquality<num>();
-    return identical(this, other) ||
-        other is Gradient &&
-            runtimeType == other.runtimeType &&
-            listEquality.equals(colors, other.colors) &&
-            listEquality.equals(stops, other.stops) &&
-            tileMode == other.tileMode;
-  }
-
-  @override
-  int get hashCode {
-    const listEquality = ListEquality<num>();
-    return listEquality.hash(colors) ^
-        listEquality.hash(stops) ^
-        tileMode.hashCode;
-  }
+  List<Object?> get props => [colors, stops, tileMode];
 }
 
 class LinearGradient extends Gradient {
@@ -118,23 +95,7 @@ class LinearGradient extends Gradient {
   final double startX, startY, endX, endY;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      super == other &&
-          other is LinearGradient &&
-          runtimeType == other.runtimeType &&
-          startX == other.startX &&
-          startY == other.startY &&
-          endX == other.endX &&
-          endY == other.endY;
-
-  @override
-  int get hashCode =>
-      super.hashCode ^
-      startX.hashCode ^
-      startY.hashCode ^
-      endX.hashCode ^
-      endY.hashCode;
+  List<Object?> get props => super.props..addAll([startX, startY, endX, endY]);
 }
 
 class RadialGradient extends Gradient {
@@ -158,18 +119,7 @@ class RadialGradient extends Gradient {
   final double radius;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      super == other &&
-          other is RadialGradient &&
-          runtimeType == other.runtimeType &&
-          centerX == other.centerX &&
-          centerY == other.centerY &&
-          radius == other.radius;
-
-  @override
-  int get hashCode =>
-      super.hashCode ^ centerX.hashCode ^ centerY.hashCode ^ radius.hashCode;
+  List<Object?> get props => super.props..addAll([centerX, centerY, radius]);
 }
 
 enum TileMode { clamp, repeated, mirror }

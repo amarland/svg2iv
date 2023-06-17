@@ -1,9 +1,9 @@
-import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 
 import '../extensions.dart';
 import 'vector_node.dart';
 
-class ImageVector {
+class ImageVector extends Equatable {
   static const defaultTintBlendMode = BlendMode.srcIn;
 
   ImageVector._init(
@@ -47,29 +47,18 @@ class ImageVector {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ImageVector &&
-          runtimeType == other.runtimeType &&
-          const ListEquality<VectorNode>().equals(nodes, other.nodes) &&
-          name == other.name &&
-          width == other.width &&
-          height == other.height &&
-          viewportWidth == other.viewportWidth &&
-          viewportHeight == other.viewportHeight &&
-          tintColor == other.tintColor &&
-          tintBlendMode == other.tintBlendMode;
-
-  @override
-  int get hashCode =>
-      const ListEquality<VectorNode>().hash(nodes) ^
-      name.hashCode ^
-      width.hashCode ^
-      height.hashCode ^
-      viewportWidth.hashCode ^
-      viewportHeight.hashCode ^
-      tintColor.hashCode ^
-      tintBlendMode.hashCode;
+  List<Object?> get props {
+    return [
+      nodes,
+      name,
+      width,
+      height,
+      viewportWidth,
+      viewportHeight,
+      tintColor,
+      tintBlendMode,
+    ];
+  }
 }
 
 class ImageVectorBuilder {
