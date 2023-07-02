@@ -376,10 +376,7 @@ class _MainPageState extends State<MainPage>
                         }
                       : null,
                   icon: const SvgIcon('res/convert_vector'),
-                  label: const Text(
-                    'Convert',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
+                  label: const Text('Convert'),
                 ),
               ),
             ],

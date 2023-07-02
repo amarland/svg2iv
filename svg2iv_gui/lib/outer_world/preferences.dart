@@ -68,7 +68,7 @@ class Preferences {
       }
       final sink = file.openWrite();
       for (final entry in preferences.entries) {
-        sink.write('${entry.key}=${entry.value}');
+        sink.writeln('${entry.key}=${entry.value}');
       }
       await sink.close();
     });

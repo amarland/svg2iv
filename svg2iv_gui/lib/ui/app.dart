@@ -56,7 +56,7 @@ class App extends StatelessWidget {
       textTheme: (colorScheme.brightness == Brightness.light
               ? typography.black
               : typography.white)
-          .apply(fontFamily: 'WorkSans'),
+          .apply(fontFamily: 'NotoSans'),
       useMaterial3: useMaterial3,
     ).copyWith(
       platform: TargetPlatform.windows,

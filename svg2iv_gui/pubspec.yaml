@@ -37,10 +37,14 @@ flutter:
     - res/logo
     - res/source_files
     - res/toggle_theme
+    - res/font/JetBrainsMono/OFL.txt
+    - res/font/NotoSans/OFL.txt
   fonts:
     - family: JetBrainsMono
       fonts:
-        - asset: res/font/jetbrains_mono_regular.ttf
-    - family: WorkSans
+        - asset: res/font/JetBrainsMono/JetBrainsMono-Regular.ttf
+    - family: NotoSans
       fonts:
-        - asset: res/font/work_sans_variable.ttf
+        - asset: res/font/NotoSans/NotoSans-Regular.ttf
+        - asset: res/font/NotoSans/NotoSans-Medium.ttf
+          weight: 500
