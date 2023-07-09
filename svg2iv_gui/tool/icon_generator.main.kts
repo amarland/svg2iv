@@ -4,10 +4,30 @@
 @file:DependsOn("image4j-0.7.2.jar")
 
 import net.sf.image4j.codec.ico.ICOEncoder
+import java.awt.Image
+import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import javax.imageio.stream.FileImageOutputStream
 
-ICOEncoder.write(
-    ImageIO.read(File("../res/logo.svg")),
-    File("../windows/runner/resources/app_icon.ico")
-)
+val source = ImageIO.read(File("../res/logo.svg"))
+
+fun Image.resize(size: Int) =
+    BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB).apply {
+        createGraphics().run {
+            drawImage(this@resize.getScaledInstance(size, size, Image.SCALE_SMOOTH), 0, 0, null)
+            dispose()
+        }
+    }
+
+ICOEncoder.write(source.resize(64), File("../windows/runner/resources/app_icon.ico"))
+
+ImageIO.getImageWritersBySuffix("png").next().run {
+    for (size in arrayOf(16, 192, 512)) {
+        val fileName = if (size == 16) "favicon.png" else "icons/Icon-$size.png"
+        FileImageOutputStream(File("../web/$fileName")).use {
+            output = it
+            write(source.resize(size))
+        }
+    }
+}
