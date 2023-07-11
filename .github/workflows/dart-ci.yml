@@ -20,7 +20,7 @@ jobs:
         if: steps.install.outcome == 'success'
 
   test-common:
-    needs: analyze
+    needs: analyze-all-modules
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
