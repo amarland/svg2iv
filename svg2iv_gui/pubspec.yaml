@@ -18,6 +18,8 @@ dependencies:
   path_provider: ^2.0.15
   svg2iv_common:
     path: ../common
+  svg2iv_common_flutter:
+    path: ../common_flutter
   tuple: ^2.0.1
   vector_graphics: ^1.1.7
   vector_math: ^2.1.4
@@ -31,20 +33,15 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - res/convert_vector
-    - res/destination_directory
-    - res/explore_files
-    - res/logo
-    - res/source_files
-    - res/toggle_theme
-    - res/font/JetBrainsMono/OFL.txt
-    - res/font/NotoSans/OFL.txt
+    - res/icons
+    - res/fonts/JetBrainsMono/OFL.txt
+    - res/fonts/NotoSans/OFL.txt
   fonts:
     - family: JetBrainsMono
       fonts:
-        - asset: res/font/JetBrainsMono/JetBrainsMono-Regular.ttf
+        - asset: res/fonts/JetBrainsMono/JetBrainsMono-Regular.ttf
     - family: NotoSans
       fonts:
-        - asset: res/font/NotoSans/NotoSans-Regular.ttf
-        - asset: res/font/NotoSans/NotoSans-Medium.ttf
+        - asset: res/fonts/NotoSans/NotoSans-Regular.ttf
+        - asset: res/fonts/NotoSans/NotoSans-Medium.ttf
           weight: 500

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common_flutter/widgets.dart';
 import 'package:vector_graphics/vector_graphics.dart';
 
 import '../outer_world/file_pickers.dart' as file_pickers;
@@ -13,7 +14,6 @@ import 'checkerboard.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
 import 'preview_selection_button.dart';
-import 'svg_icon.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -22,8 +22,8 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage>
-    with SingleTickerProviderStateMixin<MainPage> {
+class _MainPageState
+    extends State<MainPage> /*with SingleTickerProviderStateMixin<MainPage>*/ {
   /*
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -66,38 +66,13 @@ class _MainPageState extends State<MainPage>
   }
 
   static Widget _buildScaffold(BuildContext context) {
-    final bloc = BlocProvider.of<MainPageBloc>(context);
-    final theme = Theme.of(context);
-    final title = TextSpan(
-      text: '${App.name} | ',
-      children: [
-        TextSpan(
-          text: 'SVG to ImageVector conversion tool',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.useMaterial3 || theme.brightness == Brightness.dark
-                ? theme.colorScheme.onSurface
-                : theme.colorScheme.onPrimary,
-          ),
-        ),
-      ],
-    );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text.rich(title),
-        actions: [
-          IconButton(
-            onPressed: () {
-              BlocProvider.of<ThemeCubit>(context).toggleTheme();
-            },
-            icon: const SvgIcon('res/toggle_theme'),
-          ),
-          IconButton(
-            onPressed: () => bloc.add(const AboutButtonPressed()),
-            icon: const Icon(Icons.info_outlined),
-          ),
-          const SizedBox(width: 8.0),
-        ],
-      ),
+    return MainPageScaffold(
+      onToggleThemeButtonPressed: () {
+        BlocProvider.of<ThemeCubit>(context).toggleTheme();
+      },
+      onAboutButtonPressed: () {
+        BlocProvider.of<MainPageBloc>(context).add(const AboutButtonPressed());
+      },
       body: _appDialogVisibilityChangeListener(
         context: context,
         child: BlocBuilder<MainPageBloc, MainPageState>(
@@ -204,7 +179,7 @@ class _MainPageState extends State<MainPage>
                 applicationName: App.name,
                 applicationVersion: '0.1.0',
                 applicationIcon: VectorGraphic(
-                  loader: AssetBytesLoader('res/logo'),
+                  loader: AssetBytesLoader('res/icons/logo'),
                 ),
               );
             },
@@ -375,7 +350,7 @@ class _MainPageState extends State<MainPage>
                           bloc.add(const ConvertButtonClicked());
                         }
                       : null,
-                  icon: const SvgIcon('res/convert_vector'),
+                  icon: const SvgIcon('res/icons/convert_vector'),
                   label: const Text('Convert'),
                 ),
               ),

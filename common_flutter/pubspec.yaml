@@ -1,0 +1,21 @@
+name: svg2iv_common_flutter
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  svg2iv_common:
+    path: ../common
+  vector_graphics: ^1.1.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.1
+
+flutter:
+  assets:
+    - res/icons/

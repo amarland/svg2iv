@@ -12,7 +12,7 @@ class SvgIcon extends StatelessWidget {
     final theme = IconTheme.of(context);
     final size = theme.size;
     return VectorGraphic(
-      loader: AssetBytesLoader(assetName),
+      loader: AssetBytesLoader(assetName, packageName: 'svg2iv_common_flutter'),
       width: size,
       height: size,
       fit: BoxFit.scaleDown,

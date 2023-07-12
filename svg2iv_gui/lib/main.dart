@@ -12,7 +12,7 @@ void main() {
         (fontName) async => LicenseEntryWithLineBreaks(
           [fontName],
           await rootBundle.loadString(
-            'res/font/${fontName.replaceAll(' ', '')}/OFL.txt',
+            'res/fonts/${fontName.replaceAll(' ', '')}/OFL.txt',
           ),
         ),
       ),
