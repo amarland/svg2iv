@@ -1,4 +1,4 @@
-name: Dart CI
+name: Quality checks
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  analyze:
+  analyze-all-modules:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,8 +19,8 @@ jobs:
         run: dart analyze ./cli/ && dart analyze ./common/ && dart analyze ./svg2iv_gui/
         if: steps.install.outcome == 'success'
 
-  test:
-    needs: analyze
+  test-common:
+    needs: analyze-all-modules
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
