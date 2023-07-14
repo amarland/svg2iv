@@ -34,14 +34,3 @@ flutter:
   uses-material-design: true
   assets:
     - res/icons
-    - res/fonts/JetBrainsMono/OFL.txt
-    - res/fonts/NotoSans/OFL.txt
-  fonts:
-    - family: JetBrainsMono
-      fonts:
-        - asset: res/fonts/JetBrainsMono/JetBrainsMono-Regular.ttf
-    - family: NotoSans
-      fonts:
-        - asset: res/fonts/NotoSans/NotoSans-Regular.ttf
-        - asset: res/fonts/NotoSans/NotoSans-Medium.ttf
-          weight: 500

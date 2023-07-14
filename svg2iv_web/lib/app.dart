@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:svg2iv_common_flutter/theme.dart' as common_theme;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:svg2iv_common_flutter/theme.dart';
 import 'package:svg2iv_web/main_page.dart';
+
+import 'main.dart';
+import 'preferences.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
 
-  static const name = 'svg2iv';
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: const MainPage(),
-      title: name,
-      theme: common_theme.getTheme(const ColorScheme.light(), true),
-      darkTheme: common_theme.getTheme(const ColorScheme.dark(), true),
-      debugShowCheckedModeBanner: false,
+    return BlocProvider<ThemeCubit>(
+      create: (_) => ThemeCubit(preferences: BrowserPreferences()),
+      child: buildThemedMaterialApp(
+        home: const MainPage(),
+        name: appName,
+      ),
     );
   }
 }

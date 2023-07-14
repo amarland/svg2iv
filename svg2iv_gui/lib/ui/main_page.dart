@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common_flutter/app_info.dart' as app_info;
+import 'package:svg2iv_common_flutter/theme.dart';
 import 'package:svg2iv_common_flutter/widgets.dart';
-import 'package:vector_graphics/vector_graphics.dart';
 
+import '../main.dart';
 import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
-import '../state/theme_cubit.dart';
-import 'app.dart';
 import 'checkerboard.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
@@ -172,17 +172,10 @@ class _MainPageState
         if (errorMessagesDialog is ErrorMessagesDialog) {
           await showErrorMessagesDialog(context, errorMessagesDialog);
         } else if (state.isAboutDialogVisible) {
-          await showDialog<void>(
-            context: context,
-            builder: (context) {
-              return const AboutDialog(
-                applicationName: App.name,
-                applicationVersion: '0.1.0',
-                applicationIcon: VectorGraphic(
-                  loader: AssetBytesLoader('res/icons/logo'),
-                ),
-              );
-            },
+          await app_info.showAboutDialog(
+            context,
+            name: appName,
+            version: appVersion,
           );
           bloc.add(const AboutDialogClosed());
         }
@@ -201,7 +194,10 @@ class _MainPageState
       builder: (context) {
         return AlertDialog(
           content: DefaultTextStyle(
-            style: const TextStyle(fontFamily: 'JetBrainsMono'),
+            style: const TextStyle(
+              fontFamily: 'JetBrainsMono',
+              package: 'svg2iv_common_flutter',
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,

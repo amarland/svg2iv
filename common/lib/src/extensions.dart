@@ -85,8 +85,9 @@ extension StringFormatting on String {
     ).replaceAll(RegExp(r'(_|-|\s)+'), '');
   }
 
-  String toCamelCase() =>
-      toPascalCase().let((s) => s[0].toLowerCase() + s.substring(1));
+  String toCamelCase() => isNotEmpty
+      ? toPascalCase().let((s) => s[0].toLowerCase() + s.substring(1))
+      : this;
 }
 
 extension StringIndexing on String {
