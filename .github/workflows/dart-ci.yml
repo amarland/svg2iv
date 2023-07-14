@@ -45,12 +45,12 @@ jobs:
       - id: install
         name: Get dependencies
         run: >
-          dart pub get -C common && cd ./flutter_common && flutter pub get &&
+          dart pub get -C common && cd ./common_flutter && flutter pub get &&
           cd ../svg2iv_gui && flutter pub get && cd ../svg2iv_web && flutter pub get
       - name: Run all tests in `common`
         run: cd ./common/ && dart test
         if: steps.install.outcome == 'success' && matrix.os == 'ubuntu-latest'
-      - name: Run tests tagged with `include-windows`
+      - name: Run tests tagged with `include-windows` in `common`
         run: cd ./common/ && dart test -t include-windows
         if: steps.install.outcome == 'success' && matrix.os == 'windows-latest'
       - name: Run all tests in `common_flutter`
