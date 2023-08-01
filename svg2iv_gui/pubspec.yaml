@@ -27,10 +27,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  file: ^6.1.4
+  file: ^7.0.0
   flutter_lints: ^2.0.1
 
 flutter:
   uses-material-design: true
   assets:
-    - res/icons
+    - res/icons/

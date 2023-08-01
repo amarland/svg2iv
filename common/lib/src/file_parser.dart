@@ -35,6 +35,7 @@ ParseResult _parseXmlSource(
   }
   ImageVector? imageVector;
   final errorMessages = List<String>.empty(growable: true);
+  const errorMessageIndent = '  ';
   try {
     final rootElement = _parseXmlString(
       isSourceAFile ? source.readAsStringSync() : source as String,
@@ -67,18 +68,20 @@ ParseResult _parseXmlSource(
       ..write(':');
     errorMessages
       ..add(messageBuilder.toString())
-      ..add(e.message);
+      ..add('$errorMessageIndent${e.message}');
   } catch (e) {
     final messageBuilder =
         StringBuffer('An unexpected error occurred while parsing ')
           ..write(source is File ? "'${source.path}'" : 'the input string')
-          ..write(':')
-          ..write(e.runtimeType);
+          ..writeln(':')
+          ..writeln('$errorMessageIndent${e.runtimeType}');
     errorMessages.add(messageBuilder.toString());
     if (e is Error) {
-      errorMessages.add(e.stackTrace.toString());
+      errorMessages.add(
+        e.stackTrace.toString().replaceAll('\n', '\n$errorMessageIndent'),
+      );
     } else if (e is XmlException) {
-      errorMessages.add(e.message);
+      errorMessages.add('$errorMessageIndent${e.message}');
     }
   }
   return (imageVector, errorMessages);
@@ -89,15 +92,15 @@ XmlElement _parseXmlString(String source) {
   try {
     document = XmlDocument.parse(source);
   } on FileSystemException {
-    throw ParserException('The file could not be read.');
+    throw ParserException('The input file could not be read.');
   } on XmlParserException {
-    throw ParserException('The contents of the file could not be parsed.');
+    throw ParserException('The input is not valid XML.');
   }
   final XmlElement rootElement;
   try {
     rootElement = document.rootElement;
   } on StateError {
-    throw ParserException('The file is empty.');
+    throw ParserException('The input is empty.');
   }
   return rootElement;
 }

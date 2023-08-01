@@ -18,6 +18,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final sourceTextController = TextEditingController();
   final imageVectorTextController = TextEditingController();
+  var showErrorMessages = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,41 +31,55 @@ class _MainPageState extends State<MainPage> {
       },
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      controller: sourceTextController,
-                      hintText: 'Paste your SVG/VectorDrawable markup here',
+        child: FocusTraversalGroup(
+          policy: OrderedTraversalPolicy(),
+          child: Column(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    FocusTraversalOrder(
+                      order: const NumericFocusOrder(1),
+                      child: Expanded(
+                        child: _buildTextField(
+                          controller: sourceTextController,
+                          hintText: 'Paste your SVG/VectorDrawable markup here',
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16.0),
-                  Expanded(
-                    child: _buildTextField(
-                      controller: imageVectorTextController,
-                      hintText: "Click 'Convert' to see the ImageVector code",
-                      readOnly: true,
+                    const SizedBox(width: 16.0),
+                    FocusTraversalOrder(
+                      order: const NumericFocusOrder(3),
+                      child: Expanded(
+                        child: _buildTextField(
+                          controller: imageVectorTextController,
+                          hintText:
+                              "Click 'Convert' to see the ImageVector code",
+                          readOnly: true,
+                          error: showErrorMessages,
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              FocusTraversalOrder(
+                order: const NumericFocusOrder(2),
+                child: FilledButton(
+                  onPressed: _onConvertButtonClicked,
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgIcon('res/icons/convert_vector'),
+                      SizedBox(width: 8.0),
+                      Text('Convert'),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            FilledButton(
-              onPressed: _onConvertButtonClicked,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgIcon('res/icons/convert_vector'),
-                  SizedBox(width: 8.0),
-                  Text('Convert'),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -74,10 +89,14 @@ class _MainPageState extends State<MainPage> {
     required TextEditingController controller,
     required String hintText,
     bool readOnly = false,
+    bool error = false,
   }) {
     return Builder(builder: (context) {
-      final textTheme = Theme.of(context).textTheme;
+      final themeData = Theme.of(context);
+      final textTheme = themeData.textTheme;
+      final errorColor = themeData.colorScheme.error;
       final textStyle = textTheme.bodySmall!.copyWith(
+        color: error ? errorColor : null,
         fontFamily: 'JetBrainsMono',
         package: 'svg2iv_common_flutter',
       );
@@ -85,7 +104,20 @@ class _MainPageState extends State<MainPage> {
         controller: controller,
         decoration: InputDecoration(
           hintText: hintText,
+          errorText: error ? '\u200B' : null,
+          errorStyle: const TextStyle(fontSize: 0.0),
           contentPadding: const EdgeInsets.all(12.0),
+          prefixIcon: error
+              ? const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    widthFactor: 1.0,
+                    child: Icon(Icons.error_outline),
+                  ),
+                )
+              : null,
+          prefixIconColor: error ? errorColor : null,
         ),
         style: textStyle,
         textAlignVertical: TextAlignVertical.top,
@@ -102,12 +134,22 @@ class _MainPageState extends State<MainPage> {
     final (imageVector, errorMessages) = parseXmlString(
       sourceTextController.text,
     );
+    final bool showErrorMessages;
+    final buffer = StringBuffer();
     if (imageVector != null) {
-      final buffer = StringBuffer();
       writeFileContents(buffer, [imageVector]);
-      imageVectorTextController.text = buffer.toString();
+      showErrorMessages = false;
+    } else if (errorMessages.isNotEmpty) {
+      buffer.writeAll(errorMessages, '\n');
+      showErrorMessages = true;
+    } else {
+      buffer.write('An unknown error has occurred.');
+      showErrorMessages = true;
     }
-    // TODO: show errors
+    imageVectorTextController.text = buffer.toString();
+    setState(() {
+      this.showErrorMessages = showErrorMessages;
+    });
   }
 
   @override
