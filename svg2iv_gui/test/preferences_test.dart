@@ -7,11 +7,13 @@ import 'package:svg2iv_gui/outer_world/preferences.dart';
 void main() {
   test('preferences are written to/loaded from local storage', () async {
     final memoryFileSystem = MemoryFileSystem.test();
-    final preferencesFile = memoryFileSystem.file('./preferences');
-    var preferences = FilePreferences.internal(preferencesFile)
-      ..setDarkModeEnabled(true)
-      ..setDarkModeEnabled(!Preferences.isMaterial3EnabledByDefault);
-    preferences = FilePreferences.internal(memoryFileSystem.file('./blank'));
+    final preferencesFile = memoryFileSystem.file('preferences');
+    var preferences = FilePreferences.internal(preferencesFile);
+    await preferences.setDarkModeEnabled(true);
+    await preferences.setMaterial3Enabled(
+      !Preferences.isMaterial3EnabledByDefault,
+    );
+    preferences = FilePreferences.internal(memoryFileSystem.file('blank'));
     expect((await preferences.getPreferences()).isEmpty, true);
     preferences = FilePreferences.internal(preferencesFile);
     expect(await preferences.getThemeMode(), ThemeMode.dark);

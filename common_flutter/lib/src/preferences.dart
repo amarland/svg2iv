@@ -17,11 +17,7 @@ abstract class Preferences {
   Map<String, String>? preferences;
 
   Future<Map<String, String>> getPreferences() async {
-    if (preferences != null) {
-      return preferences!;
-    }
-    preferences = await loadPreferencesFromStorage();
-    return preferences!;
+    return preferences ??= await loadPreferencesFromStorage();
   }
 
   @protected

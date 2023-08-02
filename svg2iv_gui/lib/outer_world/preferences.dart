@@ -20,10 +20,7 @@ class FilePreferences extends Preferences {
   File? _file;
 
   Future<File> _getFile() async {
-    if (_file != null) {
-      return _file!;
-    }
-    return File(
+    return _file ??= File(
       path.join(
         (await path_provider.getApplicationSupportDirectory()).path,
         'svg2iv.ini',
@@ -50,13 +47,13 @@ class FilePreferences extends Preferences {
 
   @override
   Future<void> setPreference(String key, Object value) async {
-    super.setPreference(key, value);
-    _writePreferences();
+    await super.setPreference(key, value);
+    await _writePreferences();
   }
 
   Future<void> _writePreferences() async {
     final preferences = await getPreferences();
-    return runIgnoringException<FileSystemException>(() async {
+    await runIgnoringException<FileSystemException>(() async {
       final file = await _getFile();
       if (!await file.exists()) {
         await file.create(recursive: true);
@@ -65,6 +62,7 @@ class FilePreferences extends Preferences {
       for (final entry in preferences.entries) {
         sink.writeln('${entry.key}=${entry.value}');
       }
+      await sink.flush();
       await sink.close();
     });
   }
