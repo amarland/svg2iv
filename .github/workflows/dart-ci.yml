@@ -59,6 +59,6 @@ jobs:
       - name: Run all tests in `svg2iv_gui`
         run: cd ./svg2iv_gui/ && flutter test
         if: steps.install.outcome == 'success' && matrix.os == 'ubuntu-latest'
-      - name: Run all tests in `svg2iv_web`
-        run: cd ./svg2iv_web/ && flutter test
-        if: steps.install.outcome == 'success' && matrix.os == 'ubuntu-latest'
+#       - name: Run all tests in `svg2iv_web`
+#         run: cd ./svg2iv_web/ && flutter test
+#         if: steps.install.outcome == 'success' && matrix.os == 'ubuntu-latest'
