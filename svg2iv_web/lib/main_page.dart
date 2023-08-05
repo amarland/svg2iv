@@ -18,7 +18,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final sourceTextController = TextEditingController();
   final imageVectorTextController = TextEditingController();
-  var showErrorMessages = false;
+  var isSegmentedButtonVisible = false;
+  var areErrorsVisible = false;
+  var isConvertButtonEnabled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,7 @@ class _MainPageState extends State<MainPage> {
         app_info.showAboutDialog(context, name: appName, version: appVersion);
       },
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
         child: FocusTraversalGroup(
           policy: OrderedTraversalPolicy(),
           child: Column(
@@ -38,28 +40,9 @@ class _MainPageState extends State<MainPage> {
               Expanded(
                 child: Row(
                   children: [
-                    FocusTraversalOrder(
-                      order: const NumericFocusOrder(1),
-                      child: Expanded(
-                        child: _buildTextField(
-                          controller: sourceTextController,
-                          hintText: 'Paste your SVG/VectorDrawable markup here',
-                        ),
-                      ),
-                    ),
+                    _buildLeftTextField(),
                     const SizedBox(width: 16.0),
-                    FocusTraversalOrder(
-                      order: const NumericFocusOrder(3),
-                      child: Expanded(
-                        child: _buildTextField(
-                          controller: imageVectorTextController,
-                          hintText:
-                              "Click 'Convert' to see the ImageVector code",
-                          readOnly: true,
-                          error: showErrorMessages,
-                        ),
-                      ),
-                    ),
+                    _buildRightTextField(),
                   ],
                 ),
               ),
@@ -67,7 +50,8 @@ class _MainPageState extends State<MainPage> {
               FocusTraversalOrder(
                 order: const NumericFocusOrder(2),
                 child: FilledButton(
-                  onPressed: _onConvertButtonClicked,
+                  onPressed:
+                      isConvertButtonEnabled ? _onConvertButtonClicked : null,
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -85,11 +69,75 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  Widget _buildLeftTextField() {
+    return FocusTraversalOrder(
+      order: const NumericFocusOrder(1),
+      child: Expanded(
+        child: _buildTextField(
+          controller: sourceTextController,
+          hintText: 'Paste your SVG/VectorDrawable markup here',
+          onChanged: (text) {
+            final enabled = text.isNotEmpty;
+            if (enabled != isConvertButtonEnabled) {
+              setState(() => isConvertButtonEnabled = enabled);
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRightTextField() {
+    return Expanded(
+      child: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(3),
+            child: _buildTextField(
+              controller: imageVectorTextController,
+              hintText: "Click 'Convert' to see the ImageVector code",
+              readOnly: true,
+              error: areErrorsVisible,
+            ),
+          ),
+          if (isSegmentedButtonVisible)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FocusTraversalOrder(
+                order: const NumericFocusOrder(4),
+                child: SegmentedButton(
+                  segments: const [
+                    ButtonSegment(
+                      value: false,
+                      icon: Icon(Icons.code_outlined),
+                      label: Text('Code'),
+                    ),
+                    ButtonSegment(
+                      value: true,
+                      icon: Icon(Icons.image_outlined),
+                      label: Text('Preview'),
+                    ),
+                  ],
+                  selected: const {false}, // TODO
+                  onSelectionChanged: (selected) {
+                    // TODO: setState(() => ...);
+                  },
+                  showSelectedIcon: false,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
     bool readOnly = false,
     bool error = false,
+    ValueChanged<String>? onChanged,
   }) {
     return Builder(builder: (context) {
       final themeData = Theme.of(context);
@@ -113,7 +161,7 @@ class _MainPageState extends State<MainPage> {
                   child: Align(
                     alignment: Alignment.topCenter,
                     widthFactor: 1.0,
-                    child: Icon(Icons.error_outline),
+                    child: Icon(Icons.error_outline_outlined),
                   ),
                 )
               : null,
@@ -126,6 +174,7 @@ class _MainPageState extends State<MainPage> {
         enableSuggestions: false,
         maxLines: null,
         expands: true,
+        onChanged: onChanged,
       );
     });
   }
@@ -148,7 +197,8 @@ class _MainPageState extends State<MainPage> {
     }
     imageVectorTextController.text = buffer.toString();
     setState(() {
-      this.showErrorMessages = showErrorMessages;
+      isSegmentedButtonVisible = !showErrorMessages;
+      areErrorsVisible = showErrorMessages;
     });
   }
 
