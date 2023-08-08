@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/models.dart';
 
-import '../util/image_vector_painter.dart';
+import 'image_vector_painter.dart';
 
 class Checkerboard extends StatefulWidget {
   const Checkerboard({
@@ -70,11 +70,17 @@ class _CheckerboardState extends State<Checkerboard> {
   void _updateState([Checkerboard? oldWidget]) {
     final imageVector = widget.imageVector;
     if (imageVector != null) {
-      final size = widget.size;
       if (oldWidget == null ||
           _cachedImage == null ||
           imageVector != oldWidget.imageVector ||
-          size != oldWidget.size) {
+          widget.size != oldWidget.size) {
+        final aspectRatio = imageVector.width / imageVector.height;
+        final Size size;
+        if (aspectRatio.isNegative) {
+          size = Size(widget.size.width / aspectRatio, widget.size.height);
+        } else {
+          size = Size(widget.size.width, widget.size.height / aspectRatio);
+        }
         final picture = imageVector.toPicture(size);
         final image = picture.toImageSync(
           size.width.floor(),
@@ -101,7 +107,8 @@ class _CheckerboardPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const squareSize = 8.0;
+    final shortestSide = size.shortestSide;
+    final squareSize = shortestSide / 16 - (shortestSide / 16) % 4;
     final actualWidth = size.width - size.width % squareSize;
     final actualHeight = size.height - size.height % squareSize;
     final offsetX = (size.width - actualWidth) / 2,
@@ -137,24 +144,20 @@ class _CheckerboardPainter extends CustomPainter {
 }
 
 class _ImagePainter extends CustomPainter {
-  const _ImagePainter(this.picture);
+  const _ImagePainter(this.image);
 
-  final ui.Image picture;
+  final ui.Image image;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const scaleFactor = 0.925;
-    final offsetX = (size.width - size.width * scaleFactor) / 2,
-        offsetY = (size.height - size.height * scaleFactor) / 2;
-    canvas.scale(scaleFactor, scaleFactor);
+    const scaleFactor = 0.9;
+    final offsetX = (size.width - image.width * scaleFactor) / 2;
+    final offsetY = (size.height - image.height * scaleFactor) / 2;
     canvas.translate(offsetX, offsetY);
-    canvas.drawImage(
-      picture,
-      const ui.Offset(0.0, 0.0),
-      ui.Paint(),
-    );
+    canvas.scale(scaleFactor, scaleFactor);
+    canvas.drawImage(image, const ui.Offset(0.0, 0.0), ui.Paint());
   }
 
   @override
-  bool shouldRepaint(_ImagePainter oldPainter) => picture != oldPainter.picture;
+  bool shouldRepaint(_ImagePainter oldPainter) => image != oldPainter.image;
 }

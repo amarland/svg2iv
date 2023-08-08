@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/parser.dart';
 import 'package:svg2iv_common/writer.dart';
 import 'package:svg2iv_common_flutter/app_info.dart' as app_info;
+import 'package:svg2iv_common_flutter/image_vector_preview.dart';
 import 'package:svg2iv_common_flutter/theme.dart';
 import 'package:svg2iv_common_flutter/widgets.dart';
 
@@ -15,12 +16,19 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
+enum _ImageVectorViewMode {
+  code,
+  preview;
+}
+
 class _MainPageState extends State<MainPage> {
-  final sourceTextController = TextEditingController();
-  final imageVectorTextController = TextEditingController();
-  var isSegmentedButtonVisible = false;
-  var areErrorsVisible = false;
-  var isConvertButtonEnabled = false;
+  final _sourceTextController = TextEditingController();
+  final _imageVectorTextController = TextEditingController();
+  ImageVector? _imageVector;
+  var _isSegmentedButtonVisible = false;
+  var _imageVectorViewMode = _ImageVectorViewMode.code;
+  var _areErrorsVisible = false;
+  var _isConvertButtonEnabled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +59,7 @@ class _MainPageState extends State<MainPage> {
                 order: const NumericFocusOrder(2),
                 child: FilledButton(
                   onPressed:
-                      isConvertButtonEnabled ? _onConvertButtonClicked : null,
+                      _isConvertButtonEnabled ? _onConvertButtonClicked : null,
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -74,12 +82,12 @@ class _MainPageState extends State<MainPage> {
       order: const NumericFocusOrder(1),
       child: Expanded(
         child: _buildTextField(
-          controller: sourceTextController,
+          controller: _sourceTextController,
           hintText: 'Paste your SVG/VectorDrawable markup here',
           onChanged: (text) {
             final enabled = text.isNotEmpty;
-            if (enabled != isConvertButtonEnabled) {
-              setState(() => isConvertButtonEnabled = enabled);
+            if (enabled != _isConvertButtonEnabled) {
+              setState(() => _isConvertButtonEnabled = enabled);
             }
           },
         ),
@@ -88,42 +96,59 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildRightTextField() {
+    final Widget imageVectorAsWidget = switch (_imageVectorViewMode) {
+      _ImageVectorViewMode.code => FocusTraversalOrder(
+          order: const NumericFocusOrder(3),
+          child: _buildTextField(
+            controller: _imageVectorTextController,
+            hintText: "Click 'Convert' to see the ImageVector code",
+            readOnly: true,
+            error: _areErrorsVisible,
+          ),
+        ),
+      _ImageVectorViewMode.preview => AspectRatio(
+          aspectRatio: 1.0,
+          child: LayoutBuilder(
+            builder: (_, constraints) {
+              return Checkerboard(
+                size: constraints.biggest,
+                imageVector: _imageVector,
+              );
+            },
+          ),
+        )
+    };
     return Expanded(
       child: Stack(
-        alignment: Alignment.topRight,
+        alignment: Alignment.center,
         children: [
-          FocusTraversalOrder(
-            order: const NumericFocusOrder(3),
-            child: _buildTextField(
-              controller: imageVectorTextController,
-              hintText: "Click 'Convert' to see the ImageVector code",
-              readOnly: true,
-              error: areErrorsVisible,
-            ),
-          ),
-          if (isSegmentedButtonVisible)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FocusTraversalOrder(
-                order: const NumericFocusOrder(4),
-                child: SegmentedButton(
-                  segments: const [
-                    ButtonSegment(
-                      value: false,
-                      icon: Icon(Icons.code_outlined),
-                      label: Text('Code'),
-                    ),
-                    ButtonSegment(
-                      value: true,
-                      icon: Icon(Icons.image_outlined),
-                      label: Text('Preview'),
-                    ),
-                  ],
-                  selected: const {false}, // TODO
-                  onSelectionChanged: (selected) {
-                    // TODO: setState(() => ...);
-                  },
-                  showSelectedIcon: false,
+          imageVectorAsWidget,
+          if (_isSegmentedButtonVisible)
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(4),
+                  child: SegmentedButton(
+                    segments: const [
+                      ButtonSegment(
+                        value: _ImageVectorViewMode.code,
+                        icon: Icon(Icons.code_outlined),
+                        label: Text('Code'),
+                      ),
+                      ButtonSegment(
+                        value: _ImageVectorViewMode.preview,
+                        icon: Icon(Icons.image_outlined),
+                        label: Text('Preview'),
+                      ),
+                    ],
+                    selected: {_imageVectorViewMode},
+                    onSelectionChanged: (selection) {
+                      setState(() => _imageVectorViewMode = selection.single);
+                    },
+                    showSelectedIcon: false,
+                  ),
                 ),
               ),
             ),
@@ -181,8 +206,9 @@ class _MainPageState extends State<MainPage> {
 
   void _onConvertButtonClicked() {
     final (imageVector, errorMessages) = parseXmlString(
-      sourceTextController.text,
+      _sourceTextController.text,
     );
+    _imageVector = imageVector;
     final bool showErrorMessages;
     final buffer = StringBuffer();
     if (imageVector != null) {
@@ -195,17 +221,18 @@ class _MainPageState extends State<MainPage> {
       buffer.write('An unknown error has occurred.');
       showErrorMessages = true;
     }
-    imageVectorTextController.text = buffer.toString();
+    _imageVectorTextController.text = buffer.toString();
     setState(() {
-      isSegmentedButtonVisible = !showErrorMessages;
-      areErrorsVisible = showErrorMessages;
+      _isSegmentedButtonVisible = !showErrorMessages;
+      _areErrorsVisible = showErrorMessages;
+      if (showErrorMessages) _imageVectorViewMode = _ImageVectorViewMode.code;
     });
   }
 
   @override
   void dispose() {
     super.dispose();
-    sourceTextController.dispose();
-    imageVectorTextController.dispose();
+    _sourceTextController.dispose();
+    _imageVectorTextController.dispose();
   }
 }

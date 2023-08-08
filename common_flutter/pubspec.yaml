@@ -7,10 +7,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  collection: ^1.17.1
   flutter_bloc: ^8.1.3
   svg2iv_common:
     path: ../common
   vector_graphics: ^1.1.7
+  vector_math: ^2.1.4
 
 dev_dependencies:
   flutter_test:

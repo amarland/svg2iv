@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common_flutter/app_info.dart' as app_info;
+import 'package:svg2iv_common_flutter/image_vector_preview.dart';
 import 'package:svg2iv_common_flutter/theme.dart';
 import 'package:svg2iv_common_flutter/widgets.dart';
 
@@ -10,7 +11,6 @@ import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
-import 'checkerboard.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
 import 'preview_selection_button.dart';
@@ -308,8 +308,8 @@ class _MainPageState
                   child: LayoutBuilder(
                     builder: (_, constraints) {
                       return Checkerboard(
-                        imageVector: state.imageVector,
                         size: constraints.biggest,
+                        imageVector: state.imageVector,
                       );
                     },
                   ),
