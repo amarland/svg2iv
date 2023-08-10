@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:svg2iv_common/parser.dart';
 import 'package:svg2iv_common/writer.dart';
 import 'package:svg2iv_common_flutter/app_info.dart' as app_info;
@@ -24,6 +27,7 @@ enum _ImageVectorViewMode {
 class _MainPageState extends State<MainPage> {
   final _sourceTextController = TextEditingController();
   final _imageVectorTextController = TextEditingController();
+  late DropzoneViewController _dropzoneViewController;
   ImageVector? _imageVector;
   var _isSegmentedButtonVisible = false;
   var _imageVectorViewMode = _ImageVectorViewMode.code;
@@ -78,19 +82,33 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildLeftTextField() {
-    return FocusTraversalOrder(
-      order: const NumericFocusOrder(1),
-      child: Expanded(
-        child: _buildTextField(
-          controller: _sourceTextController,
-          hintText: 'Paste your SVG/VectorDrawable markup here',
-          onChanged: (text) {
-            final enabled = text.isNotEmpty;
-            if (enabled != _isConvertButtonEnabled) {
-              setState(() => _isConvertButtonEnabled = enabled);
-            }
-          },
-        ),
+    return Expanded(
+      child: Stack(
+        children: [
+          DropzoneView(
+            operation: DragOperation.copy,
+            mime: const [
+              'application/xml',
+              'text/xml',
+              'image/svg+xml',
+            ],
+            onCreated: (controller) => _dropzoneViewController = controller,
+            onDrop: _onSourceFileDropped,
+          ),
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(1),
+            child: _buildTextField(
+              controller: _sourceTextController,
+              hintText: 'Paste your SVG/VectorDrawable markup here',
+              onChanged: (text) {
+                final enabled = text.isNotEmpty;
+                if (enabled != _isConvertButtonEnabled) {
+                  setState(() => _isConvertButtonEnabled = enabled);
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -227,6 +245,13 @@ class _MainPageState extends State<MainPage> {
       _areErrorsVisible = showErrorMessages;
       if (showErrorMessages) _imageVectorViewMode = _ImageVectorViewMode.code;
     });
+  }
+
+  void _onSourceFileDropped(dynamic file) async {
+    // TODO: show feedback
+    _sourceTextController.text = await utf8.decodeStream(
+      _dropzoneViewController.getFileStream(file),
+    );
   }
 
   @override
