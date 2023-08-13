@@ -1,5 +1,3 @@
-import 'dart:io';
-
 extension NullableStringHandling on String? {
   bool get isNullOrEmpty => this == null || this!.isEmpty;
 
@@ -109,15 +107,5 @@ extension DoubleToStringFormatting on num {
     return (trimmed[lastIndex] == '.'
         ? trimmed.substring(0, lastIndex)
         : trimmed);
-  }
-}
-
-extension FileNameExtraction on File {
-  String getNameWithoutExtension() {
-    final path = this.path;
-    return path.substring(
-      path.lastIndexOf(Platform.pathSeparator) + 1,
-      path.lastIndexOfOrNull('.'),
-    );
   }
 }

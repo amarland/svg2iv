@@ -36,7 +36,10 @@ class MainPageScaffold extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: onToggleThemeButtonPressed,
-            icon: const SvgIcon('res/icons/toggle_theme'),
+            icon: const SvgIcon(
+              'res/icons/toggle_theme',
+              packageName: 'svg2iv_common_flutter',
+            ),
           ),
           IconButton(
             onPressed: onAboutButtonPressed,

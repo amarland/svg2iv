@@ -346,7 +346,10 @@ class _MainPageState
                           bloc.add(const ConvertButtonClicked());
                         }
                       : null,
-                  icon: const SvgIcon('res/icons/convert_vector'),
+                  icon: const SvgIcon(
+                    'res/icons/convert_vector',
+                    packageName: 'svg2iv_common_flutter',
+                  ),
                   label: const Text('Convert'),
                 ),
               ),

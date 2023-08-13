@@ -5,6 +5,7 @@ class CustomTextField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.hintText,
+    this.focusNode,
     this.readOnly = false,
     this.error = false,
     this.onChanged,
@@ -12,6 +13,7 @@ class CustomTextField extends StatelessWidget {
 
   final TextEditingController controller;
   final String hintText;
+  final FocusNode? focusNode;
   final bool readOnly;
   final bool error;
   final ValueChanged<String>? onChanged;
@@ -29,8 +31,10 @@ class CustomTextField extends StatelessWidget {
       );
       return TextField(
         controller: controller,
+        focusNode: focusNode,
         decoration: InputDecoration(
           hintText: hintText,
+          hintMaxLines: 8 /* default may result in ellipsized text */,
           errorText: error ? '\u200B' : null,
           errorStyle: const TextStyle(fontSize: 0.0),
           contentPadding: const EdgeInsets.all(12.0),

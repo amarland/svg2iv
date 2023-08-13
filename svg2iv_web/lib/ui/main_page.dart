@@ -5,8 +5,8 @@ import 'package:svg2iv_common_flutter/app_info.dart' as app_info;
 import 'package:svg2iv_common_flutter/theme.dart';
 import 'package:svg2iv_common_flutter/widgets.dart';
 
+import '../main.dart';
 import 'image_vector_viewer.dart';
-import 'main.dart';
 import 'source_text_field.dart';
 
 class MainPage extends StatefulWidget {
@@ -17,20 +17,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final _sourceTextController = TextEditingController();
+  final _imageVectorViewerFocusNode = FocusNode();
   ParseResult? _parseResult;
-  var _isConvertButtonEnabled = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _sourceTextController.addListener(() {
-      final isTextNotEmpty = _sourceTextController.text.isNotEmpty;
-      if (isTextNotEmpty != _isConvertButtonEnabled) {
-        setState(() => _isConvertButtonEnabled = isTextNotEmpty);
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,42 +40,22 @@ class _MainPageState extends State<MainPage> {
                   children: [
                     Expanded(
                       child: SourceTextField(
-                        textController: _sourceTextController,
                         focusOrder: 1,
+                        onSourceParsed: (result) {
+                          setState(() => _parseResult = result);
+                          _imageVectorViewerFocusNode.requestFocus();
+                        },
                       ),
                     ),
                     const SizedBox(width: 16.0),
                     Expanded(
                       child: ImageVectorViewer(
-                        focusOrder: 3,
+                        focusOrder: 2,
                         parseResult: _parseResult,
+                        focusNode: _imageVectorViewerFocusNode,
                       ),
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              FocusTraversalOrder(
-                order: const NumericFocusOrder(2),
-                child: FilledButton(
-                  onPressed: _isConvertButtonEnabled
-                      ? () {
-                          setState(() {
-                            // TODO: make this async
-                            _parseResult = parseXmlString(
-                              _sourceTextController.text,
-                            );
-                          });
-                        }
-                      : null,
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SvgIcon('res/icons/convert_vector'),
-                      SizedBox(width: 8.0),
-                      Text('Convert'),
-                    ],
-                  ),
                 ),
               ),
             ],
@@ -99,7 +67,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void dispose() {
+    _imageVectorViewerFocusNode.dispose();
     super.dispose();
-    _sourceTextController.dispose();
   }
 }

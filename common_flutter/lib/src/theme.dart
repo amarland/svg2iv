@@ -35,17 +35,35 @@ Widget buildThemedMaterialApp({
 
 ThemeData _getThemeData(ColorScheme colorScheme, bool useMaterial3) {
   final typography = Typography.material2021(colorScheme: colorScheme);
-  return ThemeData.from(
+  final themeData = ThemeData.from(
     colorScheme: colorScheme,
     textTheme: (colorScheme.brightness == Brightness.light
             ? typography.black
             : typography.white)
         .apply(fontFamily: 'NotoSans'),
     useMaterial3: useMaterial3,
-  ).copyWith(
-    inputDecorationTheme: const InputDecorationTheme(
-      border: OutlineInputBorder(),
+  );
+  final segmentedButtonThemeData = themeData.segmentedButtonTheme;
+  final segmentedButtonBackgroundColor = MaterialStateColor.resolveWith(
+    (states) {
+      if (states.contains(MaterialState.disabled)) {
+        return colorScheme.surface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.selected)) {
+        return colorScheme.secondaryContainer;
+      }
+      return colorScheme.surface;
+    },
+  );
+  return themeData.copyWith(
+    inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
+      border: const OutlineInputBorder(),
       alignLabelWithHint: true,
+    ),
+    segmentedButtonTheme: segmentedButtonThemeData.copyWith(
+      style: segmentedButtonThemeData.style
+              ?.copyWith(backgroundColor: segmentedButtonBackgroundColor) ??
+          ButtonStyle(backgroundColor: segmentedButtonBackgroundColor),
     ),
   );
 }

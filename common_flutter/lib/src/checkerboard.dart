@@ -26,6 +26,8 @@ class Checkerboard extends StatefulWidget {
 
 class _CheckerboardState extends State<Checkerboard> {
   ui.Image? _cachedImage;
+  late Rect _rect;
+  late double _squareSize;
 
   @override
   void initState() {
@@ -43,22 +45,25 @@ class _CheckerboardState extends State<Checkerboard> {
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
     final colors = themeData.colorScheme;
-    return CustomPaint(
-      painter: _CheckerboardPainter(
-        oddSquareColor:
-            widget.oddSquareColor ?? colors.onInverseSurface.withOpacity(0.5),
-        evenSquareColor:
-            widget.oddSquareColor ?? colors.onSurfaceVariant.withOpacity(0.5),
-      ),
-      foregroundPainter: _cachedImage?.let(_ImagePainter.new),
-      child: widget.imageVector == null
-          ? const SizedBox(
-              width: 48.0,
-              height: 48.0,
-              child: CircularProgressIndicator(),
-            )
-          : null,
-    );
+    if (widget.imageVector == null) {
+      return const SizedBox(
+        width: 48.0,
+        height: 48.0,
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      return CustomPaint(
+        painter: _CheckerboardPainter(
+          rect: _rect,
+          squareSize: _squareSize,
+          oddSquareColor:
+              widget.oddSquareColor ?? colors.onInverseSurface.withOpacity(0.5),
+          evenSquareColor:
+              widget.oddSquareColor ?? colors.onSurfaceVariant.withOpacity(0.5),
+        ),
+        foregroundPainter: _cachedImage?.let(_ImagePainter.new),
+      );
+    }
   }
 
   @override
@@ -70,27 +75,38 @@ class _CheckerboardState extends State<Checkerboard> {
   void _updateState([Checkerboard? oldWidget]) {
     final imageVector = widget.imageVector;
     if (imageVector != null) {
+      final size = widget.size;
       if (oldWidget == null ||
-          _cachedImage == null ||
           imageVector != oldWidget.imageVector ||
-          widget.size != oldWidget.size) {
+          size != oldWidget.size) {
+        final shortestSide = size.shortestSide;
+        final squareSize = shortestSide / 16 - (shortestSide / 16) % 4;
+        final actualWidth = size.width - size.width % squareSize;
+        final actualHeight = size.height - size.height % squareSize;
+        final offsetX = (size.width - actualWidth) / 2,
+            offsetY = (size.height - actualHeight) / 2;
         final aspectRatio = imageVector.width / imageVector.height;
-        final Size size;
+        final int imageVectorWidth, imageVectorHeight;
         if (aspectRatio.isNegative) {
-          size = Size(widget.size.width / aspectRatio, widget.size.height);
+          imageVectorWidth = (actualWidth / aspectRatio).floor();
+          imageVectorHeight = actualHeight.floor();
         } else {
-          size = Size(widget.size.width, widget.size.height / aspectRatio);
+          imageVectorWidth = actualWidth.floor();
+          imageVectorHeight = (actualHeight / aspectRatio).floor();
         }
-        final picture = imageVector.toPicture(size);
+        final picture = imageVector.toPicture(
+          imageVectorWidth,
+          imageVectorHeight,
+        );
         final image = picture.toImageSync(
-          size.width.floor(),
-          size.height.floor(),
+          imageVectorWidth,
+          imageVectorHeight,
         );
         picture.dispose();
         _cachedImage?.dispose();
-        setState(() {
-          _cachedImage = image;
-        });
+        _cachedImage = image;
+        _rect = Rect.fromLTWH(offsetX, offsetY, actualWidth, actualHeight);
+        _squareSize = squareSize;
       }
     }
   }
@@ -98,47 +114,43 @@ class _CheckerboardState extends State<Checkerboard> {
 
 class _CheckerboardPainter extends CustomPainter {
   const _CheckerboardPainter({
+    required this.rect,
+    required this.squareSize,
     required this.oddSquareColor,
     required this.evenSquareColor,
   }) : super();
 
+  final Rect rect;
+  final double squareSize;
   final Color oddSquareColor;
   final Color evenSquareColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final shortestSide = size.shortestSide;
-    final squareSize = shortestSide / 16 - (shortestSide / 16) % 4;
-    final actualWidth = size.width - size.width % squareSize;
-    final actualHeight = size.height - size.height % squareSize;
-    final offsetX = (size.width - actualWidth) / 2,
-        offsetY = (size.height - actualHeight) / 2;
-    double x = offsetX, y = offsetY;
-    /*
-    canvas.drawRect(
-      ui.Rect.fromLTWH(0.0, 0.0, size.width, size.height),
-      Paint()..color = Colors.deepPurple.withOpacity(0.5),
-    );
-    */
+    double x = rect.left, y = rect.top;
     var odd = true;
     final paint = Paint()..isAntiAlias = false;
-    while (y < actualHeight) {
-      canvas.drawRect(
-        Rect.fromLTWH(x, y, squareSize, squareSize),
-        paint..color = odd ? oddSquareColor : evenSquareColor,
-      );
-      if (x + squareSize < size.width - offsetX) {
+    final rowCount = rect.height ~/ squareSize - 1;
+    final columnCount = rect.width ~/ squareSize - 1;
+    for (int row = 0; row <= rowCount; row++) {
+      for (int column = 0; column <= columnCount; column++) {
+        canvas.drawRect(
+          Rect.fromLTWH(x, y, squareSize, squareSize),
+          paint..color = odd ? oddSquareColor : evenSquareColor,
+        );
         x += squareSize;
-      } else {
-        x = (y + squareSize) % (squareSize);
-        y += squareSize;
+        odd = !odd;
       }
-      odd = !odd;
+      x = rect.left;
+      y += squareSize;
+      if (columnCount % 2 == 1) odd = !odd;
     }
   }
 
   @override
   bool shouldRepaint(_CheckerboardPainter oldPainter) =>
+      rect != oldPainter.rect ||
+      squareSize != oldPainter.squareSize ||
       oddSquareColor != oldPainter.oddSquareColor ||
       evenSquareColor != oldPainter.evenSquareColor;
 }
@@ -150,12 +162,14 @@ class _ImagePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const scaleFactor = 0.9;
-    final offsetX = (size.width - image.width * scaleFactor) / 2;
-    final offsetY = (size.height - image.height * scaleFactor) / 2;
-    canvas.translate(offsetX, offsetY);
-    canvas.scale(scaleFactor, scaleFactor);
-    canvas.drawImage(image, const ui.Offset(0.0, 0.0), ui.Paint());
+    canvas.drawImage(
+      image,
+      ui.Offset(
+        (size.width - image.width) / 2,
+        (size.height - image.height) / 2,
+      ),
+      ui.Paint(),
+    );
   }
 
   @override

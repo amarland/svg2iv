@@ -16,7 +16,10 @@ import '../util/android_resources.dart';
 
 final _elementsToIgnore = <XmlElement>{};
 
-ImageVector parseVectorDrawableElement(XmlElement rootElement) {
+ImageVector parseVectorDrawableElement(
+  XmlElement rootElement, {
+  String? imageVectorName,
+}) {
   final parsedRequiredAttributes = <String, dynamic>{
     'viewportWidth': rootElement.getAndroidNSAttribute<double>('viewportWidth'),
     'viewportHeight':
@@ -38,7 +41,8 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
   final builder = ImageVectorBuilder(viewportWidth, viewportHeight)
       .width((parsedRequiredAttributes['width'] as Dimension).value)
       .height((parsedRequiredAttributes['height'] as Dimension).value);
-  rootElement.getAndroidNSAttribute<String>('name')?.let(builder.name);
+  (imageVectorName ?? rootElement.getAndroidNSAttribute('name'))
+      ?.let(builder.name);
   rootElement
       .getAndroidNSAttribute<SolidColor>('tintColor')
       ?.colorInt

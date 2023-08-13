@@ -9,20 +9,19 @@ class ImageVectorViewer extends StatefulWidget {
   const ImageVectorViewer({
     super.key,
     required this.focusOrder,
+    this.focusNode,
     this.parseResult,
   });
 
   final double focusOrder;
+  final FocusNode? focusNode;
   final ParseResult? parseResult;
 
   @override
   State<StatefulWidget> createState() => _ImageVectorViewerState();
 }
 
-enum _ImageVectorViewMode {
-  code,
-  preview;
-}
+enum _ImageVectorViewMode { code, preview }
 
 class _ImageVectorViewerState extends State<ImageVectorViewer> {
   final _textController = TextEditingController();
@@ -66,7 +65,8 @@ class _ImageVectorViewerState extends State<ImageVectorViewer> {
           order: NumericFocusOrder(widget.focusOrder),
           child: CustomTextField(
             controller: _textController,
-            hintText: "Click 'Convert' to see the ImageVector code",
+            hintText: "Click 'Convert' to see the ImageVector code.",
+            focusNode: widget.focusNode,
             readOnly: true,
             error: _areErrorsVisible,
           ),
@@ -93,7 +93,7 @@ class _ImageVectorViewerState extends State<ImageVectorViewer> {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: FocusTraversalOrder(
-                order: NumericFocusOrder(widget.focusOrder + 1),
+                order: NumericFocusOrder(widget.focusOrder + 0.1),
                 child: SegmentedButton(
                   segments: const [
                     ButtonSegment(
@@ -122,7 +122,7 @@ class _ImageVectorViewerState extends State<ImageVectorViewer> {
 
   @override
   void dispose() {
-    super.dispose();
     _textController.dispose();
+    super.dispose();
   }
 }
