@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:svg2iv_common/extensions.dart';
 import 'package:test/test.dart';
 
@@ -87,21 +85,6 @@ void main() {
       expect(testString.toCamelCase(), expectedString);
     });
   });
-  test(
-    "File.getNameWithoutExtension() returns a File's name"
-    ' without its extension',
-    () {
-      final fileNameWithoutExtension = 'test_file';
-      final file = File(
-        // ignore: prefer_interpolation_to_compose_strings
-        Directory.systemTemp.absolute.path +
-            Platform.pathSeparator +
-            fileNameWithoutExtension +
-            '.test',
-      );
-      expect(file.getNameWithoutExtension(), fileNameWithoutExtension);
-    },
-  );
   test(
     'num.toStringWithMaxDecimals(max) returns a String with no more than'
     ' max digits after the decimal point and no trailing zeros',

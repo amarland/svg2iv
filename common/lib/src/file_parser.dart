@@ -5,56 +5,70 @@ import 'package:xml/xml.dart';
 import 'converter/gd2iv.dart';
 import 'converter/svg2iv.dart';
 import 'converter/vd2iv.dart';
+import 'extensions.dart';
 import 'model/image_vector.dart';
 
 typedef ParseResult = (ImageVector?, List<String> errorMessages);
-typedef ParseSource = (File, SourceDefinitionType);
 
 enum SourceDefinitionType { explicit, implicit }
 
-ParseResult parseXmlFile((File, SourceDefinitionType) source) {
-  final (file, definitionType) = source;
+ParseResult parseXmlFile(File file, SourceDefinitionType definitionType) {
   return _parseXmlSource(
-    file,
+    file.readAsStringSync(),
     isSourceDefinedExplicitly: definitionType == SourceDefinitionType.explicit,
   );
 }
 
-ParseResult parseXmlString(String source) =>
-    _parseXmlSource(source, isSourceDefinedExplicitly: true);
+ParseResult parseXmlString(String source, {String? sourcePath}) {
+  return _parseXmlSource(
+    source,
+    isSourceDefinedExplicitly: true,
+    sourcePath: sourcePath,
+  );
+}
 
 ParseResult _parseXmlSource(
-  dynamic source, {
+  String source, {
   required bool isSourceDefinedExplicitly,
+  String? sourcePath,
 }) {
-  final isSourceAFile = source is File;
-  if (!isSourceAFile && source is! String) {
-    throw UnsupportedError(
-      'The source must be either a `File` or a `String`!',
-    );
-  }
+  final hasPath = sourcePath != null && sourcePath.isNotEmpty;
   ImageVector? imageVector;
-  final errorMessages = List<String>.empty(growable: true);
+  final errorMessages = <String>[];
+  const errorMessageIndent = '  ';
   try {
-    final rootElement = _parseXmlString(
-      isSourceAFile ? source.readAsStringSync() : source as String,
-    );
+    final rootElement = _parseXmlString(source);
+    final imageVectorName = hasPath
+        ? sourcePath.substring(
+            sourcePath.lastIndexOf(r'[/\]') + 1,
+            sourcePath.lastIndexOfOrNull('.'),
+          )
+        : null;
     final rootElementName = rootElement.name.local;
     switch (rootElementName) {
       case 'svg':
-        imageVector = parseSvgElement(rootElement);
+        imageVector = parseSvgElement(
+          rootElement,
+          imageVectorName: imageVectorName,
+        );
         break;
       case 'vector':
-        imageVector = parseVectorDrawableElement(rootElement);
+        imageVector = parseVectorDrawableElement(
+          rootElement,
+          imageVectorName: imageVectorName,
+        );
         break;
       case 'shape':
-        imageVector = parseShapeDrawableElement(rootElement);
+        imageVector = parseShapeDrawableElement(
+          rootElement,
+          imageVectorName: imageVectorName,
+        );
         break;
       default:
         if (isSourceDefinedExplicitly) {
           final messageBuilder = StringBuffer();
-          if (isSourceAFile) {
-            messageBuilder.write("'${source.path}': ");
+          if (hasPath) {
+            messageBuilder.write("'$sourcePath': ");
           }
           messageBuilder.write("Unsupported XML root: '$rootElementName'");
           errorMessages.add(messageBuilder.toString());
@@ -63,22 +77,24 @@ ParseResult _parseXmlSource(
     }
   } on ParserException catch (e) {
     final messageBuilder = StringBuffer('An error occurred while parsing ')
-      ..write(source is File ? "'${source.path}'" : 'the input string')
+      ..write(hasPath ? "'$sourcePath'" : 'the input string')
       ..write(':');
     errorMessages
       ..add(messageBuilder.toString())
-      ..add(e.message);
+      ..add('$errorMessageIndent${e.message}');
   } catch (e) {
     final messageBuilder =
         StringBuffer('An unexpected error occurred while parsing ')
-          ..write(source is File ? "'${source.path}'" : 'the input string')
-          ..write(':')
-          ..write(e.runtimeType);
+          ..write(hasPath ? "'$sourcePath'" : 'the input string')
+          ..writeln(':')
+          ..writeln('$errorMessageIndent${e.runtimeType}');
     errorMessages.add(messageBuilder.toString());
     if (e is Error) {
-      errorMessages.add(e.stackTrace.toString());
+      errorMessages.add(
+        e.stackTrace.toString().replaceAll('\n', '\n$errorMessageIndent'),
+      );
     } else if (e is XmlException) {
-      errorMessages.add(e.message);
+      errorMessages.add('$errorMessageIndent${e.message}');
     }
   }
   return (imageVector, errorMessages);
@@ -89,15 +105,15 @@ XmlElement _parseXmlString(String source) {
   try {
     document = XmlDocument.parse(source);
   } on FileSystemException {
-    throw ParserException('The file could not be read.');
+    throw ParserException('The input file could not be read.');
   } on XmlParserException {
-    throw ParserException('The contents of the file could not be parsed.');
+    throw ParserException('The input is not valid XML.');
   }
   final XmlElement rootElement;
   try {
     rootElement = document.rootElement;
   } on StateError {
-    throw ParserException('The file is empty.');
+    throw ParserException('The input is empty.');
   }
   return rootElement;
 }

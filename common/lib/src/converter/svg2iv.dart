@@ -19,7 +19,10 @@ final _definitionSeparatorPattern = RegExp(r'[,\s]\s*');
 
 final _definitions = <String, dynamic>{};
 
-ImageVector parseSvgElement(XmlElement rootElement) {
+ImageVector parseSvgElement(
+  XmlElement rootElement, {
+  String? imageVectorName,
+}) {
   preprocessSvg(rootElement);
   final viewBoxAsString = rootElement.getAttribute('viewBox');
   final viewBox = viewBoxAsString != null
@@ -53,7 +56,7 @@ ImageVector parseSvgElement(XmlElement rootElement) {
     );
   }
   final builder = ImageVectorBuilder(viewportWidth, viewportHeight);
-  rootElement.getAttribute('id')?.let(builder.name);
+  (imageVectorName ?? rootElement.getAttribute('id'))?.let(builder.name);
   if (width == null && widthAsString != null) {
     width = _parseLength(widthAsString, baseForPercentage: viewportWidth);
   }

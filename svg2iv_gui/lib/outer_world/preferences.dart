@@ -1,36 +1,26 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:svg2iv_common/extensions.dart';
+import 'package:svg2iv_common_flutter/preferences.dart';
 
 import '../util/exception_handlers.dart';
 
-class Preferences {
-  Preferences._();
-
-  static const _useDarkMode = "use_dark_mode";
-  static const _useMaterial3 = "use_material3";
-
+class FilePreferences extends Preferences {
   @visibleForTesting
-  static const defaultThemeMode = ThemeMode.system;
-  @visibleForTesting
-  static const isMaterial3EnabledByDefault = false;
+  FilePreferences.internal([this._file]) : super();
 
-  static File? _file;
+  factory FilePreferences() => _instance;
 
-  @visibleForTesting
-  static set file(File file) => _file = file;
+  static final FilePreferences _instance = FilePreferences.internal();
 
-  static Map<String, String>? _preferences;
+  File? _file;
 
-  static Future<File> _getFile() async {
-    if (_file != null) {
-      return _file!;
-    }
-    return File(
+  Future<File> _getFile() async {
+    return _file ??= File(
       path.join(
         (await path_provider.getApplicationSupportDirectory()).path,
         'svg2iv.ini',
@@ -38,11 +28,9 @@ class Preferences {
     );
   }
 
-  static Future<Map<String, String>> _getPreferences() async {
-    if (_preferences != null) {
-      return _preferences!;
-    }
-    final preferences = <String, String>{};
+  @override
+  Future<Map<String, String>> loadPreferencesFromStorage() async {
+    final preferences = HashMap<String, String>();
     await runIgnoringException<FileSystemException>(() async {
       final file = await _getFile();
       if (await file.exists()) {
@@ -54,14 +42,18 @@ class Preferences {
         }
       }
     });
-    _preferences = preferences;
     return preferences;
   }
 
-  static Future<void> _setPreference(String key, Object value) async {
-    final preferences = await _getPreferences()
-      ..[key] = value.toString();
-    return runIgnoringException<FileSystemException>(() async {
+  @override
+  Future<void> setPreference(String key, Object value) async {
+    await super.setPreference(key, value);
+    await _writePreferences();
+  }
+
+  Future<void> _writePreferences() async {
+    final preferences = await getPreferences();
+    await runIgnoringException<FileSystemException>(() async {
       final file = await _getFile();
       if (!await file.exists()) {
         await file.create(recursive: true);
@@ -70,33 +62,8 @@ class Preferences {
       for (final entry in preferences.entries) {
         sink.writeln('${entry.key}=${entry.value}');
       }
+      await sink.flush();
       await sink.close();
     });
-  }
-
-  static Future<ThemeMode> getThemeMode() async {
-    switch ((await _getPreferences())[_useDarkMode]) {
-      case 'true':
-        return ThemeMode.dark;
-      case 'false':
-        return ThemeMode.light;
-      default:
-        return defaultThemeMode;
-    }
-  }
-
-  static Future<bool> isMaterial3Enabled() async {
-    final value = (await _getPreferences())[_useMaterial3];
-    return !value.isNullOrEmpty
-        ? value!.toLowerCase() == 'true'
-        : isMaterial3EnabledByDefault;
-  }
-
-  static Future<void> setDarkModeEnabled(bool enabled) async {
-    await _setPreference(_useDarkMode, enabled);
-  }
-
-  static Future<void> setMaterial3Enabled(bool enabled) async {
-    await _setPreference(_useMaterial3, enabled);
   }
 }

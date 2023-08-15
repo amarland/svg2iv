@@ -1,26 +1,25 @@
 import 'package:file/memory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:svg2iv_common_flutter/preferences.dart';
 import 'package:svg2iv_gui/outer_world/preferences.dart';
 
 void main() {
-  Preferences.file = MemoryFileSystem.test().file('./preferences.ini');
-
-  test('dark mode', () async {
-    expect(await Preferences.getThemeMode(), Preferences.defaultThemeMode);
-    Preferences.setDarkModeEnabled(true);
-    expect(await Preferences.getThemeMode(), ThemeMode.dark);
-    Preferences.setDarkModeEnabled(false);
-    expect(await Preferences.getThemeMode(), ThemeMode.light);
-  });
-  test('Material 3', () async {
-    expect(
-      await Preferences.isMaterial3Enabled(),
-      Preferences.isMaterial3EnabledByDefault,
+  test('preferences are written to/loaded from local storage', () async {
+    final memoryFileSystem = MemoryFileSystem.test();
+    final preferencesFile = memoryFileSystem.file('preferences');
+    var preferences = FilePreferences.internal(preferencesFile);
+    await preferences.setDarkModeEnabled(true);
+    await preferences.setMaterial3Enabled(
+      !Preferences.isMaterial3EnabledByDefault,
     );
-    Preferences.setMaterial3Enabled(true);
-    expect(await Preferences.isMaterial3Enabled(), true);
-    Preferences.setMaterial3Enabled(false);
-    expect(await Preferences.isMaterial3Enabled(), false);
+    preferences = FilePreferences.internal(memoryFileSystem.file('blank'));
+    expect((await preferences.getPreferences()).isEmpty, true);
+    preferences = FilePreferences.internal(preferencesFile);
+    expect(await preferences.getThemeMode(), ThemeMode.dark);
+    expect(
+      await preferences.isMaterial3Enabled(),
+      !Preferences.isMaterial3EnabledByDefault,
+    );
   });
 }

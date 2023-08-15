@@ -8,14 +8,14 @@ import 'extensions.dart';
 import 'vector_path_command_interpreter.dart';
 
 extension ImageVectorPainting on ImageVector {
-  ui.Picture toPicture(ui.Size size) {
+  ui.Picture toPicture(int width, int height) {
     // https://github.com/flutter/flutter/issues/83872
     final ui.Path reusablePath = ui.Path();
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final viewBox = ui.Rect.fromLTWH(0.0, 0.0, viewportWidth, viewportHeight);
     final ui.Canvas canvas = ui.Canvas(recorder, viewBox);
-    if (size.width != viewportWidth || size.height != viewportHeight) {
-      canvas.scale(size.width / viewportWidth, size.height / viewportHeight);
+    if (width != viewportWidth || height != viewportHeight) {
+      canvas.scale(width / viewportWidth, height / viewportHeight);
     }
     canvas.clipRect(viewBox);
     for (final node in nodes) {

@@ -12,7 +12,10 @@ import '../util/path_building_helpers.dart';
 
 enum _Shape { rectangle, oval, line, ring }
 
-ImageVector parseShapeDrawableElement(XmlElement rootElement) {
+ImageVector parseShapeDrawableElement(
+  XmlElement rootElement, {
+  String? imageVectorName,
+}) {
   final sizeElement = rootElement.getElement('size');
   final width = sizeElement?.getAndroidNSAttribute<Dimension>('width')?.value;
   final height = sizeElement?.getAndroidNSAttribute<Dimension>('height')?.value;
@@ -23,6 +26,7 @@ ImageVector parseShapeDrawableElement(XmlElement rootElement) {
     );
   }
   final imageVectorBuilder = ImageVectorBuilder(width, height);
+  imageVectorName?.let(imageVectorBuilder.name);
   final shape = rootElement
           .getAndroidNSAttribute<String>('shape')
           ?.let(_Shape.values.byName) ??

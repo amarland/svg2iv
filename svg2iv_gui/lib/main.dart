@@ -1,23 +1,14 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:svg2iv_common_flutter/app_info.dart';
 
-import '../ui/app.dart';
+import 'ui/app.dart';
+
+const appName = 'svg2iv_gui';
+const appVersion = '0.1.0';
 
 void main() {
-  LicenseRegistry.addLicense(
-    () => Stream.fromFutures(
-      ['JetBrains Mono', 'Noto Sans'].map(
-        (fontName) async => LicenseEntryWithLineBreaks(
-          [fontName],
-          await rootBundle.loadString(
-            'res/font/${fontName.replaceAll(' ', '')}/OFL.txt',
-          ),
-        ),
-      ),
-    ),
-  );
+  addFontLicenses();
   runApp(const App());
   doWhenWindowReady(() {
     appWindow
