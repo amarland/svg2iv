@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/parser.dart';
 import 'package:svg2iv_common_flutter/widgets.dart';
@@ -27,11 +29,30 @@ class SourceTextField extends StatefulWidget {
 
 enum _FabAction { selectFile, convertSource }
 
+sealed class _DropzoneEvent {
+  const _DropzoneEvent();
+}
+
+class _DropEvent extends _DropzoneEvent {
+  const _DropEvent(this.file);
+
+  final dynamic file;
+}
+
+class _DropInvalidEvent extends _DropzoneEvent {
+  const _DropInvalidEvent();
+}
+
+class _DropMultipleEvent extends _DropzoneEvent {
+  const _DropMultipleEvent();
+}
+
 class _SourceTextFieldState extends State<SourceTextField> {
   final _textController = TextEditingController();
   late DropzoneViewController _dropzoneController;
   var _areInteractionsEnabled = true;
   _FabAction _fabAction = _FabAction.selectFile;
+  final _dropzoneEventsController = StreamController<_DropzoneEvent>();
   String? _droppedFileName;
 
   @override
@@ -44,6 +65,23 @@ class _SourceTextFieldState extends State<SourceTextField> {
       } else if (isTextFieldEmpty && _fabAction == _FabAction.convertSource) {
         setState(() => _fabAction = _FabAction.selectFile);
       }
+    });
+    _dropzoneEventsController.stream
+        .debounceBuffer(const Duration(milliseconds: 100))
+        .listen((events) {
+      T? firstEventOfType<T extends _DropzoneEvent>() {
+        final event = events.firstWhereOrNull((e) => e is T);
+        return event != null ? event as T : null;
+      }
+
+      final dropMultipleEvent = firstEventOfType<_DropMultipleEvent>();
+      if (dropMultipleEvent != null || events.length > 1) {
+        _showSnackBar(context, 'Only one file at a time for now, sorry!');
+      } else if (firstEventOfType<_DropInvalidEvent>() != null) {
+        _showSnackBar(context, 'The type of the file you dropped is invalid.');
+      }
+      final droppedFile = firstEventOfType<_DropEvent>()?.file;
+      if (droppedFile != null) _onFileSelected(droppedFile);
     });
   }
 
@@ -61,7 +99,13 @@ class _SourceTextFieldState extends State<SourceTextField> {
           operation: DragOperation.copy,
           mime: mimeTypes,
           onCreated: (controller) => _dropzoneController = controller,
-          onDrop: _onFileSelected,
+          onDrop: (file) => _dropzoneEventsController.add(_DropEvent(file)),
+          onDropInvalid: (_) {
+            _dropzoneEventsController.add(const _DropInvalidEvent());
+          },
+          onDropMultiple: (_) {
+            _dropzoneEventsController.add(const _DropMultipleEvent());
+          },
         ),
         FocusTraversalOrder(
           order: NumericFocusOrder(widget.focusOrder),
@@ -77,7 +121,7 @@ Alternatively, you can open a file by clicking the button below.''',
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0),
           child: FocusTraversalOrder(
             order: NumericFocusOrder(widget.focusOrder + 0.1),
             child: FloatingActionButton.extended(
@@ -111,6 +155,15 @@ Alternatively, you can open a file by clicking the button below.''',
     );
   }
 
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 6),
+      ),
+    );
+  }
+
   void _onFileSelected(dynamic file) async {
     _droppedFileName = await _dropzoneController.getFilename(file);
     setState(() => _areInteractionsEnabled = false);
@@ -136,6 +189,7 @@ Alternatively, you can open a file by clicking the button below.''',
   @override
   void dispose() {
     _textController.dispose();
+    _dropzoneEventsController.close();
     super.dispose();
   }
 }

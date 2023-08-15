@@ -91,7 +91,7 @@ class _ImageVectorViewerState extends State<ImageVectorViewer> {
           Align(
             alignment: Alignment.topRight,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12.0),
               child: FocusTraversalOrder(
                 order: NumericFocusOrder(widget.focusOrder + 0.1),
                 child: SegmentedButton(

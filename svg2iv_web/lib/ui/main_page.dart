@@ -33,29 +33,23 @@ class _MainPageState extends State<MainPage> {
         padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
         child: FocusTraversalGroup(
           policy: OrderedTraversalPolicy(),
-          child: Column(
+          child: Row(
             children: [
               Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SourceTextField(
-                        focusOrder: 1,
-                        onSourceParsed: (result) {
-                          setState(() => _parseResult = result);
-                          _imageVectorViewerFocusNode.requestFocus();
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16.0),
-                    Expanded(
-                      child: ImageVectorViewer(
-                        focusOrder: 2,
-                        parseResult: _parseResult,
-                        focusNode: _imageVectorViewerFocusNode,
-                      ),
-                    ),
-                  ],
+                child: SourceTextField(
+                  focusOrder: 1,
+                  onSourceParsed: (result) {
+                    setState(() => _parseResult = result);
+                    _imageVectorViewerFocusNode.requestFocus();
+                  },
+                ),
+              ),
+              const SizedBox(width: 16.0),
+              Expanded(
+                child: ImageVectorViewer(
+                  focusOrder: 2,
+                  parseResult: _parseResult,
+                  focusNode: _imageVectorViewerFocusNode,
                 ),
               ),
             ],

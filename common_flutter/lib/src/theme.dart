@@ -65,6 +65,9 @@ ThemeData _getThemeData(ColorScheme colorScheme, bool useMaterial3) {
               ?.copyWith(backgroundColor: segmentedButtonBackgroundColor) ??
           ButtonStyle(backgroundColor: segmentedButtonBackgroundColor),
     ),
+    snackBarTheme: themeData.snackBarTheme.copyWith(
+      behavior: SnackBarBehavior.floating,
+    ),
   );
 }
 
