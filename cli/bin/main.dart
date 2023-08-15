@@ -82,7 +82,7 @@ If not set, the generated property will be declared as a top-level property.
       ..writeln(argParser.usage);
     return;
   }
-  List<ParseSource> sources = argResults.rest
+  List<(File, SourceDefinitionType)> sources = argResults.rest
       .expand(
         (rest) => rest.split(RegExp(',+')).where((s) => s.isNotEmpty).expand(
           (path) sync* {
@@ -178,25 +178,16 @@ If not set, the generated property will be declared as a top-level property.
   final errorMessages = <String>[];
   if (sourceString != null) {
     final (imageVector, errorMessages) = parseXmlString(sourceString);
-    imageVectors.add(
-      imageVector?.name != null
-          ? imageVector
-          : imageVector?.copyWith(
-              name: destination is File
-                  ? destination.getNameWithoutExtension()
-                  : null,
-            ),
-    );
+    imageVectors.add(imageVector);
     errorMessages.addAll(errorMessages);
   } else {
     for (final source in sources) {
-      final (imageVector, errorMessages) = parseXmlFile(source);
-      final (sourceFile, _) = source;
-      imageVectors.add(
-        imageVector?.name != null
-            ? imageVector
-            : imageVector?.copyWith(name: sourceFile.getNameWithoutExtension()),
+      final (sourceFile, definitionType) = source;
+      final (imageVector, errorMessages) = parseXmlFile(
+        sourceFile,
+        definitionType,
       );
+      imageVectors.add(imageVector);
       errorMessages.addAll(errorMessages);
     }
   }

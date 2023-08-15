@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:svg2iv_common_flutter/widgets.dart';
 
 import '../ui/file_system_entity_selection_mode.dart';
-import '../ui/svg_icon.dart';
 import '../util/mnemonic_text_spans.dart';
 
 class FileSystemEntitySelectionField extends StatefulWidget {
@@ -43,11 +43,11 @@ class _State extends State<FileSystemEntitySelectionField> {
     final TextSpan defaultLabelSpan;
     switch (widget.selectionMode) {
       case FileSystemEntitySelectionMode.sourceFiles:
-        iconAssetName = 'res/source_files';
+        iconAssetName = 'res/icons/source_files';
         defaultLabelSpan = 'Source files'.asMnemonic();
         break;
       case FileSystemEntitySelectionMode.destinationDirectory:
-        iconAssetName = 'res/destination_directory';
+        iconAssetName = 'res/icons/destination_directory';
         defaultLabelSpan = 'Destination directory'.asMnemonic();
         break;
     }
@@ -87,7 +87,7 @@ class _State extends State<FileSystemEntitySelectionField> {
               ),
               side: theme.inputDecorationTheme.enabledBorder?.borderSide,
             ),
-            child: const SvgIcon('res/explore_files'),
+            child: const SvgIcon('res/icons/explore_files'),
           ),
         ),
       ],

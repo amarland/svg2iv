@@ -1,4 +1,4 @@
-# svg2iv ![Dart CI](https://github.com/amarland/svg2iv/actions/workflows/dart_ci.yml/badge.svg)
+# svg2iv ![Quality checks](https://github.com/amarland/svg2iv/actions/workflows/dart-ci.yml/badge.svg)
 
 A Dart command-line tool and a Flutter desktop application (still in development) for generating Jetpack Compose `ImageVector`s from simple SVG and Android `VectorDrawable` files.
 

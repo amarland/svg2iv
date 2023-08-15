@@ -1,57 +1,34 @@
+import 'package:equatable/equatable.dart';
+
 import 'vector_group.dart';
 
-class Rotation {
+class Rotation extends Equatable {
   const Rotation._(this.angle, this.pivotX, this.pivotY);
 
   final double angle;
   final double? pivotX, pivotY;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Rotation &&
-          runtimeType == other.runtimeType &&
-          angle == other.angle &&
-          pivotX == other.pivotX &&
-          pivotY == other.pivotY;
-
-  @override
-  int get hashCode => angle.hashCode ^ pivotX.hashCode ^ pivotY.hashCode;
+  List<Object?> get props => [angle, pivotX, pivotY];
 }
 
-class Scale {
+class Scale extends Equatable {
   const Scale._(this.x, this.y);
 
   final double x;
   final double? y;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Scale &&
-          runtimeType == other.runtimeType &&
-          x == other.x &&
-          y == other.y;
-
-  @override
-  int get hashCode => x.hashCode ^ y.hashCode;
+  List<Object?> get props => [x, y];
 }
 
-class Translation {
+class Translation extends Equatable {
   const Translation._(this.x, this.y);
 
   final double x, y;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Translation &&
-          runtimeType == other.runtimeType &&
-          x == other.x &&
-          y == other.y;
-
-  @override
-  int get hashCode => x.hashCode ^ y.hashCode;
+  List<Object?> get props => [x, y];
 }
 
 class Transformations {

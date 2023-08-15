@@ -18,29 +18,18 @@ dependencies:
   path_provider: ^2.0.15
   svg2iv_common:
     path: ../common
+  svg2iv_common_flutter:
+    path: ../common_flutter
   tuple: ^2.0.1
-  vector_graphics: ^1.1.6
-  vector_math: ^2.1.4
+  vector_graphics: ^1.1.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  file: ^6.1.4
+  file: ^7.0.0
   flutter_lints: ^2.0.1
 
 flutter:
   uses-material-design: true
   assets:
-    - res/convert_vector
-    - res/destination_directory
-    - res/explore_files
-    - res/logo
-    - res/source_files
-    - res/toggle_theme
-  fonts:
-    - family: JetBrainsMono
-      fonts:
-        - asset: res/font/jetbrains_mono_regular.ttf
-    - family: WorkSans
-      fonts:
-        - asset: res/font/work_sans_variable.ttf
+    - res/icons/

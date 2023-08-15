@@ -141,7 +141,7 @@ void writeImageVector(
   var indentationLevel = 0;
   final extensionReceiverDeclaration =
       extensionReceiver.isNullOrEmpty ? '' : '${extensionReceiver!}.';
-  final imageVectorName = (imageVector.name ?? '');
+  final imageVectorName = (imageVector.name ?? 'imageVector');
   final backingPropertyName = '_${imageVectorName.toCamelCase()}';
   sink
     ..writeln(

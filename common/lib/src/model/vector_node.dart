@@ -1,9 +1,13 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-abstract class VectorNode {
+abstract class VectorNode extends Equatable {
   const VectorNode(this.id);
 
   final String? id;
+
+  @override
+  List<Object?> get props => [id];
 }
 
 abstract class VectorNodeBuilder<T extends VectorNode,

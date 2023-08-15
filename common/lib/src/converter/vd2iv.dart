@@ -12,7 +12,10 @@ import '../util/path_command_mapper.dart';
 
 final _elementsToIgnore = HashSet<XmlElement>();
 
-ImageVector parseVectorDrawableElement(XmlElement rootElement) {
+ImageVector parseVectorDrawableElement(
+  XmlElement rootElement, {
+  String? sourceName,
+}) {
   final parsedRequiredAttributes = <String, dynamic>{
     'viewportWidth': rootElement.getAndroidNSAttribute<double>('viewportWidth'),
     'viewportHeight':
@@ -32,7 +35,8 @@ ImageVector parseVectorDrawableElement(XmlElement rootElement) {
   final builder = ImageVectorBuilder(viewportWidth, viewportHeight)
       .width((parsedRequiredAttributes['width'] as Dimension).value)
       .height((parsedRequiredAttributes['height'] as Dimension).value);
-  rootElement.getAndroidNSAttribute<String>('name')?.let(builder.name);
+  (sourceName ?? rootElement.getAndroidNSAttribute('name'))
+      ?.let(builder.name);
   rootElement
       .getAndroidNSAttribute<SolidColor>('tintColor')
       ?.colorInt

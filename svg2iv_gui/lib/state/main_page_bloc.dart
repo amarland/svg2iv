@@ -141,8 +141,9 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           break;
         }
       }
-      _imageVectors.clear();
-      await parseFiles(paths).forEach(_imageVectors.add);
+      _imageVectors
+        ..clear()
+        ..addAll(await parseFiles(paths));
       _previewIndex = 0;
       // await Future<void>.delayed(const Duration(seconds: 3));
       yield state.copyWith(

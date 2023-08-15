@@ -7,7 +7,10 @@ import '../extensions.dart';
 import '../file_parser.dart';
 import '../util/path_command_mapper.dart';
 
-ImageVector parseSvgElement(String xml) {
+ImageVector parseSvgElement(
+  String xml, {
+  String? sourceName,
+}) {
   final vgc.VectorInstructions instructions;
   try {
     instructions = vgc.parseWithoutOptimizers(xml);
@@ -15,6 +18,7 @@ ImageVector parseSvgElement(String xml) {
     throw ParserException(e.message);
   }
   final builder = ImageVectorBuilder(instructions.width, instructions.height);
+  sourceName?.let(builder.name);
   for (final vectorNode in _mapInstructions(instructions)) {
     builder.addNode(vectorNode);
   }

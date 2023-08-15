@@ -1,6 +1,7 @@
+import 'package:equatable/equatable.dart';
 import 'package:svg2iv_common/extensions.dart';
 
-sealed class PathNode {
+sealed class PathNode extends Equatable {
   const PathNode();
 
   String get nodeClassName;
@@ -9,18 +10,10 @@ sealed class PathNode {
 
   int get index;
 
-  List<dynamic> get arguments;
+  List<Object> get arguments;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      runtimeType == other.runtimeType &&
-          const ListEquality<dynamic>()
-              .equals(arguments, (other as PathNode).arguments);
-
-  @override
-  int get hashCode =>
-      index.hashCode ^ const ListEquality<dynamic>().hash(arguments);
+  List<Object> get props => arguments;
 }
 
 class MoveToNode extends PathNode {
@@ -35,7 +28,7 @@ class MoveToNode extends PathNode {
   int get index => 0;
 
   @override
-  List<dynamic> get arguments => [x, y];
+  List<Object> get arguments => [x, y];
 
   @override
   String toString() => 'M$x,$y';
@@ -53,7 +46,7 @@ class LineToNode extends PathNode {
   int get index => 1;
 
   @override
-  List<dynamic> get arguments => [x, y];
+  List<Object> get arguments => [x, y];
 
   @override
   String toString() => 'L$x,$y';
@@ -71,7 +64,7 @@ class CurveToNode extends PathNode {
   int get index => 2;
 
   @override
-  List<dynamic> get arguments => [x1, y1, x2, y2, x3, y3];
+  List<Object> get arguments => [x1, y1, x2, y2, x3, y3];
 
   @override
   String toString() => 'C$x1,$y1,$x2,$y2,$x3,$y3';
@@ -98,7 +91,7 @@ class ArcToNode extends PathNode {
   int get index => 3;
 
   @override
-  List<dynamic> get arguments => [rx, ry, angle, largeArc, sweep, x, y];
+  List<Object> get arguments => [rx, ry, angle, largeArc, sweep, x, y];
 
   @override
   String toString() {
@@ -116,7 +109,7 @@ class CloseNode extends PathNode {
   int get index => 4;
 
   @override
-  List<dynamic> get arguments => List.empty();
+  List<Object> get arguments => List.empty();
 
   @override
   String toString() => 'Z';

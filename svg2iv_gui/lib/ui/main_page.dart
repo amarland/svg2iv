@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
-import 'package:vector_graphics/vector_graphics.dart';
+import 'package:svg2iv_common_flutter/app_info.dart' as app_info;
+import 'package:svg2iv_common_flutter/image_vector_preview.dart';
+import 'package:svg2iv_common_flutter/theme.dart';
+import 'package:svg2iv_common_flutter/widgets.dart';
 
+import '../main.dart';
 import '../outer_world/file_pickers.dart' as file_pickers;
 import '../state/main_page_bloc.dart';
 import '../state/main_page_event.dart';
 import '../state/main_page_state.dart';
-import '../state/theme_cubit.dart';
-import 'app.dart';
-import 'checkerboard.dart';
 import 'file_system_entity_selection_field.dart';
 import 'file_system_entity_selection_mode.dart';
 import 'preview_selection_button.dart';
-import 'svg_icon.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -22,8 +22,8 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage>
-    with SingleTickerProviderStateMixin<MainPage> {
+class _MainPageState
+    extends State<MainPage> /*with SingleTickerProviderStateMixin<MainPage>*/ {
   /*
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -66,38 +66,13 @@ class _MainPageState extends State<MainPage>
   }
 
   static Widget _buildScaffold(BuildContext context) {
-    final bloc = BlocProvider.of<MainPageBloc>(context);
-    final theme = Theme.of(context);
-    final title = TextSpan(
-      text: '${App.name} | ',
-      children: [
-        TextSpan(
-          text: 'SVG to ImageVector conversion tool',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.useMaterial3 || theme.brightness == Brightness.dark
-                ? theme.colorScheme.onSurface
-                : theme.colorScheme.onPrimary,
-          ),
-        ),
-      ],
-    );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text.rich(title),
-        actions: [
-          IconButton(
-            onPressed: () {
-              BlocProvider.of<ThemeCubit>(context).toggleTheme();
-            },
-            icon: const SvgIcon('res/toggle_theme'),
-          ),
-          IconButton(
-            onPressed: () => bloc.add(const AboutButtonPressed()),
-            icon: const Icon(Icons.info_outlined),
-          ),
-          const SizedBox(width: 8.0),
-        ],
-      ),
+    return MainPageScaffold(
+      onToggleThemeButtonPressed: () {
+        BlocProvider.of<ThemeCubit>(context).toggleTheme();
+      },
+      onAboutButtonPressed: () {
+        BlocProvider.of<MainPageBloc>(context).add(const AboutButtonPressed());
+      },
       body: _appDialogVisibilityChangeListener(
         context: context,
         child: BlocBuilder<MainPageBloc, MainPageState>(
@@ -197,17 +172,10 @@ class _MainPageState extends State<MainPage>
         if (errorMessagesDialog is ErrorMessagesDialog) {
           await showErrorMessagesDialog(context, errorMessagesDialog);
         } else if (state.isAboutDialogVisible) {
-          await showDialog<void>(
-            context: context,
-            builder: (context) {
-              return const AboutDialog(
-                applicationName: App.name,
-                applicationVersion: '0.1.0',
-                applicationIcon: VectorGraphic(
-                  loader: AssetBytesLoader('res/logo'),
-                ),
-              );
-            },
+          await app_info.showAboutDialog(
+            context,
+            name: appName,
+            version: appVersion,
           );
           bloc.add(const AboutDialogClosed());
         }
@@ -226,7 +194,10 @@ class _MainPageState extends State<MainPage>
       builder: (context) {
         return AlertDialog(
           content: DefaultTextStyle(
-            style: const TextStyle(fontFamily: 'JetBrainsMono'),
+            style: const TextStyle(
+              fontFamily: 'JetBrainsMono',
+              package: 'svg2iv_common_flutter',
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,8 +308,8 @@ class _MainPageState extends State<MainPage>
                   child: LayoutBuilder(
                     builder: (_, constraints) {
                       return Checkerboard(
-                        imageVector: state.imageVector,
                         size: constraints.biggest,
+                        imageVector: state.imageVector,
                       );
                     },
                   ),
@@ -375,11 +346,11 @@ class _MainPageState extends State<MainPage>
                           bloc.add(const ConvertButtonClicked());
                         }
                       : null,
-                  icon: const SvgIcon('res/convert_vector'),
-                  label: const Text(
-                    'Convert',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  icon: const SvgIcon(
+                    'res/icons/convert_vector',
+                    packageName: 'svg2iv_common_flutter',
                   ),
+                  label: const Text('Convert'),
                 ),
               ),
             ],
