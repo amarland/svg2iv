@@ -133,7 +133,7 @@ PathFillType _mapPathFillType(vgc.PathFillType type) =>
     }
   } else {
     // opacity is handled separately
-    brush = SolidColor((color.value << 8) >> 8);
+    brush = SolidColor(color.value & 0x00FFFFFF + 0xFF000000);
   }
   return (brush, color.a / 0xFF);
 }
