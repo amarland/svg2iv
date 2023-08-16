@@ -113,9 +113,9 @@ class TextFieldState {
 
 class ErrorMessagesDialog {
   const ErrorMessagesDialog(
-    this.messages,
-    this.isReadMoreButtonVisible,
-  ) : super();
+    this.messages, {
+    required this.isReadMoreButtonVisible,
+  }) : super();
 
   final List<String> messages;
   final bool isReadMoreButtonVisible;

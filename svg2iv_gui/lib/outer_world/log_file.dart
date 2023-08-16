@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:tuple/tuple.dart';
 
 import '../util/exception_handlers.dart';
 
@@ -24,7 +23,7 @@ Future<void> writeErrorMessages(List<String> messages) async {
   });
 }
 
-Future<Tuple2<List<String>, bool>> readErrorMessages(int limit) async {
+Future<(List<String>, bool)> readErrorMessages(int limit) async {
   List<String>? messages;
   var hasMoreThanLimit = false;
   final file = File(await _filePath);
@@ -41,7 +40,7 @@ Future<Tuple2<List<String>, bool>> readErrorMessages(int limit) async {
       messages = hasMoreThanLimit ? lines.slice(0, limit) : lines;
     }
   });
-  return Tuple2(messages ?? List.empty(), hasMoreThanLimit);
+  return (messages ?? List.empty(), !hasMoreThanLimit);
 }
 
 Future<void> openLogFileInPreferredApplication() async {
@@ -55,17 +54,11 @@ Future<void> openLogFileInPreferredApplication() async {
     executable = 'xdg-open';
   }
   final filePath = await _filePath;
-  final arguments = List<String>.generate(isPlatformWindows ? 3 : 1, (index) {
-    switch (index) {
-      case 0:
-        return isPlatformWindows
-            ? 'Start-Process'
-            : filePath.replaceAll(' ', '\\ ');
-      case 1: // is Windows
-        return '-FilePath';
-      default: // == case 2; is Windows
-        return '"$filePath"';
-    }
-  });
+  final List<String> arguments;
+  if (isPlatformWindows) {
+    arguments = ['Start-Process', '-FilePath', '"$filePath"'];
+  } else {
+    arguments = [filePath.replaceAll(' ', r'\ ')];
+  }
   await Process.run(executable, arguments);
 }

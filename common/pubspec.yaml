@@ -8,12 +8,12 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  collection: ^1.17.1
+  collection: ^1.17.2
   equatable: ^2.0.5
   meta: ^1.9.1
   path_parsing: ^1.0.1
-  vector_graphics_codec: ^1.1.6
-  vector_graphics_compiler: ^1.1.6
+  vector_graphics_codec: ^1.1.7
+  vector_graphics_compiler: ^1.1.7
   xml: ^6.3.0
 
 dev_dependencies:
