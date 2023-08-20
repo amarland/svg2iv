@@ -1,2 +1,2 @@
 export 'src/scaffold.dart';
-export 'src/svg_icon.dart';
+export 'src/vector_graphic_icon.dart';

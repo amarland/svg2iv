@@ -48,10 +48,7 @@ ParseResult _parseXmlSource(
         parseEvents(source).whereType<XmlStartElementEvent>().firstOrNull?.name;
     switch (rootElementName) {
       case 'svg':
-        imageVector = parseSvgElement(
-          source,
-          sourceName: sourceName,
-        );
+        imageVector = parseSvgElement(source, sourceName: sourceName);
         break;
       case 'vector':
         imageVector = parseVectorDrawableElement(

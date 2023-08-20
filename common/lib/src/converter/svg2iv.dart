@@ -1,16 +1,14 @@
 import 'dart:collection';
 
+import 'package:svg2iv_common/extensions.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart' as vgc;
+import 'package:xml/xml_events.dart';
 
 import '../../models.dart';
-import '../extensions.dart';
 import '../file_parser.dart';
 import '../util/path_command_mapper.dart';
 
-ImageVector parseSvgElement(
-  String xml, {
-  String? sourceName,
-}) {
+ImageVector parseSvgElement(String xml, {String? sourceName}) {
   final vgc.VectorInstructions instructions;
   try {
     instructions = vgc.parseWithoutOptimizers(xml);
@@ -18,6 +16,12 @@ ImageVector parseSvgElement(
     throw ParserException(e.message);
   }
   final builder = ImageVectorBuilder(instructions.width, instructions.height);
+  sourceName ??= parseEvents(xml)
+      .whereType<XmlStartElementEvent>()
+      .firstOrNull
+      ?.attributes
+      .singleWhereOrNull((a) => a.localName == 'id')
+      ?.value;
   sourceName?.let(builder.name);
   for (final vectorNode in _mapInstructions(instructions)) {
     builder.addNode(vectorNode);

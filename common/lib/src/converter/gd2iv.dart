@@ -28,26 +28,17 @@ ImageVector parseShapeDrawableElement(
           .getAndroidNSAttribute<String>('shape')
           ?.let(_Shape.values.byName) ??
       _Shape.rectangle;
-  final VectorPathBuilder vectorPathBuilder;
   final bounds = Rect(0.0, 0.0, width, height);
-  switch (shape) {
-    case _Shape.oval:
-      vectorPathBuilder = _buildOvalPathGeometry(rootElement, bounds);
-      break;
-    case _Shape.line:
-      vectorPathBuilder = _buildLinePathGeometry(rootElement, bounds);
-      break;
-    case _Shape.ring:
-      vectorPathBuilder = _buildRingPathGeometry(rootElement, bounds);
-      break;
-    default:
-      vectorPathBuilder = _buildRectanglePathGeometry(rootElement, bounds);
-      break;
-  }
+  final vectorPathBuilder = switch (shape) {
+    _Shape.line => _buildLinePathGeometry(rootElement, bounds),
+    _Shape.oval => _buildOvalPathGeometry(rootElement, bounds),
+    _Shape.rectangle => _buildRectanglePathGeometry(rootElement, bounds),
+    _Shape.ring => _buildRingPathGeometry(rootElement, bounds),
+  };
   _parseFill(rootElement, bounds)?.let(vectorPathBuilder.fill);
   _parseStroke(rootElement)?.let((stroke) {
-    final (brush, width) = stroke;
-    vectorPathBuilder.stroke(brush);
+    final (solidColor, width) = stroke;
+    vectorPathBuilder.stroke(solidColor);
     vectorPathBuilder.strokeLineWidth(width);
   });
   return imageVectorBuilder.addNode(vectorPathBuilder.build()).build();
@@ -124,18 +115,24 @@ VectorPathBuilder _buildRingPathGeometry(
   final thickness =
       rootElement.getAndroidNSAttribute<Dimension>('thickness')?.value ??
           bounds.width / thicknessRatio;
-  final rx = bounds.width / 2.0;
-  final ry = bounds.height / 2.0;
-  final cx = bounds.left + rx;
-  final cy = bounds.top + ry;
+  final cx = bounds.left + bounds.width / 2.0;
+  final cy = bounds.top + bounds.height / 2.0;
   final innerBounds = Rect.fromRect(bounds);
   innerBounds.inset(cx - innerRadius, cy - innerRadius);
-  final irx = innerBounds.width / 2.0;
-  final iry = innerBounds.height / 2.0;
   bounds = Rect.fromRect(innerBounds);
   bounds.inset(-thickness, -thickness);
-  final pathData = obtainPathNodesForEllipse(cx: cx, cy: cy, rx: rx, ry: ry) +
-      obtainPathNodesForEllipse(cx: cx, cy: cy, rx: irx, ry: iry);
+  final pathData = obtainPathNodesForEllipse(
+        cx: cx,
+        cy: cy,
+        rx: bounds.width / 2.0,
+        ry: bounds.height / 2.0,
+      ) +
+      obtainPathNodesForEllipse(
+        cx: cx,
+        cy: cy,
+        rx: innerBounds.width / 2.0,
+        ry: innerBounds.height / 2.0,
+      );
   return VectorPathBuilder(pathData).pathFillType(PathFillType.evenOdd);
 }
 
@@ -155,7 +152,7 @@ Brush? _parseFill(XmlElement rootElement, Rect bounds) {
   return gradientElement?.let((element) => parseGradient(element, bounds));
 }
 
-(Brush, double)? _parseStroke(XmlElement rootElement) {
+(SolidColor, double)? _parseStroke(XmlElement rootElement) {
   final strokeElement = rootElement.getElement('stroke');
   final color = strokeElement?.getAndroidNSAttribute<SolidColor>('color');
   final width = strokeElement?.getAndroidNSAttribute<Dimension>('width')?.value;

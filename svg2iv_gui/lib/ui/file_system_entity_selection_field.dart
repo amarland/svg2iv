@@ -70,7 +70,7 @@ class _State extends State<FileSystemEntitySelectionField> {
             controller: _textEditingController,
             decoration: InputDecoration(
               label: Text.rich(labelSpan, overflow: TextOverflow.ellipsis),
-              prefixIcon: SvgIcon(iconAssetName),
+              prefixIcon: VectorGraphicIcon(iconAssetName),
               enabledBorder: inputBorder,
             ),
             readOnly: true,
@@ -87,7 +87,7 @@ class _State extends State<FileSystemEntitySelectionField> {
               ),
               side: theme.inputDecorationTheme.enabledBorder?.borderSide,
             ),
-            child: const SvgIcon('res/icons/explore_files'),
+            child: const VectorGraphicIcon('res/icons/explore_files'),
           ),
         ),
       ],

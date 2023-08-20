@@ -346,7 +346,7 @@ class _MainPageState
                           bloc.add(const ConvertButtonClicked());
                         }
                       : null,
-                  icon: const SvgIcon(
+                  icon: const VectorGraphicIcon(
                     'res/icons/convert_vector',
                     packageName: 'svg2iv_common_flutter',
                   ),

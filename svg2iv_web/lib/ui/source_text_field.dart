@@ -139,7 +139,7 @@ Alternatively, you can open a file by clicking the button below.''',
                   : null,
               icon: switch (_fabAction) {
                 _FabAction.selectFile => const Icon(Icons.file_open_outlined),
-                _FabAction.convertSource => const SvgIcon(
+                _FabAction.convertSource => const VectorGraphicIcon(
                     'res/icons/convert_vector',
                     packageName: 'svg2iv_common_flutter',
                   ),
