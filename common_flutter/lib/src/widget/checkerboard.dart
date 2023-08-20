@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common/models.dart';
 
-import 'image_vector_painter.dart';
+import '../util/image_vector_painter.dart';
 
 class Checkerboard extends StatefulWidget {
   const Checkerboard({
@@ -64,12 +64,6 @@ class _CheckerboardState extends State<Checkerboard> {
         foregroundPainter: _cachedImage?.let(_ImagePainter.new),
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _cachedImage?.dispose();
-    super.dispose();
   }
 
   void _updateState([Checkerboard? oldWidget]) {

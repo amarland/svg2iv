@@ -12,7 +12,6 @@ dependencies:
   equatable: ^2.0.5
   meta: ^1.9.1
   path_parsing: ^1.0.1
-  vector_graphics_codec: ^1.1.7
   vector_graphics_compiler: ^1.1.7
   xml: ^6.3.0
 

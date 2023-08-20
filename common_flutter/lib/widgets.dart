@@ -1,2 +1,3 @@
-export 'src/scaffold.dart';
-export 'src/vector_graphic_icon.dart';
+export 'src/widget/checkerboard.dart';
+export 'src/widget/scaffold.dart';
+export 'src/widget/vector_graphic_icon.dart';

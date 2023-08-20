@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:svg2iv_common/extensions.dart';
 import 'package:svg2iv_common_flutter/app_info.dart' as app_info;
-import 'package:svg2iv_common_flutter/image_vector_preview.dart';
 import 'package:svg2iv_common_flutter/theme.dart';
 import 'package:svg2iv_common_flutter/widgets.dart';
 
