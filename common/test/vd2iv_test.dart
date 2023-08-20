@@ -14,9 +14,15 @@ void main() {
               .width(32.0)
               .height(32.0)
               .addNode(
-                VectorPathBuilder(parsePathData('M30,7L30,0 37,7 30,14Z'))
-                    .fill(SolidColor(0xFF000000))
-                    .build(),
+                VectorPathBuilder(
+                  const [
+                    MoveToNode(30.0, 7.0),
+                    LineToNode(30.0, 0.0),
+                    LineToNode(37.0, 7.0),
+                    LineToNode(30.0, 14.0),
+                    CloseNode(),
+                  ],
+                ).fill(SolidColor(0xFF000000)).build(),
               )
               .build();
           final actual = parseVectorDrawableElement(
@@ -30,29 +36,73 @@ void main() {
         () {
           final clipPath4 = VectorGroupBuilder()
               .id('clip_path_4')
-              .clipPathData(parsePathData('M10,10L12,10 12,12 10,12 10,10Z'))
-              .addNode(
-                  VectorPathBuilder(parsePathData('M0,0L24,0 24,24 0,24 0,0Z'))
-                      .id('path3')
-                      .fill(SolidColor(0xFF0000FF))
-                      .stroke(SolidColor(0xFFFF0080))
-                      .strokeAlpha(0.9)
-                      .strokeLineWidth(6.0)
-                      .strokeLineCap(StrokeCap.round)
-                      .strokeLineJoin(StrokeJoin.bevel)
-                      .strokeLineMiter(5.0)
-                      .build())
+              .clipPathData(
+                const [
+                  MoveToNode(10.0, 10.0),
+                  LineToNode(12.0, 10.0),
+                  LineToNode(12.0, 12.0),
+                  LineToNode(10.0, 12.0),
+                  LineToNode(10.0, 10.0),
+                  CloseNode(),
+                ],
+              )
+              .addNode(VectorPathBuilder(
+                const [
+                  MoveToNode(0.0, 0.0),
+                  LineToNode(24.0, 0.0),
+                  LineToNode(24.0, 24.0),
+                  LineToNode(0.0, 24.0),
+                  LineToNode(0.0, 0.0),
+                  CloseNode(),
+                ],
+              )
+                  .id('path3')
+                  .fill(SolidColor(0xFF0000FF))
+                  .stroke(SolidColor(0xFFFF0080))
+                  .strokeAlpha(0.9)
+                  .strokeLineWidth(6.0)
+                  .strokeLineCap(StrokeCap.round)
+                  .strokeLineJoin(StrokeJoin.bevel)
+                  .strokeLineMiter(5.0)
+                  .build())
               .build();
           final clipPath3 = VectorGroupBuilder()
               .id('clip_path_3')
-              .clipPathData(parsePathData('M8,8L16,8 16,16 8,16 8,8Z'))
+              .clipPathData(
+                const [
+                  MoveToNode(8.0, 8.0),
+                  LineToNode(16.0, 8.0),
+                  LineToNode(16.0, 16.0),
+                  LineToNode(8.0, 16.0),
+                  LineToNode(8.0, 8.0),
+                  CloseNode(),
+                ],
+              )
               .addNode(clipPath4)
               .build();
           final clipPath2 = VectorGroupBuilder()
               .id('clip_path_2')
-              .clipPathData(parsePathData('M4,4L24,4 24,24 4,24 4,4Z'))
+              .clipPathData(
+                const [
+                  MoveToNode(4.0, 4.0),
+                  LineToNode(24.0, 4.0),
+                  LineToNode(24.0, 24.0),
+                  LineToNode(4.0, 24.0),
+                  LineToNode(4.0, 4.0),
+                  CloseNode(),
+                ],
+              )
               .addNode(
-                VectorPathBuilder(parsePathData('M0,0L24,0 24,24 0,24 0,0Z'))
+                VectorPathBuilder(
+                  const [
+                    MoveToNode(0.0, 0.0),
+                    LineToNode(24.0, 0.0),
+                    LineToNode(24.0, 24.0),
+                    LineToNode(0.0, 24.0),
+                    LineToNode(0.0, 0.0),
+                    CloseNode(),
+                  ],
+                )
                     .id('path_2')
                     .fill(SolidColor(0xFFFF0000))
                     .fillAlpha(0.6)
@@ -80,24 +130,51 @@ void main() {
                     .build()!,
               )
               .addNode(
-                VectorPathBuilder(parsePathData('M0,0L24,0 24,24 0,24 0,0Z'))
-                    .id('path_4')
-                    .fill(SolidColor(0xFF00FF00))
-                    .build(),
+                VectorPathBuilder(
+                  const [
+                    MoveToNode(0.0, 0.0),
+                    LineToNode(24.0, 0.0),
+                    LineToNode(24.0, 24.0),
+                    LineToNode(0.0, 24.0),
+                    LineToNode(0.0, 0.0),
+                    CloseNode(),
+                  ],
+                ).id('path_4').fill(SolidColor(0xFF00FF00)).build(),
               )
               .build();
-          final path5 =
-              VectorPathBuilder(parsePathData('M17,0L21,0 21,3 17,3 17,0Z'))
-                  .fill(SolidColor(0xFF0080FF))
-                  .trimPathStart(18.0)
-                  .trimPathEnd(20.5)
-                  .trimPathOffset(0.5)
-                  .build();
+          final path5 = VectorPathBuilder(
+            const [
+              MoveToNode(17.0, 0.0),
+              LineToNode(21.0, 0.0),
+              LineToNode(21.0, 3.0),
+              LineToNode(17.0, 3.0),
+              LineToNode(17.0, 0.0),
+              CloseNode(),
+            ],
+          )
+              .fill(SolidColor(0xFF0080FF))
+              .trimPathStart(18.0)
+              .trimPathEnd(20.5)
+              .trimPathOffset(0.5)
+              .build();
           final expected = ImageVectorBuilder(32.0, 32.0)
               .width(24.0)
               .height(24.0)
               .addNode(
-                VectorPathBuilder(parsePathData('M21,0H30V9H21ZM23,2V7H28V2Z'))
+                VectorPathBuilder(
+                  const [
+                    MoveToNode(21.0, 0.0),
+                    LineToNode(30.0, 0.0),
+                    LineToNode(30.0, 9.0),
+                    LineToNode(21.0, 9.0),
+                    CloseNode(),
+                    MoveToNode(23.0, 2.0),
+                    LineToNode(23.0, 7.0),
+                    LineToNode(28.0, 7.0),
+                    LineToNode(28.0, 2.0),
+                    CloseNode(),
+                  ],
+                )
                     .id('path_1')
                     .fill(SolidColor(0xFFFF8000))
                     .pathFillType(PathFillType.evenOdd)
@@ -106,7 +183,16 @@ void main() {
               .addNode(
                 VectorGroupBuilder()
                     .id('clip_path_1')
-                    .clipPathData(parsePathData('M0,0L20,0 20,20 0,20 0,0Z'))
+                    .clipPathData(
+                      const [
+                        MoveToNode(0.0, 0.0),
+                        LineToNode(20.0, 0.0),
+                        LineToNode(20.0, 20.0),
+                        LineToNode(0.0, 20.0),
+                        LineToNode(0.0, 0.0),
+                        CloseNode(),
+                      ],
+                    )
                     .addNode(group1)
                     .addNode(group2)
                     .addNode(path5)
@@ -118,7 +204,6 @@ void main() {
           );
           expect(actual, expected);
         },
-        skip: true,
       );
     },
   );

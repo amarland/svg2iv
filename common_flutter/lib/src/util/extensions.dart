@@ -90,38 +90,3 @@ extension BrushToPaintMapping on Brush {
     return paint;
   }
 }
-
-extension PathNodesToSvgPathDataStringMapping on List<PathNode> {
-  String toSvgPathDataString() {
-    const commandLetterMap = {
-      PathDataCommand.close: 'Z',
-      PathDataCommand.moveTo: 'M',
-      PathDataCommand.relativeMoveTo: 'm',
-      PathDataCommand.lineTo: 'L',
-      PathDataCommand.relativeLineTo: 'l',
-      PathDataCommand.horizontalLineTo: 'H',
-      PathDataCommand.relativeHorizontalLineTo: 'h',
-      PathDataCommand.verticalLineTo: 'V',
-      PathDataCommand.relativeVerticalLineTo: 'v',
-      PathDataCommand.curveTo: 'C',
-      PathDataCommand.relativeCurveTo: 'c',
-      PathDataCommand.smoothCurveTo: 'S',
-      PathDataCommand.relativeSmoothCurveTo: 's',
-      PathDataCommand.quadraticBezierCurveTo: 'Q',
-      PathDataCommand.relativeQuadraticBezierCurveTo: 'q',
-      PathDataCommand.smoothQuadraticBezierCurveTo: 'T',
-      PathDataCommand.relativeSmoothQuadraticBezierCurveTo: 't',
-      PathDataCommand.arcTo: 'A',
-      PathDataCommand.relativeArcTo: 'a',
-    };
-    return map((segment) {
-      return commandLetterMap[segment.command]! +
-          (segment.command != PathDataCommand.close ? ' ' : '') +
-          segment.arguments
-              .map((value) => value is bool
-                  ? (value ? '1' : '0')
-                  : (value as double).toStringWithMaxDecimals(5))
-              .join(' ');
-    }).join(' ');
-  }
-}

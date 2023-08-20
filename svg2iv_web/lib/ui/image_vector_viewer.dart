@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:svg2iv_common/parser.dart';
 import 'package:svg2iv_common/writer.dart';
-import 'package:svg2iv_common_flutter/image_vector_preview.dart';
+import 'package:svg2iv_common_flutter/widgets.dart';
 
 import 'custom_text_field.dart';
 

@@ -88,10 +88,10 @@ If not set, the generated property will be declared as a top-level property.
           (path) sync* {
             if (FileSystemEntity.isDirectorySync(path)) {
               yield* _listSvgFilesRecursivelySync(Directory(path)).map(
-                (file) => (file, SourceDefinitionType.implicit),
+                (file) => (file.absolute, SourceDefinitionType.implicit),
               );
             } else if (FileSystemEntity.isFileSync(path)) {
-              yield (File(path), SourceDefinitionType.explicit);
+              yield (File(path).absolute, SourceDefinitionType.explicit);
             } else {
               _logError("'$path' does not exist!");
               if (argResults.rest.length == 1) {
@@ -174,8 +174,8 @@ If not set, the generated property will be declared as a top-level property.
       }
     }
   }
-  final imageVectors = List<ImageVector?>.empty(growable: true);
-  final errorMessages = List<String>.empty(growable: true);
+  final imageVectors = <ImageVector?>[];
+  final errorMessages = <String>[];
   if (sourceString != null) {
     final (imageVector, errorMessages) = parseXmlString(sourceString);
     imageVectors.add(imageVector);

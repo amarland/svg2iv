@@ -96,12 +96,13 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       switch (event.snackBarId) {
         case _previewErrorsSnackBarId:
           const maxErrorMessageCount = 8;
-          final errorMessages = await readErrorMessages(maxErrorMessageCount);
+          final (errorMessages, isListExhaustive) =
+              await readErrorMessages(maxErrorMessageCount);
           yield state.copyWith(
             snackBarInfo: () => null,
             errorMessagesDialog: () => ErrorMessagesDialog(
-              errorMessages.item1,
-              errorMessages.item2,
+              errorMessages,
+              isReadMoreButtonVisible: !isListExhaustive,
             ),
           );
           break;

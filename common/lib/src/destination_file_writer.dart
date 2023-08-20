@@ -3,52 +3,8 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+import '../models.dart';
 import 'extensions.dart';
-import 'model/brush.dart';
-import 'model/image_vector.dart';
-import 'model/vector_group.dart';
-import 'model/vector_node.dart';
-import 'model/vector_path.dart';
-
-const _commandsToFunctionAndClassNames = {
-  PathDataCommand.close: ('close', 'Close'),
-  PathDataCommand.moveTo: ('moveTo', 'MoveTo'),
-  PathDataCommand.relativeMoveTo: ('moveToRelative', 'RelativeMoveTo'),
-  PathDataCommand.lineTo: ('lineTo', 'LineTo'),
-  PathDataCommand.relativeLineTo: ('lineToRelative', 'RelativeLineTo'),
-  PathDataCommand.horizontalLineTo: ('horizontalLineTo', 'HorizontalTo'),
-  PathDataCommand.relativeHorizontalLineTo: (
-    'horizontalLineToRelative',
-    'RelativeHorizontalTo',
-  ),
-  PathDataCommand.verticalLineTo: ('verticalLineTo', 'VerticalTo'),
-  PathDataCommand.relativeVerticalLineTo: (
-    'verticalLineToRelative',
-    'RelativeVerticalTo',
-  ),
-  PathDataCommand.curveTo: ('curveTo', 'CurveTo'),
-  PathDataCommand.relativeCurveTo: ('curveToRelative', 'RelativeCurveTo'),
-  PathDataCommand.smoothCurveTo: ('reflectiveCurveTo', 'ReflectiveCurveTo'),
-  PathDataCommand.relativeSmoothCurveTo: (
-    'reflectiveCurveToRelative',
-    'RelativeReflectiveCurveTo',
-  ),
-  PathDataCommand.quadraticBezierCurveTo: ('quadTo', 'QuadTo'),
-  PathDataCommand.relativeQuadraticBezierCurveTo: (
-    'quadToRelative',
-    'RelativeQuadTo',
-  ),
-  PathDataCommand.smoothQuadraticBezierCurveTo: (
-    'reflectiveQuadTo',
-    'ReflectiveQuadTo',
-  ),
-  PathDataCommand.relativeSmoothQuadraticBezierCurveTo: (
-    'reflectiveQuadToRelative',
-    'RelativeReflectiveQuadTo',
-  ),
-  PathDataCommand.arcTo: ('arcTo', 'ArcTo'),
-  PathDataCommand.relativeArcTo: ('arcToRelative', 'RelativeArcTo'),
-};
 
 Future<void> writeImageVectorsToFile(
   String destinationPath,
@@ -286,51 +242,46 @@ int writeGroup(
     indentationLevel,
     shouldStatementBePrecededByPoint ? '.group' : 'group',
   );
-  // TODO: this should always return true based on the logic
-  //       in `VectorGroupBuilder.build`; sort this out?
-  if (group.id != null || group.definesTransformations) {
-    sink.writeln('(');
-    sink
-      ..writeArgumentIfNotNull(++indentationLevel, 'name', group.id)
-      ..writeArgumentIfNotNull(
-          indentationLevel, 'rotate', group.rotation?.angle)
-      ..writeArgumentIfNotNull(
-        indentationLevel,
-        'pivotX',
-        group.rotation?.pivotX.takeIf((it) => it != VectorGroup.defaultPivotX),
-      )
-      ..writeArgumentIfNotNull(
-        indentationLevel,
-        'pivotY',
-        group.rotation?.pivotY.takeIf((it) => it != VectorGroup.defaultPivotY),
-      )
-      ..writeArgumentIfNotNull(
-        indentationLevel,
-        'scaleX',
-        group.scale?.x.takeIf((it) => it != VectorGroup.defaultScaleX),
-      )
-      ..writeArgumentIfNotNull(
-        indentationLevel,
-        'scaleY',
-        group.scale?.y.takeIf((it) => it != VectorGroup.defaultScaleY),
-      )
-      ..writeArgumentIfNotNull(
-        indentationLevel,
-        'translationX',
-        group.translation?.x
-            .takeIf((it) => it != VectorGroup.defaultTranslationX),
-      )
-      ..writeArgumentIfNotNull(
-        indentationLevel,
-        'translationY',
-        group.translation?.y
-            .takeIf((it) => it != VectorGroup.defaultTranslationY),
-      )
-      ..writeArgumentIfNotNull(
-          indentationLevel, 'clipPathData', group.clipPathData);
-    sink.writeIndent(--indentationLevel, ')');
-  }
-  sink.writeln(' {');
+  sink.writeln('(');
+  sink
+    ..writeArgumentIfNotNull(++indentationLevel, 'name', group.id)
+    ..writeArgumentIfNotNull(indentationLevel, 'rotate', group.rotation?.angle)
+    ..writeArgumentIfNotNull(
+      indentationLevel,
+      'pivotX',
+      group.rotation?.pivotX.takeIf((it) => it != VectorGroup.defaultPivotX),
+    )
+    ..writeArgumentIfNotNull(
+      indentationLevel,
+      'pivotY',
+      group.rotation?.pivotY.takeIf((it) => it != VectorGroup.defaultPivotY),
+    )
+    ..writeArgumentIfNotNull(
+      indentationLevel,
+      'scaleX',
+      group.scale?.x.takeIf((it) => it != VectorGroup.defaultScaleX),
+    )
+    ..writeArgumentIfNotNull(
+      indentationLevel,
+      'scaleY',
+      group.scale?.y.takeIf((it) => it != VectorGroup.defaultScaleY),
+    )
+    ..writeArgumentIfNotNull(
+      indentationLevel,
+      'translationX',
+      group.translation?.x
+          .takeIf((it) => it != VectorGroup.defaultTranslationX),
+    )
+    ..writeArgumentIfNotNull(
+      indentationLevel,
+      'translationY',
+      group.translation?.y
+          .takeIf((it) => it != VectorGroup.defaultTranslationY),
+    )
+    ..writeArgumentIfNotNull(
+        indentationLevel, 'clipPathData', group.clipPathData)
+    ..writeIndent(--indentationLevel, ')')
+    ..writeln(' {');
   indentationLevel = _writeNodes(
     sink,
     group.nodes,
@@ -460,30 +411,26 @@ void _writePathNodes(
   bool asClassConstructorCall = false,
 }) {
   for (final node in nodes) {
-    _commandsToFunctionAndClassNames[node.command]?.let(
-      (names) {
-        final (builderMethodName, className) = names;
-        final name =
-            asClassConstructorCall ? 'PathNode.$className' : builderMethodName;
-        if (node.command == PathDataCommand.close && asClassConstructorCall) {
-          sink.writeIndent(indentationLevel, '$name,');
-        } else {
-          sink
-            ..writeIndent(indentationLevel, '$name(')
-            ..writeAll(
-              node.arguments.map(
-                (argument) => argument is double
-                    ? numToKotlinFloatAsString(argument)
-                    : argument,
-              ),
-              ', ',
-            )
-            ..write(')');
-          if (asClassConstructorCall) sink.write(',');
-        }
-        sink.writeln();
-      },
-    );
+    final callableName = asClassConstructorCall
+        ? 'PathNode.${node.nodeClassName}'
+        : node.builderMethodName;
+    if (node is CloseNode && asClassConstructorCall) {
+      sink.writeIndent(indentationLevel, '$callableName,');
+    } else {
+      sink
+        ..writeIndent(indentationLevel, '$callableName(')
+        ..writeAll(
+          node.arguments.map(
+            (argument) => argument is double
+                ? numToKotlinFloatAsString(argument)
+                : argument,
+          ),
+          ', ',
+        )
+        ..write(')');
+      if (asClassConstructorCall) sink.write(',');
+    }
+    sink.writeln();
   }
 }
 

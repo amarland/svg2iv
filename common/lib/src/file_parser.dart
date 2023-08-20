@@ -1,6 +1,7 @@
 import 'dart:io' show File, FileSystemException;
 
 import 'package:xml/xml.dart';
+import 'package:xml/xml_events.dart';
 
 import 'converter/gd2iv.dart';
 import 'converter/svg2iv.dart';
@@ -37,31 +38,28 @@ ParseResult _parseXmlSource(
   final errorMessages = <String>[];
   const errorMessageIndent = '  ';
   try {
-    final rootElement = _parseXmlString(source);
-    final imageVectorName = hasPath
+    final sourceName = hasPath
         ? sourcePath.substring(
             sourcePath.lastIndexOf(r'[/\]') + 1,
             sourcePath.lastIndexOfOrNull('.'),
           )
         : null;
-    final rootElementName = rootElement.name.local;
+    final rootElementName =
+        parseEvents(source).whereType<XmlStartElementEvent>().firstOrNull?.name;
     switch (rootElementName) {
       case 'svg':
-        imageVector = parseSvgElement(
-          rootElement,
-          imageVectorName: imageVectorName,
-        );
+        imageVector = parseSvgElement(source, sourceName: sourceName);
         break;
       case 'vector':
         imageVector = parseVectorDrawableElement(
-          rootElement,
-          imageVectorName: imageVectorName,
+          _parseXmlString(source),
+          sourceName: sourceName,
         );
         break;
       case 'shape':
         imageVector = parseShapeDrawableElement(
-          rootElement,
-          imageVectorName: imageVectorName,
+          _parseXmlString(source),
+          sourceName: sourceName,
         );
         break;
       default:

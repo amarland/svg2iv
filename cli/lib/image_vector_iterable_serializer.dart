@@ -67,13 +67,14 @@ Map<String, dynamic> _mapVectorPath(VectorPath path) {
 
 Map<String, dynamic> _mapPathNode(PathNode pathNode) {
   return {
-    'command': pathNode.command.index,
-    'arguments': pathNode.arguments.map<double>((value) {
-      if (value is double) return value;
-      if (value is bool) return value ? 1.0 : 0.0;
-      throw 'Argument $value for path node $pathNode'
-          ' is neither a double nor a boolean.';
-    }),
+    'command': pathNode.index,
+    if (pathNode is! CloseNode)
+      'arguments': pathNode.arguments.map<double>((value) {
+        if (value is double) return value;
+        if (value is bool) return value ? 1.0 : 0.0;
+        throw 'Argument $value for path node $pathNode'
+            ' is neither a double nor a boolean.';
+      }),
   };
 }
 

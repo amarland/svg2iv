@@ -1,7 +1,8 @@
-import 'package:equatable/equatable.dart';
+import 'package:collection/collection.dart' show ListEquality;
 
 import '../extensions.dart';
 import 'brush.dart';
+import 'path_node.dart';
 import 'vector_node.dart';
 
 class VectorPath extends VectorNode {
@@ -17,7 +18,7 @@ class VectorPath extends VectorNode {
   static const defaultTrimPathEnd = 1.0;
   static const defaultTrimPathOffset = 0.0;
 
-  const VectorPath._init(
+  const VectorPath._(
     this.pathData, {
     String? id,
     this.fill,
@@ -44,27 +45,23 @@ class VectorPath extends VectorNode {
   final StrokeJoin? strokeLineJoin;
   final double? strokeLineMiter;
   final PathFillType? pathFillType;
-  final double? trimPathStart;
-  final double? trimPathEnd;
-  final double? trimPathOffset;
+  final double? trimPathStart, trimPathEnd, trimPathOffset;
 
-  bool get hasAttributes {
-    return [
-      id,
-      fill,
-      fillAlpha,
-      stroke,
-      strokeAlpha,
-      strokeLineWidth,
-      strokeLineCap,
-      strokeLineJoin,
-      strokeLineMiter,
-      pathFillType,
-      trimPathStart,
-      trimPathEnd,
-      trimPathOffset,
-    ].anyNotNull();
-  }
+  bool get hasAttributes => [
+        id,
+        fill,
+        fillAlpha,
+        stroke,
+        strokeAlpha,
+        strokeLineWidth,
+        strokeLineCap,
+        strokeLineJoin,
+        strokeLineMiter,
+        pathFillType,
+        trimPathStart,
+        trimPathEnd,
+        trimPathOffset,
+      ].anyNotNull();
 
   VectorPath copyWith({
     List<PathNode>? pathData,
@@ -82,7 +79,7 @@ class VectorPath extends VectorNode {
     double? trimPathEnd,
     double? trimPathOffset,
   }) {
-    return VectorPath._init(
+    return VectorPath._(
       pathData ?? this.pathData,
       id: id ?? this.id,
       fill: fill ?? this.fill,
@@ -101,24 +98,39 @@ class VectorPath extends VectorNode {
   }
 
   @override
-  List<Object?> get props {
-    return super.props
-      ..addAll([
-        pathData,
-        fill,
-        fillAlpha,
-        stroke,
-        strokeAlpha,
-        strokeLineWidth,
-        strokeLineCap,
-        strokeLineJoin,
-        strokeLineMiter,
-        pathFillType,
-        trimPathStart,
-        trimPathEnd,
-        trimPathOffset,
-      ]);
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VectorPath &&
+          runtimeType == other.runtimeType &&
+          const ListEquality<PathNode>().equals(pathData, other.pathData) &&
+          fill == other.fill &&
+          fillAlpha == other.fillAlpha &&
+          stroke == other.stroke &&
+          strokeAlpha == other.strokeAlpha &&
+          strokeLineWidth == other.strokeLineWidth &&
+          strokeLineCap == other.strokeLineCap &&
+          strokeLineJoin == other.strokeLineJoin &&
+          strokeLineMiter == other.strokeLineMiter &&
+          pathFillType == other.pathFillType &&
+          trimPathStart == other.trimPathStart &&
+          trimPathEnd == other.trimPathEnd &&
+          trimPathOffset == other.trimPathOffset;
+
+  @override
+  int get hashCode =>
+      const ListEquality<PathNode>().hash(pathData) ^
+      fill.hashCode ^
+      fillAlpha.hashCode ^
+      stroke.hashCode ^
+      strokeAlpha.hashCode ^
+      strokeLineWidth.hashCode ^
+      strokeLineCap.hashCode ^
+      strokeLineJoin.hashCode ^
+      strokeLineMiter.hashCode ^
+      pathFillType.hashCode ^
+      trimPathStart.hashCode ^
+      trimPathEnd.hashCode ^
+      trimPathOffset.hashCode;
 }
 
 class VectorPathBuilder
@@ -126,9 +138,61 @@ class VectorPathBuilder
   VectorPathBuilder(this._pathData);
 
   final List<PathNode> _pathData;
-  double? _trimPathStart;
-  double? _trimPathEnd;
-  double? _trimPathOffset;
+  Brush? _fill;
+  double? _fillAlpha;
+  Brush? _stroke;
+  double? _strokeAlpha;
+  double? _strokeLineWidth;
+  StrokeCap? _strokeLineCap;
+  StrokeJoin? _strokeLineJoin;
+  double? _strokeLineMiter;
+  PathFillType? _pathFillType;
+  double? _trimPathStart, _trimPathEnd, _trimPathOffset;
+
+  VectorPathBuilder fill(Brush fill) {
+    _fill = fill;
+    return this;
+  }
+
+  VectorPathBuilder fillAlpha(double fillAlpha) {
+    _fillAlpha = fillAlpha;
+    return this;
+  }
+
+  VectorPathBuilder stroke(Brush stroke) {
+    _stroke = stroke;
+    return this;
+  }
+
+  VectorPathBuilder strokeAlpha(double strokeAlpha) {
+    _strokeAlpha = strokeAlpha;
+    return this;
+  }
+
+  VectorPathBuilder strokeLineWidth(double strokeLineWidth) {
+    _strokeLineWidth = strokeLineWidth;
+    return this;
+  }
+
+  VectorPathBuilder strokeLineCap(StrokeCap strokeLineCap) {
+    _strokeLineCap = strokeLineCap;
+    return this;
+  }
+
+  VectorPathBuilder strokeLineJoin(StrokeJoin strokeLineJoin) {
+    _strokeLineJoin = strokeLineJoin;
+    return this;
+  }
+
+  VectorPathBuilder strokeLineMiter(double strokeLineMiter) {
+    _strokeLineMiter = strokeLineMiter;
+    return this;
+  }
+
+  VectorPathBuilder pathFillType(PathFillType pathFillType) {
+    _pathFillType = pathFillType;
+    return this;
+  }
 
   VectorPathBuilder trimPathStart(double trimPathStart) {
     _trimPathStart = trimPathStart;
@@ -147,57 +211,24 @@ class VectorPathBuilder
 
   @override
   VectorPath build() {
-    final strokeLineWidth = strokeLineWidth_;
+    final strokeLineWidth = _strokeLineWidth;
     final isStroked =
-        stroke_ != null && strokeLineWidth != null && strokeLineWidth > 0.0;
-    return VectorPath._init(
+        _stroke != null && strokeLineWidth != null && strokeLineWidth > 0.0;
+    return VectorPath._(
       _pathData,
       id: id_,
-      fill: fill_,
-      fillAlpha: fill_ != null ? multiplyAlphas(fillAlpha_, alpha_) : null,
-      stroke: stroke_,
-      strokeAlpha: isStroked ? multiplyAlphas(strokeAlpha_, alpha_) : null,
-      strokeLineWidth: isStroked ? strokeLineWidth : null,
-      strokeLineCap: isStroked ? strokeLineCap_ : null,
-      strokeLineJoin: isStroked ? strokeLineJoin_ : null,
-      strokeLineMiter: isStroked ? strokeLineMiter_ : null,
-      pathFillType: pathFillType_,
+      fill: _fill,
+      fillAlpha: _fill != null ? _fillAlpha : null,
+      stroke: _stroke,
+      strokeAlpha: isStroked ? _strokeAlpha : null,
+      strokeLineWidth: isStroked ? _strokeLineWidth : null,
+      strokeLineCap: isStroked ? _strokeLineCap : null,
+      strokeLineJoin: isStroked ? _strokeLineJoin : null,
+      strokeLineMiter: isStroked ? _strokeLineMiter : null,
+      pathFillType: _pathFillType,
       trimPathStart: _trimPathStart,
       trimPathEnd: _trimPathEnd,
       trimPathOffset: _trimPathOffset,
     );
   }
-}
-
-enum PathDataCommand {
-  close,
-  moveTo,
-  relativeMoveTo,
-  lineTo,
-  relativeLineTo,
-  horizontalLineTo,
-  relativeHorizontalLineTo,
-  verticalLineTo,
-  relativeVerticalLineTo,
-  curveTo,
-  relativeCurveTo,
-  smoothCurveTo,
-  relativeSmoothCurveTo,
-  quadraticBezierCurveTo,
-  relativeQuadraticBezierCurveTo,
-  smoothQuadraticBezierCurveTo,
-  relativeSmoothQuadraticBezierCurveTo,
-  arcTo,
-  relativeArcTo,
-}
-
-class PathNode extends Equatable {
-  // TODO: add named constructors for each command?
-  const PathNode(this.command, this.arguments);
-
-  final PathDataCommand command;
-  final List<dynamic> arguments;
-
-  @override
-  List<Object?> get props => [command, arguments];
 }

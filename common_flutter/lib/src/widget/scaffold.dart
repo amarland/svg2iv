@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'svg_icon.dart';
+import 'vector_graphic_icon.dart';
 
 class MainPageScaffold extends StatelessWidget {
   const MainPageScaffold({
@@ -36,7 +36,7 @@ class MainPageScaffold extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: onToggleThemeButtonPressed,
-            icon: const SvgIcon(
+            icon: const VectorGraphicIcon(
               'res/icons/toggle_theme',
               packageName: 'svg2iv_common_flutter',
             ),

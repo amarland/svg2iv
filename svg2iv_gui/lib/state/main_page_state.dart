@@ -26,7 +26,7 @@ class MainPageState {
     destinationSelectionTextFieldState: TextFieldState.initial,
     areSelectionButtonsEnabled: true,
     extensionReceiverTextFieldState: TextFieldState.initial,
-    imageVector: CustomIcons.faceIcon,
+    imageVector: CustomIcons.home,
     isPreviousPreviewButtonVisible: false,
     isNextPreviewButtonVisible: false,
     isConvertButtonEnabled: false,
@@ -113,9 +113,9 @@ class TextFieldState {
 
 class ErrorMessagesDialog {
   const ErrorMessagesDialog(
-    this.messages,
-    this.isReadMoreButtonVisible,
-  ) : super();
+    this.messages, {
+    required this.isReadMoreButtonVisible,
+  }) : super();
 
   final List<String> messages;
   final bool isReadMoreButtonVisible;

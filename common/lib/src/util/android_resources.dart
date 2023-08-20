@@ -184,16 +184,14 @@ Iterable<(double, int)> _parseGradientColorStops(
     return childElements.mapIndexed((index, item) {
       final offset = item.getAndroidNSAttribute<double>('offset') ??
           index / (lastIndex > 0 ? lastIndex : 1);
-      final color =
-          item.getAndroidNSAttribute<Gradient>('color')?.colors.singleOrNull;
+      final color = item.getAndroidNSAttribute<SolidColor>('color')?.colorInt;
       return color != null ? (offset, color) : null;
     }).whereNotNull();
   } else {
     return gradientElement.androidNSAttributes
         .where((attr) => attr.name.local.endsWith('Color'))
         .map((attr) {
-      final colorInt =
-          parseAndroidResourceValue<Gradient>(attr)?.colors.singleOrNull;
+      final colorInt = parseAndroidResourceValue<SolidColor>(attr)?.colorInt;
       if (colorInt == null) return null;
       final double offset;
       switch (attr.name.local) {

@@ -1,12 +1,9 @@
 import 'package:equatable/equatable.dart';
-import 'package:vector_math/vector_math.dart';
 
 import 'vector_group.dart';
 
 class Rotation extends Equatable {
-  const Rotation(this.angle, {double? pivotX, double? pivotY})
-      : pivotX = pivotX ?? 0.0,
-        pivotY = pivotY ?? 0.0;
+  const Rotation._(this.angle, this.pivotX, this.pivotY);
 
   final double angle;
   final double? pivotX, pivotY;
@@ -16,7 +13,7 @@ class Rotation extends Equatable {
 }
 
 class Scale extends Equatable {
-  const Scale(this.x, [double? y]) : y = y ?? x;
+  const Scale._(this.x, this.y);
 
   final double x;
   final double? y;
@@ -26,85 +23,41 @@ class Scale extends Equatable {
 }
 
 class Translation extends Equatable {
-  const Translation(this.x, [double? y]) : y = y ?? 0.0;
+  const Translation._(this.x, this.y);
 
-  final double x;
-  final double y;
-
-  Translation operator +(Translation other) =>
-      Translation(x + other.x, y + other.y);
+  final double x, y;
 
   @override
   List<Object?> get props => [x, y];
 }
 
 class Transformations {
-  Transformations._init(this.rotation, this.scale, this.translation);
-
-  factory Transformations.fromMatrix4(Matrix4 matrix) {
-    Quaternion rotationQuaternion = Quaternion.identity();
-    Vector3 scaleVector = Vector3.zero();
-    Vector3 translationVector = Vector3.zero();
-    matrix.decompose(translationVector, rotationQuaternion, scaleVector);
-    final rotationAxis = rotationQuaternion.axis;
-    final rotation = _isQuaternionIdentity(rotationQuaternion)
-        ? null
-        : Rotation(
-            degrees(rotationQuaternion.radians),
-            pivotX: rotationAxis.x,
-            pivotY: rotationAxis.y,
-          );
-    final scale = scaleVector.x == 1.0 && scaleVector.y == 1.0
-        ? null
-        : Scale(scaleVector.x, scaleVector.y);
-    final translation = translationVector.x == 0.0 && translationVector.y == 0.0
-        ? null
-        : Translation(translationVector.x, translationVector.y);
-    return Transformations._init(rotation, scale, translation);
-  }
+  const Transformations._(this.rotation, this.scale, this.translation);
 
   final Rotation? rotation;
   final Scale? scale;
-  Translation? translation;
-
-  bool get definesTranslationOnly =>
-      translation != null && rotation == null && scale == null;
-
-  Translation? consumeTranslation() {
-    final result = translation;
-    translation = null;
-    return result;
-  }
-
-  static bool _isQuaternionIdentity(Quaternion quaternion) =>
-      quaternion.x == 0.0 &&
-      quaternion.y == 0.0 &&
-      quaternion.z == 0.0 &&
-      quaternion.w == 1.0;
-}
-
-extension TranslationExtensions on Translation? {
-  Translation orDefault() => this ?? Translation(0.0, 0.0);
+  final Translation? translation;
 }
 
 class TransformationsBuilder {
-  final _matrices = <Matrix4>[];
+  Rotation? _rotation;
+  Scale? _scale;
+  Translation? _translation;
 
   TransformationsBuilder translate({double? x, double? y}) {
     x ??= VectorGroup.defaultTranslationX;
     y ??= VectorGroup.defaultTranslationY;
     if (x != VectorGroup.defaultTranslationX ||
         y != VectorGroup.defaultTranslationY) {
-      _matrices.add(Matrix4.translationValues(x, y, 0.0));
+      _translation = Translation._(x, y);
     }
     return this;
   }
 
   TransformationsBuilder scale({required double x, double? y}) {
-    if (x != VectorGroup.defaultScaleX) {
-      _matrices.add(
-        Matrix4.identity()..scale(x, y ?? x),
-      );
+    y ??= x;
+    if (x != VectorGroup.defaultScaleX || y != VectorGroup.defaultScaleY) {
+      _scale = Scale._(x, y);
     }
     return this;
   }
@@ -115,45 +68,17 @@ class TransformationsBuilder {
     double? pivotY,
   }) {
     if (degrees != 0.0) {
-      final mustTranslate = pivotX != null || pivotY != null;
       pivotX ??= VectorGroup.defaultPivotX;
       pivotY ??= VectorGroup.defaultPivotY;
-      if (mustTranslate) {
-        translate(x: pivotX, y: pivotY);
-      }
-      _matrices.add(
-        Matrix4.identity()..rotateZ(radians(degrees)),
-      );
-      if (mustTranslate) {
-        translate(x: -pivotX, y: -pivotY);
-      }
-    }
-    return this;
-  }
-
-  TransformationsBuilder skewX(double degrees) {
-    if (degrees != 0.0) {
-      _matrices.add(Matrix4.skewX(radians(degrees)));
-    }
-    return this;
-  }
-
-  TransformationsBuilder skewY(double degrees) {
-    if (degrees != 0.0) {
-      _matrices.add(Matrix4.skewY(radians(degrees)));
+      _rotation = Rotation._(degrees, pivotX, pivotY);
     }
     return this;
   }
 
   Transformations? build() {
-    if (_matrices.isEmpty) {
+    if (_rotation == null && _scale == null && _translation == null) {
       return null;
     }
-    final result = _matrices[0];
-    final count = _matrices.length;
-    for (var index = 1; index < count; index++) {
-      result.multiply(_matrices[index]);
-    }
-    return Transformations.fromMatrix4(result);
+    return Transformations._(_rotation, _scale, _translation);
   }
 }

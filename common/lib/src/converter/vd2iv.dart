@@ -1,24 +1,20 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings
+import 'dart:collection';
 
 import 'package:collection/collection.dart';
+import 'package:vector_graphics_compiler/vector_graphics_compiler.dart' as vgc;
 import 'package:xml/xml.dart';
 
+import '../../models.dart';
 import '../extensions.dart';
 import '../file_parser.dart';
-import '../model/brush.dart';
-import '../model/image_vector.dart';
-import '../model/transformations.dart';
-import '../model/vector_group.dart';
-import '../model/vector_node.dart';
-import '../model/vector_path.dart';
-import '../path_data_parser.dart';
 import '../util/android_resources.dart';
+import '../util/path_command_mapper.dart';
 
-final _elementsToIgnore = <XmlElement>{};
+final _elementsToIgnore = HashSet<XmlElement>();
 
 ImageVector parseVectorDrawableElement(
   XmlElement rootElement, {
-  String? imageVectorName,
+  String? sourceName,
 }) {
   final parsedRequiredAttributes = <String, dynamic>{
     'viewportWidth': rootElement.getAndroidNSAttribute<double>('viewportWidth'),
@@ -28,20 +24,18 @@ ImageVector parseVectorDrawableElement(
     'height': rootElement.getAndroidNSAttribute<Dimension>('height'),
   };
   if (parsedRequiredAttributes.values.anyNull()) {
-    throw ParserException(
-      'Missing required attribute(s): ' +
-          parsedRequiredAttributes.entries
-              .where((entry) => entry.value == null)
-              .map((entry) => entry.key)
-              .join(', '),
-    );
+    final missingAttributes = parsedRequiredAttributes.entries
+        .where((entry) => entry.value == null)
+        .map((entry) => entry.key)
+        .join(', ');
+    throw ParserException('Missing required attribute(s): $missingAttributes');
   }
   final viewportWidth = parsedRequiredAttributes['viewportWidth'] as double;
   final viewportHeight = parsedRequiredAttributes['viewportHeight'] as double;
   final builder = ImageVectorBuilder(viewportWidth, viewportHeight)
       .width((parsedRequiredAttributes['width'] as Dimension).value)
       .height((parsedRequiredAttributes['height'] as Dimension).value);
-  (imageVectorName ?? rootElement.getAndroidNSAttribute('name'))
+  (sourceName ?? rootElement.getAndroidNSAttribute('name'))
       ?.let(builder.name);
   rootElement
       .getAndroidNSAttribute<SolidColor>('tintColor')
@@ -49,7 +43,7 @@ ImageVector parseVectorDrawableElement(
       .let(builder.tintColor);
   rootElement
       .getAndroidNSAttribute<String>('tintBlendMode')
-      ?.let(blendModeFromString)
+      ?.let(_blendModeFromString)
       ?.let(builder.tintBlendMode);
   for (final node in _parseElements(rootElement.childElements)) {
     builder.addNode(node);
@@ -111,10 +105,7 @@ VectorGroup _parseGroupElement(XmlElement groupElement) {
   final translationY = attributes['translateY']
       ?.let((v) => parseAndroidResourceValue<double>(v));
   if (translationX != null || translationY != null) {
-    transformationsBuilder.translate(
-      x: translationX ?? 0.0,
-      y: translationY ?? 0.0,
-    );
+    transformationsBuilder.translate(x: translationX, y: translationY);
   }
   final transformations = transformationsBuilder.build();
   if (transformations != null) {
@@ -127,9 +118,7 @@ VectorGroup _parseGroupElement(XmlElement groupElement) {
 }
 
 VectorPath? _parsePathElement(XmlElement pathElement) {
-  final pathData = parsePathData(
-    pathElement.getAndroidNSAttribute<String>('pathData'),
-  );
+  final pathData = _parsePathDataAttribute(pathElement);
   if (pathData.isEmpty) return null;
   final builder = VectorPathBuilder(pathData);
   for (final attribute in pathElement.androidNSAttributes) {
@@ -214,9 +203,7 @@ VectorPath? _parsePathElement(XmlElement pathElement) {
 }
 
 VectorGroup? _parseClipPathElement(XmlElement clipPathElement) {
-  final clipPathData = parsePathData(
-    clipPathElement.getAndroidNSAttribute<String>('pathData'),
-  );
+  final clipPathData = _parsePathDataAttribute(clipPathElement);
   if (clipPathData.isEmpty) return null;
   final groupBuilder = VectorGroupBuilder().clipPathData(clipPathData);
   clipPathElement
@@ -232,4 +219,31 @@ VectorGroup? _parseClipPathElement(XmlElement clipPathElement) {
     _elementsToIgnore.add(element);
   }
   return groupBuilder.build();
+}
+
+BlendMode? _blendModeFromString(String valueAsString) {
+  switch (valueAsString.toLowerCase()) {
+    case 'src_over':
+      return BlendMode.srcOver;
+    case 'src_in':
+      return BlendMode.srcIn;
+    case 'src_atop':
+      return BlendMode.srcAtop;
+    // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui/src/androidMain/kotlin/androidx/compose/ui/graphics/vector/compat/XmlVectorParser.android.kt;l=228
+    // "b/73224934 PorterDuff Multiply maps to Skia Modulate"
+    case 'multiply':
+      return BlendMode.modulate;
+    case 'screen':
+      return BlendMode.screen;
+    case 'add':
+      return BlendMode.plus;
+  }
+  return null;
+}
+
+List<PathNode> _parsePathDataAttribute(XmlElement pathElement) {
+  final pathDataAsString =
+      pathElement.getAndroidNSAttribute<String>('pathData');
+  if (pathDataAsString.isNullOrEmpty) return List.empty();
+  return mapPathCommands(vgc.parseSvgPathData(pathDataAsString!));
 }
