@@ -17,7 +17,10 @@ void addFontLicenses() {
             final (fontName, directoryName) = pair;
             return LicenseEntryWithLineBreaks(
               [fontName],
-              await rootBundle.loadString('res/fonts/$directoryName/OFL.txt'),
+              await rootBundle.loadString(
+                'packages/svg2iv_common_flutter/'
+                'res/fonts/$directoryName/OFL.txt',
+              ),
             );
           },
         ),
@@ -43,6 +46,7 @@ Future<void> showAboutDialog(
             packageName: 'svg2iv_common_flutter',
           ),
         ),
+        applicationLegalese: '© 2023 Anthony Marland',
       );
     },
   );
