@@ -1,6 +1,8 @@
 name: svg2iv
 description: A command-line application to convert SVG files to Jetpack Compose `ImageVector`s.
-# version: 1.0.0
+version: 0.1.0
+
+publish_to: 'none'
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

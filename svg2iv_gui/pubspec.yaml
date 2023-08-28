@@ -1,6 +1,6 @@
 name: svg2iv_gui
 description: A simple GUI for svg2iv.
-# version: 1.0.0
+version: 0.0.0-dev
 
 publish_to: 'none'
 

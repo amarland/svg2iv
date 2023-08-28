@@ -1,6 +1,6 @@
 name: svg2iv_web
 description: A simple web app for svg2iv.
-# version: 1.0.0
+version: 0.1.0
 
 publish_to: 'none'
 
