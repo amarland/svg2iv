@@ -66,8 +66,8 @@ class _MainPageState
 
   static Widget _buildScaffold(BuildContext context) {
     return MainPageScaffold(
-      onToggleThemeButtonPressed: () {
-        BlocProvider.of<ThemeCubit>(context).toggleTheme();
+      onToggleThemeButtonPressed: () async {
+        await BlocProvider.of<ThemeCubit>(context).toggleTheme();
       },
       onAboutButtonPressed: () {
         BlocProvider.of<MainPageBloc>(context).add(const AboutButtonPressed());

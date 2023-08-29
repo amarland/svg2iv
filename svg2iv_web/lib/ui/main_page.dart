@@ -23,11 +23,15 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return MainPageScaffold(
-      onToggleThemeButtonPressed: () {
-        BlocProvider.of<ThemeCubit>(context).toggleTheme();
+      onToggleThemeButtonPressed: () async {
+        await BlocProvider.of<ThemeCubit>(context).toggleTheme();
       },
-      onAboutButtonPressed: () {
-        app_info.showAboutDialog(context, name: appName, version: appVersion);
+      onAboutButtonPressed: () async {
+        await app_info.showAboutDialog(
+          context,
+          name: appName,
+          version: appVersion,
+        );
       },
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),

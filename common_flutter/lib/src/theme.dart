@@ -77,9 +77,7 @@ class ThemeCubit extends Cubit<_AppTheme?> {
     AccentColorDelegate? accentColorDelegate,
   })  : _preferences = preferences,
         _accentColorDelegate = accentColorDelegate,
-        super(null) {
-    _loadTheme();
-  }
+        super(null);
 
   final Preferences _preferences;
   final AccentColorDelegate? _accentColorDelegate;
@@ -87,7 +85,7 @@ class ThemeCubit extends Cubit<_AppTheme?> {
   static const _androidGreen = Color(0xFF00DE7A);
   static const _androidBlue = Color(0xFF2196F3);
 
-  void toggleTheme() async {
+  Future<void> toggleTheme() async {
     final currentTheme = state;
     if (currentTheme == null) {
       return;
@@ -101,7 +99,7 @@ class ThemeCubit extends Cubit<_AppTheme?> {
     await _preferences.setDarkModeEnabled(isCurrentThemeLight);
   }
 
-  void _loadTheme() async {
+  Future<void> loadTheme() async {
     final themeMode = await _preferences.getThemeMode();
     final useMaterial3 = await _preferences.isMaterial3Enabled();
     final accentColor = await _accentColorDelegate?.accentColor;
