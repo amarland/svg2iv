@@ -173,8 +173,8 @@ class _MainPageState
         } else if (state.isAboutDialogVisible) {
           await app_info.showAboutDialog(
             context,
-            name: appName,
-            version: appVersion,
+            applicationName: appName,
+            applicationVersion: appVersion,
           );
           bloc.add(const AboutDialogClosed());
         }

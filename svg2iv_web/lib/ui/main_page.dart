@@ -29,8 +29,8 @@ class _MainPageState extends State<MainPage> {
       onAboutButtonPressed: () async {
         await app_info.showAboutDialog(
           context,
-          name: appName,
-          version: appVersion,
+          applicationName: appName,
+          applicationVersion: appVersion,
         );
       },
       body: Padding(
